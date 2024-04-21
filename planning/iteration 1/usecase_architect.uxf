@@ -1,0 +1,14 @@
+<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><element><id>UMLActor</id><coordinates><x>370</x><y>470</y><w>60</w><h>120</h></coordinates><panel_attributes>Architect
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>390</x><y>440</y><w>160</w><h>90</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>140;17;10;70</additional_attributes></element><element><id>UMLUseCase</id><coordinates><x>530</x><y>400</y><w>120</w><h>100</h></coordinates><panel_attributes>Manage project:
+Create
+Delete
+Update</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLUseCase</id><coordinates><x>530</x><y>510</y><w>120</w><h>80</h></coordinates><panel_attributes>Manaje job
+Create
+Update
+Delete</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>390</x><y>500</y><w>160</w><h>70</h></coordinates><panel_attributes>lt=-&gt;&gt;</panel_attributes><additional_attributes>10;10;140;45</additional_attributes></element><element><id>Relation</id><coordinates><x>390</x><y>500</y><w>160</w><h>170</h></coordinates><panel_attributes>lt=-&gt;&gt;</panel_attributes><additional_attributes>10;10;140;147</additional_attributes></element><element><id>UMLUseCase</id><coordinates><x>530</x><y>600</y><w>120</w><h>100</h></coordinates><panel_attributes>Manage channel
+Create 
+Delete
+Update</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLUseCase</id><coordinates><x>530</x><y>280</y><w>120</w><h>100</h></coordinates><panel_attributes>Retrieve objects
+Projects
+Jobs
+Channels</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>390</x><y>320</y><w>160</w><h>210</h></coordinates><panel_attributes>lt=-&gt;&gt;</panel_attributes><additional_attributes>10;190;140;15</additional_attributes></element></diagram>
