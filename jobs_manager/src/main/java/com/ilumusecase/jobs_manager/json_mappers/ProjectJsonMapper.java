@@ -17,8 +17,11 @@ public class ProjectJsonMapper {
 
         MappingJacksonValue wrapper = new MappingJacksonValue(project);
         FilterProvider filters = new SimpleFilterProvider()
-            .addFilter("project-reference", SimpleBeanPropertyFilter.filterOutAllExcept("id"))
-            .addFilter("plug-channel", SimpleBeanPropertyFilter.serializeAll());
+            .addFilter("project-reference", SimpleBeanPropertyFilter.filterOutAllExcept("id", "projectDetails"))
+            .addFilter("plug-channel", SimpleBeanPropertyFilter.serializeAll())
+            .addFilter("node-plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
+            .addFilter("channel-plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
+            .addFilter("plug-jobNode", SimpleBeanPropertyFilter.serializeAll());
         wrapper.setFilters(filters);
 
         return wrapper;
@@ -28,8 +31,11 @@ public class ProjectJsonMapper {
 
         MappingJacksonValue wrapper = new MappingJacksonValue(project);
         FilterProvider filters = new SimpleFilterProvider()
-            .addFilter("project-reference", SimpleBeanPropertyFilter.filterOutAllExcept("id"))
-            .addFilter("plug-channel", SimpleBeanPropertyFilter.serializeAll());
+            .addFilter("project-reference", SimpleBeanPropertyFilter.filterOutAllExcept("id", "projectDetails"))
+            .addFilter("plug-channel", SimpleBeanPropertyFilter.serializeAll())
+            .addFilter("node-plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
+            .addFilter("channel-plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
+            .addFilter("plug-jobNode", SimpleBeanPropertyFilter.serializeAll());
         wrapper.setFilters(filters);
 
         return wrapper;

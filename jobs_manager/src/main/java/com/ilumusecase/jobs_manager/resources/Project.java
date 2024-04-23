@@ -1,6 +1,8 @@
 package com.ilumusecase.jobs_manager.resources;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
@@ -24,7 +26,15 @@ public class Project {
 
     @DBRef
     @JsonFilter("plug-channel")
+    private List<Channel> channels = new ArrayList<>();
+    @DBRef
+    @JsonFilter("plug-jobNode")
+    private List<JobNode> jobNodes = new ArrayList<>(); 
+
+    @DBRef
+    @JsonFilter("plug-channel")
     private Map<String, Channel> inputChannels = new HashMap<>();
+    @DBRef
     @JsonFilter("plug-channel")
     private Map<String, Channel> outputChannels = new HashMap<>();
 }

@@ -1,5 +1,8 @@
 package com.ilumusecase.jobs_manager.resources;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -16,10 +19,20 @@ public class Channel {
     @Id
     private String id;
 
+    private ChannelDetails channelDetails;
+
+    
     @DBRef
     @JsonFilter("project-reference")
     private Project project;
 
-    private ChannelDetails channelDetails;
+
+    @DBRef
+    @JsonFilter("channel-plug-jobNode")
+    private List<JobNode> inputJobs = new ArrayList<>();
+    
+    @DBRef
+    @JsonFilter("channel-plug-jobNode")
+    private List<JobNode> outputJobs = new ArrayList<>();
     
 }

@@ -8,16 +8,15 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.ilumusecase.jobs_manager.resources.Channel;
+import com.ilumusecase.jobs_manager.resources.JobNode;
 
 @Component
-public class ChannelJsonMapper {
-
-    public MappingJacksonValue getFullChannel(Channel channel){
-
-        MappingJacksonValue wrapper = new MappingJacksonValue(channel);
+public class JobNodeJsonMapper {
+    
+    public MappingJacksonValue getFullJobNode(JobNode jobNode){
+        MappingJacksonValue wrapper = new MappingJacksonValue(jobNode);
         FilterProvider filters = new SimpleFilterProvider()
-            .addFilter("channel-plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
+            .addFilter("node-plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
             .addFilter("project-reference", SimpleBeanPropertyFilter.serializeAll())
             .addFilter("plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
             .addFilter("plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"));
@@ -26,11 +25,10 @@ public class ChannelJsonMapper {
         return wrapper;
     }
 
-    public MappingJacksonValue getFullChannelList(List<Channel> channel){
-
-        MappingJacksonValue wrapper = new MappingJacksonValue(channel);
+    public MappingJacksonValue getFullJobNodeList(List<JobNode> jobNodes){
+        MappingJacksonValue wrapper = new MappingJacksonValue(jobNodes);
         FilterProvider filters = new SimpleFilterProvider()
-            .addFilter("channel-plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
+            .addFilter("node-plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
             .addFilter("project-reference", SimpleBeanPropertyFilter.serializeAll())
             .addFilter("plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
             .addFilter("plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"));
@@ -38,5 +36,4 @@ public class ChannelJsonMapper {
 
         return wrapper;
     }
-
 }
