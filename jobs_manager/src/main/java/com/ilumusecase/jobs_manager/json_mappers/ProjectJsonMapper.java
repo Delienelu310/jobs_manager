@@ -1,4 +1,4 @@
-package com.ilumusecase.json_mappers;
+package com.ilumusecase.jobs_manager.json_mappers;
 
 import java.util.List;
 
