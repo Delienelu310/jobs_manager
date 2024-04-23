@@ -1,8 +1,8 @@
 package com.ilumusecase.jobs_manager.controllers;
 
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,26 +16,35 @@ import com.ilumusecase.jobs_manager.resources.Channel;
 import com.ilumusecase.jobs_manager.resources.ChannelDetails;
 import com.ilumusecase.jobs_manager.resources.Project;
 import com.ilumusecase.jobs_manager.resources.ProjectDetails;
+import com.ilumusecase.json_mappers.JsonMappersFactory;
 
 @RestController
 public class ProjectController {
 
     @Autowired
     private RepositoryFactory repositoryFactory;
+    @Autowired
+    private JsonMappersFactory jsonMappersFactory;
     
     @GetMapping("/projects")
-    public List<Project> getAllProjects(){
-        return repositoryFactory.getProjectRepository().retrieveAllProjects();
+    public MappingJacksonValue getAllProjects(){
+        return jsonMappersFactory.getProjectJsonMapper().getFullProjectList(
+            repositoryFactory.getProjectRepository().retrieveAllProjects()
+        );
     }
 
     @GetMapping("/projects/{id}")
-    public Project getProjectById(@PathVariable("id") String id){
-        return repositoryFactory.getProjectRepository().retrieveProjectById(id);
+    public MappingJacksonValue getProjectById(@PathVariable("id") String id){
+        return jsonMappersFactory.getProjectJsonMapper().getFullProject(
+            repositoryFactory.getProjectRepository().retrieveProjectById(id)
+        );
     }
 
     @PostMapping("/projects")
-    public Project createProject(@RequestBody ProjectDetails projectDetails){
-        return repositoryFactory.getProjectRepository().createProject(projectDetails);
+    public MappingJacksonValue createProject(@RequestBody ProjectDetails projectDetails){
+        return jsonMappersFactory.getProjectJsonMapper().getFullProject(
+            repositoryFactory.getProjectRepository().createProject(projectDetails)
+        );
     }
 
     @DeleteMapping("/projects/{id}")
@@ -44,7 +53,7 @@ public class ProjectController {
     }
 
     @PutMapping("/projects/{id}/input/add/{label}")
-    public Project addInputChannel(@PathVariable("id") String id, @PathVariable("label") String label, @RequestBody ChannelDetails channelDetails){
+    public MappingJacksonValue addInputChannel(@PathVariable("id") String id, @PathVariable("label") String label, @RequestBody ChannelDetails channelDetails){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
         Channel channel =  repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
 
@@ -53,22 +62,35 @@ public class ProjectController {
         }
         project.getInputChannels().put(label, channel);
 
-        return repositoryFactory.getProjectRepository().updateProjectFull(project);
+        return jsonMappersFactory.getProjectJsonMapper().getFullProject(
+            repositoryFactory.getProjectRepository().updateProjectFull(project)
+        );
     }
 
     @PutMapping("/projects/{id}/input/remove/{channel_id}")
-    public void removeInputChannel(@PathVariable("id") Long id, @PathVariable("channel_id") Long channelId){
-
+    public MappingJacksonValue removeInputChannel(@PathVariable("id") String id, @PathVariable("channel_id") Long channelId){
+        return null;
     }
 
     @PutMapping("/projects/{id}/output/add/{channel_id}")
-    public void addOutputChannel(@PathVariable("id") Long id, @PathVariable("channel_id") Long channelId){
+    public MappingJacksonValue addOutputChannel(@PathVariable("id") String id, @PathVariable("label") String label, @RequestBody ChannelDetails channelDetails){
 
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
+        Channel channel =  repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
+
+        if(project.getOutputChannels().containsKey(label)){
+            throw new RuntimeException("The label is already taken");
+        }
+        project.getOutputChannels().put(label, channel);
+
+        return jsonMappersFactory.getProjectJsonMapper().getFullProject(
+            repositoryFactory.getProjectRepository().updateProjectFull(project)
+        );
     }
 
     @PutMapping("/projects/{id}/output/remove/{channel_id}")
-    public void removeOutputChannel(@PathVariable("id") Long id, @PathVariable("channel_id") Long channelId){
-
+    public MappingJacksonValue removeOutputChannel(@PathVariable("id") String id, @PathVariable("channel_id") String channelId){
+        return null;
     }
 
     @PutMapping("/projects/{id}/start/channels")

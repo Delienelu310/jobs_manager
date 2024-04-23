@@ -1,8 +1,7 @@
 package com.ilumusecase.jobs_manager.controllers;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,37 +13,50 @@ import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.Channel;
 import com.ilumusecase.jobs_manager.resources.ChannelDetails;
 import com.ilumusecase.jobs_manager.resources.Project;
+import com.ilumusecase.json_mappers.JsonMappersFactory;
 
 @RestController
 public class ChannelController {
     
     @Autowired
     private RepositoryFactory repositoryFactory;
+    @Autowired
+    private JsonMappersFactory jsonMappersFactory;
+
 
     @GetMapping("/channels")
-    public List<Channel> retrieveAllChannels(){
-        return repositoryFactory.getChannelsRepository().retrieveAll();
+    public MappingJacksonValue retrieveAllChannels(){
+        return jsonMappersFactory.getChannelJsonMapper().getFullChannelList(
+            repositoryFactory.getChannelsRepository().retrieveAll()
+        );
     }
 
     @GetMapping("/projects/{project_id}/channels")
-    public List<Channel> retreiveChannelsByProjectId(@PathVariable("project_id") String projectId){
-        return repositoryFactory.getChannelsRepository().retrieveAllByProjectId(projectId);
+    public MappingJacksonValue retreiveChannelsByProjectId(@PathVariable("project_id") String projectId){
+
+        return jsonMappersFactory.getChannelJsonMapper().getFullChannelList(
+            repositoryFactory.getChannelsRepository().retrieveAllByProjectId(projectId)
+        );
+
     }
 
     @GetMapping("/projects/{project_id}/channels/{channel_id}")
-    public Channel retrieveChannel(@PathVariable("project_id") String projectId, @PathVariable("channel_id") String channelId){
+    public MappingJacksonValue retrieveChannel(@PathVariable("project_id") String projectId, @PathVariable("channel_id") String channelId){
         Channel channel = repositoryFactory.getChannelsRepository().retrieveById(channelId);
         if( !channel.getProject().getId().equals(projectId) ){
             throw new RuntimeException("The channel does not belong to the project with id " + projectId);
         }
 
-        return channel;
+        return jsonMappersFactory.getChannelJsonMapper().getFullChannel(channel);
     }
 
     @PostMapping("/projects/{project_id}/channels")
-    public Channel createChannel(@PathVariable("project_id") String projectId, @RequestBody ChannelDetails channelDetails){
+    public MappingJacksonValue createChannel(@PathVariable("project_id") String projectId, @RequestBody ChannelDetails channelDetails){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
-        return repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
+        return jsonMappersFactory.getChannelJsonMapper().getFullChannel(
+            repositoryFactory.getChannelsRepository().createChannel(project, channelDetails)
+        );
+        
     }
 
     @DeleteMapping("/channels/{id}")
