@@ -9,11 +9,13 @@ public interface ProjectRepository {
 
 
     public List<Project> retrieveAllProjects();
-    public Project retrieveProjectById(Long id);
+    public Project retrieveProjectById(String id);
 
     public Project createProject(ProjectDetails projectDetails);
+    public Project updateProject(String id, ProjectDetails projectDetails);
+    public Project updateProjectFull(Project project);
 
-    public void deleteProject(Long id);
+    public void deleteProject(String id);
 
 
 

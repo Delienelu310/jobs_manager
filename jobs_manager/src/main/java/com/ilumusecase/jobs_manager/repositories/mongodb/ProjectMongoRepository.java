@@ -2,6 +2,7 @@ package com.ilumusecase.jobs_manager.repositories.mongodb;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.ProjectRepository;
@@ -12,6 +13,7 @@ import com.ilumusecase.jobs_manager.resources.ProjectDetails;
 @Repository
 public class ProjectMongoRepository implements ProjectRepository {
 
+    @Autowired
     private MongoProject mongoProject;
 
     @Override
@@ -20,7 +22,7 @@ public class ProjectMongoRepository implements ProjectRepository {
     }
 
     @Override
-    public Project retrieveProjectById(Long id) {
+    public Project retrieveProjectById(String id) {
         return mongoProject.findById(id).get();
     }
 
@@ -33,8 +35,23 @@ public class ProjectMongoRepository implements ProjectRepository {
     }
 
     @Override
-    public void deleteProject(Long id) {
+    public void deleteProject(String id) {
         mongoProject.deleteById(id);
+    }
+
+    @Override
+    public Project updateProject(String id, ProjectDetails projectDetails) {
+
+        Project project = mongoProject.findById(id).get();
+
+        project.setProjectDetails(projectDetails);
+
+        return mongoProject.save(project);
+    }
+
+    @Override
+    public Project updateProjectFull(Project project) {
+        return mongoProject.save(project);
     }
     
 }

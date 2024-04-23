@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import com.ilumusecase.jobs_manager.resources.Project;
 
 @Repository
-public interface MongoProject extends MongoRepository<Project, Long>{
+public interface MongoProject extends MongoRepository<Project, String>{
 
     
 }
