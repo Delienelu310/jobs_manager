@@ -15,6 +15,7 @@ import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.Channel;
 import com.ilumusecase.jobs_manager.resources.ChannelDetails;
+import com.ilumusecase.jobs_manager.resources.JobNode;
 import com.ilumusecase.jobs_manager.resources.Project;
 import com.ilumusecase.jobs_manager.resources.ProjectDetails;
 
@@ -68,8 +69,52 @@ public class ProjectController {
     }
 
     @PutMapping("/projects/{id}/input/remove/{channel_id}")
-    public MappingJacksonValue removeInputChannel(@PathVariable("id") String id, @PathVariable("channel_id") Long channelId){
-        return null;
+    public MappingJacksonValue removeInputChannel(@PathVariable("id") String id, @PathVariable("channel_id") String channelId){
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
+        Channel channel = repositoryFactory.getChannelsRepository().retrieveById(id);
+
+        if( !project.getId().equals(channel.getId())){
+            throw new RuntimeException("Channel with id " + channelId +"does not belong to project with id " + id);
+        }
+
+        // 1. remove the channel from input and output channels field of the project objects
+        for(String label : project.getInputChannels().keySet()){
+            if(project.getInputChannels().get(label).getId().equals(channelId)){
+                project.getInputChannels().remove(label);
+            }
+
+            if(project.getOutputChannels().get(label).getId().equals(channelId)){
+                project.getOutputChannels().remove(label);
+            }
+        }
+        
+        // 2. if the channel does no connect to jobNodes, then you should remove it
+        if(channel.getInputJobs().size() == 0 || channel.getOutputJobs().size() == 0){
+
+            for(JobNode jobNode : channel.getInputJobs()){
+                for( String label : jobNode.getInput().keySet()){
+                    if(jobNode.getInput().get(label).getId().equals( channel.getId() )){
+                        jobNode.getInput().remove(label);
+                    }
+                }
+
+                for( String label : jobNode.getOutput().keySet()){
+                    if(jobNode.getInput().get(label).getId().equals( channel.getId() )){
+                        jobNode.getOutput().remove(label);
+                    }
+                }
+
+                repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+
+            }
+
+            repositoryFactory.getChannelsRepository().deleteChannelById(channelId);
+        }
+        
+        return jsonMappersFactory.getProjectJsonMapper().getFullProject(
+            repositoryFactory.getProjectRepository().updateProjectFull(project)
+        );
+
     }
 
     @PutMapping("/projects/{id}/output/add/{channel_id}")
@@ -90,7 +135,7 @@ public class ProjectController {
 
     @PutMapping("/projects/{id}/output/remove/{channel_id}")
     public MappingJacksonValue removeOutputChannel(@PathVariable("id") String id, @PathVariable("channel_id") String channelId){
-        return null;
+        return this.removeInputChannel(id, channelId);
     }
 
     @PutMapping("/projects/{id}/start/channels")
