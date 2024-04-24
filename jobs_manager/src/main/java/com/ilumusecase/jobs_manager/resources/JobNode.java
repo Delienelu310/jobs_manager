@@ -1,5 +1,6 @@
 package com.ilumusecase.jobs_manager.resources;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
@@ -27,11 +28,11 @@ public class JobNode {
     
     @DBRef
     @JsonFilter("node-plug-channel")
-    private Map<String, Channel> input;
+    private Map<String, List<Channel>> input;
     
     @DBRef
     @JsonFilter("node-plug-channel")
-    private Map<String, Channel> output;
+    private Map<String, List<Channel>> output;
 
     
 }

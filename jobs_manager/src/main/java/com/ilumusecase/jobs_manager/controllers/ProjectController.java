@@ -93,15 +93,11 @@ public class ProjectController {
 
             for(JobNode jobNode : channel.getInputJobs()){
                 for( String label : jobNode.getInput().keySet()){
-                    if(jobNode.getInput().get(label).getId().equals( channel.getId() )){
-                        jobNode.getInput().remove(label);
-                    }
+                    jobNode.getInput().get(label).removeIf(ch -> ch.getId().equals(channelId));
                 }
 
                 for( String label : jobNode.getOutput().keySet()){
-                    if(jobNode.getInput().get(label).getId().equals( channel.getId() )){
-                        jobNode.getOutput().remove(label);
-                    }
+                    jobNode.getOutput().get(label).removeIf(ch -> ch.getId().equals(channelId));
                 }
 
                 repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
