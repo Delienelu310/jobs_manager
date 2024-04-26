@@ -1,0 +1,26 @@
+Tested:
+1, 
+
+to test:
+1. Creating project and retrieving it 
+    ./create_project.sh
+    ./get_proejcts.sh
+2. Deleting empty project
+3. Updating details of empty project
+4. Adding input and output channels to project
+5. Removing input and output channeld from project
+
+
+6. Creating jobnode and retrieving it
+7. retrieving project with jobnodes in it
+8. updating empty jobnode
+9. adding and removing labels 
+10. deleting 
+
+11. retrieving channels
+12. connecting jobnode to project input/output
+13. connecting jobnode to other job node
+14. deleting channel 
+15. deleting non-empty jobnode 
+16. deleting non-empty project 
+ 
