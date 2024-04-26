@@ -1,20 +1,41 @@
 Tested:
-1, 
+1, 2, 3, 4, 5, 6, 7, 8
 
 to test:
 1. Creating project and retrieving it 
     ./create_project.sh
-    ./get_proejcts.sh
+    ./get_projects.sh
 2. Deleting empty project
-3. Updating details of empty project
-4. Adding input and output channels to project
-5. Removing input and output channeld from project
+    ./delete_project.sh id
+    ./get_projects.sh
 
+3. Updating details of empty project
+    ./create_project.sh
+    ./update_project.sh id
+    ./get_projects.sh
+
+4. Adding input and output channels to project
+    ./add_project_input_channel.sh project_id label
+    ./add_project_output_channel.sh project_id label
+    
+5. Removing input and output channeld from project
+    ./remove_project_input_channel.sh project_id label
+    ./remove_project_input_channel.sh project_id label
 
 6. Creating jobnode and retrieving it
+    ./create_jobnode.sh project_id
+    ./get_jobnodes.sh project_id
+
 7. retrieving project with jobnodes in it
+    ./get_projects.sh
+
 8. updating empty jobnode
+    ./update_jobnode.sh projectId jobNodeId
+
+
 9. adding and removing labels 
+    
+
 10. deleting 
 
 11. retrieving channels

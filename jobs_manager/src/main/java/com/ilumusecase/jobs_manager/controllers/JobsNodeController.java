@@ -41,7 +41,7 @@ public class JobsNodeController {
         );
     }
 
-    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}}")
+    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}")
     public MappingJacksonValue retrieveById(@PathVariable("project_id") String projectId, @PathVariable("job_node_id") String jobNodeId){
         return jsonMappersFactory.getJobNodeJsonMapper().getFullJobNode( 
             repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
@@ -57,16 +57,24 @@ public class JobsNodeController {
 
     @PostMapping("/projects/{project_id}/job_nodes")
     public MappingJacksonValue createJobNode(@PathVariable("project_id") String projectId, @RequestBody JobNodeDetails jobNodeDetails){
-        return jsonMappersFactory.getJobNodeJsonMapper().getFullJobNode(
-            repositoryFactory.getJobNodesRepository().createJobNode(
-                repositoryFactory.getProjectRepository().retrieveProjectById(projectId), 
-                jobNodeDetails
-            )
-        );
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().createJobNode( project, jobNodeDetails);
+
+        
+        project.getJobNodes().add(jobNode);
+        repositoryFactory.getProjectRepository().updateProjectFull(project);
+
+        
+        return jsonMappersFactory.getJobNodeJsonMapper().getFullJobNode(jobNode);
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}")
-    public MappingJacksonValue updateJobNodeDetails(@PathVariable("job_node_id") String jobNodeId, @RequestBody JobNodeDetails jobNodeDetails){
+    public MappingJacksonValue updateJobNodeDetails(@PathVariable("project_id") String projectId, @PathVariable("job_node_id") String jobNodeId, @RequestBody JobNodeDetails jobNodeDetails){
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
+        if(!project.getJobNodes().stream().anyMatch(jn -> jn.getId().equals(jobNodeId))){
+            throw new RuntimeException();
+        }
+        
         return jsonMappersFactory.getJobNodeJsonMapper().getFullJobNode(
             repositoryFactory.getJobNodesRepository().updateJobNode(jobNodeId, jobNodeDetails)
         );
@@ -210,7 +218,7 @@ public class JobsNodeController {
 
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(outputJobNodeId);
-        //output job send data, input job receives it
+        //output job sends data, input job receives it
         JobNode inputJob = null, outputJob = null;
         if(inputJobNodeId != null){
             inputJob = repositoryFactory.getJobNodesRepository().retrieveById(inputJobNodeId);
@@ -234,30 +242,30 @@ public class JobsNodeController {
 
         // check first and second mods:
         if(outputJob != null && outputJobNodeLabel != null && projectOutputLabel != null){
-            if(!project.getOutputChannels().containsKey(projectOutputLabel)){
+            if(!project.getOutputChannels().containsKey(projectOutputLabel) || project.getOutputChannels().get(projectOutputLabel) == null){
                 throw new RuntimeException();
             }
-            if( !outputJob.getOutput().containsKey(outputJobNodeLabel)){
+            if( !outputJob.getOutput().containsKey(outputJobNodeLabel) || outputJob.getOutput().get(outputJobNodeLabel) == null){
                 throw new RuntimeException();
             }
         }
 
         if(inputJob != null && inputJobNodeLabel != null && projectInputLabel != null){
-            if(!project.getInputChannels().containsKey(projectInputLabel)){
+            if(!project.getInputChannels().containsKey(projectInputLabel) || project.getInputChannels().get(projectOutputLabel) == null){
                 throw new RuntimeException();
             }
-            if( !inputJob.getInput().containsKey(inputJobNodeLabel)){
+            if( !inputJob.getInput().containsKey(inputJobNodeLabel) || inputJob.getInput().get(inputJobNodeLabel) == null){
                 throw new RuntimeException();
             }
         }
 
         // check third mod:
         if(inputJob != null && inputJobNodeLabel != null && outputJob != null && outputJobNodeLabel != null){
-            if(!inputJob.getInput().containsKey(inputJobNodeLabel)){
+            if(!inputJob.getInput().containsKey(inputJobNodeLabel) || inputJob.getInput().get(inputJobNodeLabel) == null){
                 throw new RuntimeException();
             }
             
-            if(!outputJob.getOutput().containsKey(outputJobNodeLabel)){
+            if(!outputJob.getOutput().containsKey(outputJobNodeLabel) || outputJob.getOutput().get(outputJobNodeLabel) == null){
                 throw new RuntimeException();
             }
         }

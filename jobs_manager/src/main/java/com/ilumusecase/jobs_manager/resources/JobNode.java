@@ -1,5 +1,6 @@
 package com.ilumusecase.jobs_manager.resources;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,13 +27,13 @@ public class JobNode {
     @JsonFilter("project-reference")
     private Project project;
     
-    @DBRef
+    @DBRef(lazy = true)
     @JsonFilter("node-plug-channel")
-    private Map<String, List<Channel>> input;
+    private Map<String, List<Channel>> input = new HashMap<>();
     
-    @DBRef
+    @DBRef(lazy = true)
     @JsonFilter("node-plug-channel")
-    private Map<String, List<Channel>> output;
+    private Map<String, List<Channel>> output = new HashMap<>();
 
     
 }

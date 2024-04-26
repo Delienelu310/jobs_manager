@@ -24,17 +24,17 @@ public class Project {
 
     private ProjectDetails projectDetails;
 
-    @DBRef
+    @DBRef(lazy=true)
     @JsonFilter("plug-channel")
     private List<Channel> channels = new ArrayList<>();
-    @DBRef
+    @DBRef(lazy=true)
     @JsonFilter("plug-jobNode")
     private List<JobNode> jobNodes = new ArrayList<>(); 
 
-    @DBRef
+    @DBRef(lazy=true)
     @JsonFilter("plug-channel")
     private Map<String, Channel> inputChannels = new HashMap<>();
-    @DBRef
+    @DBRef(lazy=true)
     @JsonFilter("plug-channel")
     private Map<String, Channel> outputChannels = new HashMap<>();
 }

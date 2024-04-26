@@ -1,5 +1,7 @@
 package com.ilumusecase.jobs_manager.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.Channel;
@@ -59,13 +62,14 @@ public class ChannelController {
         );
         
     }
-
+    
     @DeleteMapping("/projects/{project_id}/channels/{channel_id}")
     public void deleteChannelById(@PathVariable("project_id") String projectId, @PathVariable("channel_id") String channelId){
         // remove channel from input and output of project
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         for(String label : project.getInputChannels().keySet()){
             if(project.getInputChannels().get(label).getId().equals(channelId)){
+
                 project.getInputChannels().remove(label);
             }
         }
@@ -75,7 +79,8 @@ public class ChannelController {
                 project.getOutputChannels().remove(label);
             }
         }
-        
+
+
         project.getChannels().removeIf(ch -> ch.getId().equals(channelId));
         repositoryFactory.getProjectRepository().updateProjectFull(project);
 

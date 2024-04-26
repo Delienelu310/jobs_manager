@@ -1,6 +1,5 @@
 package com.ilumusecase.jobs_manager.controllers;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,7 +14,6 @@ import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.Channel;
 import com.ilumusecase.jobs_manager.resources.ChannelDetails;
-import com.ilumusecase.jobs_manager.resources.JobNode;
 import com.ilumusecase.jobs_manager.resources.Project;
 import com.ilumusecase.jobs_manager.resources.ProjectDetails;
 
@@ -26,6 +24,9 @@ public class ProjectController {
     private RepositoryFactory repositoryFactory;
     @Autowired
     private JsonMappersFactory jsonMappersFactory;
+
+    @Autowired
+    private ChannelController channelController;
     
     @GetMapping("/projects")
     public MappingJacksonValue getAllProjects(){
@@ -58,80 +59,66 @@ public class ProjectController {
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
         Channel channel =  repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
 
-        if(project.getInputChannels().containsKey(label)){
+        if(project.getInputChannels().containsKey(label) && project.getInputChannels().get(label) != null){
             throw new RuntimeException("The label is already taken");
         }
         project.getInputChannels().put(label, channel);
+        project.getChannels().add(channel);
 
         return jsonMappersFactory.getProjectJsonMapper().getFullProject(
             repositoryFactory.getProjectRepository().updateProjectFull(project)
         );
     }
 
-    @PutMapping("/projects/{id}/input/remove/{channel_id}")
-    public MappingJacksonValue removeInputChannel(@PathVariable("id") String id, @PathVariable("channel_id") String channelId){
+    @PutMapping("/projects/{id}/input/remove/{label}")
+    public MappingJacksonValue removeInputChannel(@PathVariable("id") String id, @PathVariable("label") String label){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
-        Channel channel = repositoryFactory.getChannelsRepository().retrieveById(id);
 
-        if( !project.getId().equals(channel.getId())){
-            throw new RuntimeException("Channel with id " + channelId +"does not belong to project with id " + id);
+        if(  !project.getInputChannels().containsKey(label) || project.getInputChannels().get(label) == null){
+            throw new RuntimeException();
         }
+        Channel channel = project.getInputChannels().get(label);
 
-        // 1. remove the channel from input and output channels field of the project objects
-        for(String label : project.getInputChannels().keySet()){
-            if(project.getInputChannels().get(label).getId().equals(channelId)){
-                project.getInputChannels().remove(label);
-            }
-
-            if(project.getOutputChannels().get(label).getId().equals(channelId)){
-                project.getOutputChannels().remove(label);
-            }
-        }
-        
-        // 2. if the channel does no connect to jobNodes, then you should remove it
-        if(channel.getInputJobs().size() == 0 || channel.getOutputJobs().size() == 0){
-
-            for(JobNode jobNode : channel.getInputJobs()){
-                for( String label : jobNode.getInput().keySet()){
-                    jobNode.getInput().get(label).removeIf(ch -> ch.getId().equals(channelId));
-                }
-
-                for( String label : jobNode.getOutput().keySet()){
-                    jobNode.getOutput().get(label).removeIf(ch -> ch.getId().equals(channelId));
-                }
-
-                repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
-
-            }
-
-            repositoryFactory.getChannelsRepository().deleteChannelById(channelId);
-        }
+        channelController.deleteChannelById(id, channel.getId());
         
         return jsonMappersFactory.getProjectJsonMapper().getFullProject(
-            repositoryFactory.getProjectRepository().updateProjectFull(project)
+            repositoryFactory.getProjectRepository().retrieveProjectById(id)
         );
 
     }
 
-    @PutMapping("/projects/{id}/output/add/{channel_id}")
+    @PutMapping("/projects/{id}/output/add/{label}")
     public MappingJacksonValue addOutputChannel(@PathVariable("id") String id, @PathVariable("label") String label, @RequestBody ChannelDetails channelDetails){
 
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
         Channel channel =  repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
 
-        if(project.getOutputChannels().containsKey(label)){
+        if(project.getOutputChannels().containsKey(label) && project.getOutputChannels().get(label) != null){
             throw new RuntimeException("The label is already taken");
         }
         project.getOutputChannels().put(label, channel);
+        project.getChannels().add(channel);
 
         return jsonMappersFactory.getProjectJsonMapper().getFullProject(
             repositoryFactory.getProjectRepository().updateProjectFull(project)
         );
     }
 
-    @PutMapping("/projects/{id}/output/remove/{channel_id}")
-    public MappingJacksonValue removeOutputChannel(@PathVariable("id") String id, @PathVariable("channel_id") String channelId){
-        return this.removeInputChannel(id, channelId);
+    @PutMapping("/projects/{id}/output/remove/{label}")
+    public MappingJacksonValue removeOutputChannel(@PathVariable("id") String id, @PathVariable("label") String label){
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
+
+        if(  !project.getOutputChannels().containsKey(label) || project.getOutputChannels().get(label) == null){
+            throw new RuntimeException();
+        }
+        Channel channel = project.getOutputChannels().get(label);
+
+        channelController.deleteChannelById(id, channel.getId());
+        
+        return jsonMappersFactory.getProjectJsonMapper().getFullProject(
+            repositoryFactory.getProjectRepository().retrieveProjectById(id)
+        );
+
     }
 
     @PutMapping("/projects/{id}/start/channels")
@@ -145,7 +132,7 @@ public class ProjectController {
     }
 
     @PutMapping("/projects/{id}")
-    public Project updateProject(@PathVariable("id") String id, ProjectDetails projectDetails){
+    public Project updateProject(@PathVariable("id") String id, @RequestBody ProjectDetails projectDetails){
         return repositoryFactory.getProjectRepository().updateProject(id, projectDetails);
     }
 
