@@ -1,8 +1,6 @@
 package com.ilumusecase.jobs_manager.controllers;
 
 
-import java.util.ArrayList;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +16,7 @@ import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.Channel;
 import com.ilumusecase.jobs_manager.resources.ChannelDetails;
+import com.ilumusecase.jobs_manager.resources.ChannelList;
 import com.ilumusecase.jobs_manager.resources.JobNode;
 import com.ilumusecase.jobs_manager.resources.JobNodeDetails;
 import com.ilumusecase.jobs_manager.resources.Project;
@@ -81,7 +80,7 @@ public class JobsNodeController {
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/add/input/{label}")
-    public void addInputLabel(@PathVariable("projectId") String projectId, @PathVariable("jobNodeId") String jobNodeId, @PathVariable("label") String label){
+    public void addInputLabel(@PathVariable("project_id") String projectId, @PathVariable("job_node_id") String jobNodeId, @PathVariable("label") String label){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         if( !jobNode.getProject().getId().equals(projectId)){
             throw new RuntimeException();
@@ -91,12 +90,13 @@ public class JobsNodeController {
             throw new RuntimeException();
         }  
 
-        jobNode.getInput().put(label, new ArrayList<>());
+        ChannelList channelList = repositoryFactory.getChannelListRepository().create();
+        jobNode.getInput().put(label, channelList);
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/add/output/{label}")
-    public void addOutputChannel(@PathVariable("projectId") String projectId, @PathVariable("jobNodeId") String jobNodeId, @PathVariable("label") String label){
+    public void addOutputChannel(@PathVariable("project_id") String projectId, @PathVariable("job_node_id") String jobNodeId, @PathVariable("label") String label){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         if( !jobNode.getProject().getId().equals(projectId)){
             throw new RuntimeException();
@@ -106,13 +106,14 @@ public class JobsNodeController {
             throw new RuntimeException();
         }  
 
-        jobNode.getOutput().put(label, new ArrayList<>());
+        ChannelList channelList = repositoryFactory.getChannelListRepository().create();
+        jobNode.getOutput().put(label, channelList);
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
     }
 
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/remove/input/{label}")
-    public void removeInputLabel(@PathVariable("projectId") String projectId, @PathVariable("jobNodeId") String jobNodeId, @PathVariable("label") String label){
+    public void removeInputLabel(@PathVariable("project_id") String projectId, @PathVariable("job_node_id") String jobNodeId, @PathVariable("label") String label){
         
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
@@ -124,7 +125,7 @@ public class JobsNodeController {
             throw new RuntimeException();
         }  
 
-        for(Channel channel : jobNode.getInput().get(label)){
+        for(Channel channel : jobNode.getInput().get(label).getChannelList()){
             channel.getOutputJobs().removeIf(jn -> jn.getId().equals(jobNodeId));
 
             
@@ -154,12 +155,14 @@ public class JobsNodeController {
 
         }
 
+        repositoryFactory.getChannelListRepository().delete(jobNode.getInput().get(label).getId());
+        jobNode.getInput().remove(label);
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
 
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/remove/output/{label}")
-    public void removeOutputLabel(@PathVariable("projectId") String projectId, @PathVariable("jobNodeId") String jobNodeId, @PathVariable("label") String label){
+    public void removeOutputLabel(@PathVariable("project_id") String projectId, @PathVariable("job_node_id") String jobNodeId, @PathVariable("label") String label){
         
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
@@ -171,7 +174,7 @@ public class JobsNodeController {
             throw new RuntimeException();
         }  
 
-        for(Channel channel : jobNode.getOutput().get(label)){
+        for(Channel channel : jobNode.getOutput().get(label).getChannelList()){
             channel.getInputJobs().removeIf(jn -> jn.getId().equals(jobNodeId));
 
             
@@ -199,6 +202,8 @@ public class JobsNodeController {
             }
         }
 
+        repositoryFactory.getChannelListRepository().delete(jobNode.getOutput().get(label).getId());
+        jobNode.getOutput().remove(label);
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
 
 
@@ -276,7 +281,8 @@ public class JobsNodeController {
 
             Channel channel = project.getOutputChannels().get(projectOutputLabel);
 
-            outputJob.getOutput().get(outputJobNodeLabel).add(channel);
+            outputJob.getOutput().get(outputJobNodeLabel).getChannelList().add(channel);
+            repositoryFactory.getChannelListRepository().update(outputJob.getOutput().get(outputJobNodeLabel));
             channel.getInputJobs().add(outputJob);
 
             repositoryFactory.getChannelsRepository().updateChannelFull(channel);
@@ -287,7 +293,9 @@ public class JobsNodeController {
         if(projectInputLabel != null && inputJob != null && inputJobNodeLabel != null){
             Channel channel = project.getInputChannels().get(projectInputLabel);
 
-            inputJob.getInput().get(inputJobNodeLabel).add(channel);
+            inputJob.getInput().get(inputJobNodeLabel).getChannelList().add(channel);
+            repositoryFactory.getChannelListRepository().update(inputJob.getInput().get(inputJobNodeLabel));
+
             channel.getOutputJobs().add(inputJob);
 
             repositoryFactory.getChannelsRepository().updateChannelFull(channel);
@@ -298,8 +306,11 @@ public class JobsNodeController {
         if(inputJob != null && inputJobNodeLabel != null &&  outputJob != null && outputJobNodeLabel != null){
             Channel channel = repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
 
-            inputJob.getInput().get(inputJobNodeLabel).add(channel); 
-            outputJob.getOutput().get(outputJobNodeLabel).add(channel);  
+            inputJob.getInput().get(inputJobNodeLabel).getChannelList().add(channel); 
+            outputJob.getOutput().get(outputJobNodeLabel).getChannelList().add(channel);  
+            repositoryFactory.getChannelListRepository().update(inputJob.getInput().get(inputJobNodeLabel));
+            repositoryFactory.getChannelListRepository().update(inputJob.getInput().get(outputJobNodeLabel));
+
             channel.getInputJobs().add(outputJob);
             channel.getOutputJobs().add(inputJob);
 
@@ -321,10 +332,12 @@ public class JobsNodeController {
 
         // remove the channels, that where connecting to project input/output, but dont delete them
         for(String label : jobNode.getInput().keySet()){
-            for(Channel channel : jobNode.getInput().get(label)){
+            for(Channel channel : jobNode.getInput().get(label).getChannelList()){
                 for(String labelProject : project.getInputChannels().keySet()){
                     if(project.getInputChannels().get(labelProject).getId().equals(channel.getId())){
-                        jobNode.getInput().get(label).remove(channel);
+                        jobNode.getInput().get(label).getChannelList().remove(channel);
+                        repositoryFactory.getChannelListRepository().update(jobNode.getInput().get(label));
+
                         channel.getOutputJobs().removeIf(jn -> jn.getId().equals(jobNodeId));
                     }
                 }
@@ -332,10 +345,12 @@ public class JobsNodeController {
         }
 
         for(String label : jobNode.getOutput().keySet()){
-            for(Channel channel : jobNode.getInput().get(label)){
+            for(Channel channel : jobNode.getInput().get(label).getChannelList()){
                 for(String labelProject : project.getOutputChannels().keySet()){
                     if(project.getOutputChannels().get(labelProject).getId().equals(channel.getId())){
-                        jobNode.getOutput().get(label).remove(channel);
+                        jobNode.getOutput().get(label).getChannelList().remove(channel);
+                        repositoryFactory.getChannelListRepository().update(jobNode.getOutput().get(label));
+
                         channel.getInputJobs().removeIf(jn -> jn.getId().equals(jobNodeId));
                     }
                 }
@@ -346,7 +361,7 @@ public class JobsNodeController {
 
         // remove the channels that were connecting this jobnode with other, while also deleting it if possible
         for(String label : jobNode.getInput().keySet()){
-            for(Channel channel : jobNode.getInput().get(label)){
+            for(Channel channel : jobNode.getInput().get(label).getChannelList()){
                 channel.getOutputJobs().removeIf(jn -> jn.getId().equals(jobNodeId));
                 if(channel.getOutputJobs().size() == 0){
                     channelController.deleteChannelById(projectId, channel.getId());
@@ -355,7 +370,7 @@ public class JobsNodeController {
             jobNode.getInput().remove(label);
         }
         for(String label : jobNode.getOutput().keySet()){
-            for(Channel channel : jobNode.getOutput().get(label)){
+            for(Channel channel : jobNode.getOutput().get(label).getChannelList()){
                 channel.getInputJobs().removeIf(jn -> jn.getId().equals(jobNodeId));
                 if(channel.getInputJobs().size() == 0){
                     channelController.deleteChannelById(projectId, channel.getId());

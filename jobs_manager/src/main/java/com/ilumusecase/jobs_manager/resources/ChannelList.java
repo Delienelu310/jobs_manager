@@ -1,7 +1,7 @@
 package com.ilumusecase.jobs_manager.resources;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -15,22 +15,13 @@ import lombok.NoArgsConstructor;
 @Document
 @Data
 @NoArgsConstructor
-public class JobNode {
-
+public class ChannelList {
     @Id
     private String id;
 
-    private JobNodeDetails jobNodeDetails;
-
     @DBRef
-    @JsonFilter("project-reference")
-    private Project project;
-    
-    @DBRef(lazy = true)
-    private Map<String, ChannelList> input = new HashMap<>();
-    
-    @DBRef(lazy = true)
-    private Map<String, ChannelList> output = new HashMap<>();
+    @JsonFilter("node-plug-channel")
+    private List<Channel> channelList = new ArrayList<>();
 
-    
+
 }

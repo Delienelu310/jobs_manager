@@ -1,5 +1,5 @@
 Tested:
-1, 2, 3, 4, 5, 6, 7, 8
+1, 2, 3, 4, 5, 6, 7, 8, 9
 
 to test:
 1. Creating project and retrieving it 
@@ -34,8 +34,11 @@ to test:
 
 
 9. adding and removing labels 
-    
-
+    ./add_jobnode_label.sh projectId jobNodeId label
+    ./get_jobnodes.sh
+    ./remove_jobnode_label.sh projectId jobNodeId label
+    ./get_jobnodes.sh
+    ./get_projects.sh
 10. deleting 
 
 11. retrieving channels

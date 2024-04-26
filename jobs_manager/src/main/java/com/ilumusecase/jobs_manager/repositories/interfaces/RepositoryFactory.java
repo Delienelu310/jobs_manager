@@ -5,4 +5,5 @@ public interface RepositoryFactory {
     public JobNodesRepository getJobNodesRepository();
     public ProjectRepository getProjectRepository();
     public ChannelsRepository getChannelsRepository();
+    public ChannelListRepository getChannelListRepository();
 } 
