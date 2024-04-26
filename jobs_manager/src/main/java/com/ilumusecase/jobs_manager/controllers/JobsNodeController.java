@@ -1,6 +1,8 @@
 package com.ilumusecase.jobs_manager.controllers;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.Channel;
@@ -209,20 +212,22 @@ public class JobsNodeController {
 
     }
 
+    Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
+
 
     @PutMapping("/projects/{project_id}/job_nodes/connect")
     public void connectJobNodes(
-        @PathVariable("project_id") String projectId,
-        @RequestParam("input_job_node_id") String inputJobNodeId,
-        @RequestParam("output_job_node_id") String outputJobNodeId,
-        @RequestParam("input_label") String inputJobNodeLabel,
-        @RequestParam("output_label") String outputJobNodeLabel,
-        @RequestParam("project_input_label") String projectInputLabel,
-        @RequestParam("project_output_label") String projectOutputLabel,
-        @RequestBody ChannelDetails channelDetails
+        @PathVariable(value="project_id") String projectId,
+        @RequestParam(required = false, value="input_job_node_id") String inputJobNodeId,
+        @RequestParam(required = false, value="output_job_node_id") String outputJobNodeId,
+        @RequestParam(required = false, value="input_label") String inputJobNodeLabel,
+        @RequestParam(required = false, value="output_label") String outputJobNodeLabel,
+        @RequestParam(required = false, value ="project_input_label") String projectInputLabel,
+        @RequestParam(required = false, value = "project_output_label") String projectOutputLabel,
+        @RequestBody(required = false) ChannelDetails channelDetails
 
     ){
-        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(outputJobNodeId);
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         //output job sends data, input job receives it
         JobNode inputJob = null, outputJob = null;
         if(inputJobNodeId != null){
@@ -256,7 +261,7 @@ public class JobsNodeController {
         }
 
         if(inputJob != null && inputJobNodeLabel != null && projectInputLabel != null){
-            if(!project.getInputChannels().containsKey(projectInputLabel) || project.getInputChannels().get(projectOutputLabel) == null){
+            if(!project.getInputChannels().containsKey(projectInputLabel) || project.getInputChannels().get(projectInputLabel) == null){
                 throw new RuntimeException();
             }
             if( !inputJob.getInput().containsKey(inputJobNodeLabel) || inputJob.getInput().get(inputJobNodeLabel) == null){
@@ -304,12 +309,14 @@ public class JobsNodeController {
 
         //connect input and output jobs
         if(inputJob != null && inputJobNodeLabel != null &&  outputJob != null && outputJobNodeLabel != null){
+
             Channel channel = repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
 
             inputJob.getInput().get(inputJobNodeLabel).getChannelList().add(channel); 
             outputJob.getOutput().get(outputJobNodeLabel).getChannelList().add(channel);  
             repositoryFactory.getChannelListRepository().update(inputJob.getInput().get(inputJobNodeLabel));
-            repositoryFactory.getChannelListRepository().update(inputJob.getInput().get(outputJobNodeLabel));
+            repositoryFactory.getChannelListRepository().update(outputJob.getOutput().get(outputJobNodeLabel));
+
 
             channel.getInputJobs().add(outputJob);
             channel.getOutputJobs().add(inputJob);
