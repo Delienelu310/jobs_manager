@@ -1,5 +1,5 @@
 Tested:
-1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
 
 to test:
 1. Creating project and retrieving it 
@@ -49,9 +49,10 @@ to test:
 12. connecting jobnode to project input/output
     ./jobnode_connect_project_input.sh projectId inputJobNodeId inputLabel projectInputLabel
     ./jobnode_connect_project_output.sh projectId outputJobNodeId outputLabel projectOutputLabel
-    ./jobnode_connect_jobnode.sh projectId inputJobNodeId outputJobNodeId inputLabel outputLabel
 13. connecting jobnode to other job node
+    ./jobnode_connect_jobnode.sh projectId inputJobNodeId outputJobNodeId inputLabel outputLabel
 14. deleting channel 
+    ./delete_channel.sh projectId channelId
 15. deleting non-empty jobnode 
 16. deleting non-empty project 
  
