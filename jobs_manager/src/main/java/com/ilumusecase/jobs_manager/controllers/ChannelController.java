@@ -13,6 +13,7 @@ import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.Channel;
 import com.ilumusecase.jobs_manager.resources.ChannelDetails;
+import com.ilumusecase.jobs_manager.resources.JobNode;
 import com.ilumusecase.jobs_manager.resources.Project;
 
 @RestController
@@ -59,9 +60,41 @@ public class ChannelController {
         
     }
 
-    @DeleteMapping("/channels/{id}")
-    public void deleteChannelById(@PathVariable("id") String id){
-        repositoryFactory.getChannelsRepository().deleteChannelById(id);
+    @DeleteMapping("/projects/{project_id}/channels/{channel_id}")
+    public void deleteChannelById(@PathVariable("project_id") String projectId, @PathVariable("channel_id") String channelId){
+        // remove channel from input and output of project
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
+        for(String label : project.getInputChannels().keySet()){
+            if(project.getInputChannels().get(label).getId().equals(channelId)){
+                project.getInputChannels().remove(label);
+            }
+        }
+
+        for(String label : project.getOutputChannels().keySet()){
+            if(project.getOutputChannels().get(label).getId().equals(channelId)){
+                project.getOutputChannels().remove(label);
+            }
+        }
+        
+        project.getChannels().removeIf(ch -> ch.getId().equals(channelId));
+        repositoryFactory.getProjectRepository().updateProjectFull(project);
+
+        // remove from job nodes
+        Channel channel = repositoryFactory.getChannelsRepository().retrieveById(channelId);
+        for(JobNode jobNode : channel.getInputJobs()){
+            for(String label : jobNode.getOutput().keySet()){
+                jobNode.getOutput().get(label).removeIf(ch -> ch.getId().equals(channelId));
+            }
+            repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+        }
+        for(JobNode jobNode : channel.getOutputJobs()){
+            for(String label : jobNode.getInput().keySet()){
+                jobNode.getInput().get(label).removeIf(ch -> ch.getId().equals(channelId));
+            }
+            repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+        }
+
+        repositoryFactory.getChannelsRepository().deleteChannelById(channelId);
     }
 
 }

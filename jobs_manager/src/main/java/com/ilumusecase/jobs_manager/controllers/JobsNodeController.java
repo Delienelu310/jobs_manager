@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +31,9 @@ public class JobsNodeController {
     private RepositoryFactory repositoryFactory;
     @Autowired
     private JsonMappersFactory jsonMappersFactory;
+
+    @Autowired
+    private ChannelController channelController;
 
     @GetMapping("/job_nodes")
     public MappingJacksonValue retrieveAllNodes(){
@@ -82,7 +86,7 @@ public class JobsNodeController {
 
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(outputJobNodeId);
-
+        //output job send data, input job receives it
         JobNode inputJob = null, outputJob = null;
         if(inputJobNodeId != null){
             inputJob = repositoryFactory.getJobNodesRepository().retrieveById(inputJobNodeId);
@@ -173,6 +177,62 @@ public class JobsNodeController {
 
 
         return null;
+    }
+
+    @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}")
+    public void deleteJobNode(@PathVariable("project_id") String projectId, @PathVariable("job_node_id") String jobNodeId){
+
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        if( !jobNode.getProject().getId().equals(projectId) ){
+            throw new RuntimeException();
+        }
+
+
+        // remove the channels, that where connecting to project input/output, but dont delete them
+        for(String label : jobNode.getInput().keySet()){
+            for(Channel channel : jobNode.getInput().get(label)){
+                for(String labelProject : project.getInputChannels().keySet()){
+                    if(project.getInputChannels().get(labelProject).getId().equals(channel.getId())){
+                        jobNode.getInput().get(label).remove(channel);
+                        channel.getOutputJobs().removeIf(jn -> jn.getId().equals(jobNodeId));
+                    }
+                }
+            }
+        }
+
+        for(String label : jobNode.getOutput().keySet()){
+            for(Channel channel : jobNode.getInput().get(label)){
+                for(String labelProject : project.getOutputChannels().keySet()){
+                    if(project.getOutputChannels().get(labelProject).getId().equals(channel.getId())){
+                        jobNode.getOutput().get(label).remove(channel);
+                        channel.getInputJobs().removeIf(jn -> jn.getId().equals(jobNodeId));
+                    }
+                }
+            }
+        }
+        project.getJobNodes().removeIf(jn -> jn.getId().equals(jobNodeId));
+        repositoryFactory.getProjectRepository().updateProjectFull(project);
+
+        // remove the channels that were connecting this jobnode with other, while also deleting it if possible
+        for(String label : jobNode.getInput().keySet()){
+            for(Channel channel : jobNode.getInput().get(label)){
+                channel.getOutputJobs().removeIf(jn -> jn.getId().equals(jobNodeId));
+                if(channel.getOutputJobs().size() == 0){
+                    channelController.deleteChannelById(projectId, channel.getId());
+                }
+            }
+            jobNode.getInput().remove(label);
+        }
+        for(String label : jobNode.getOutput().keySet()){
+            for(Channel channel : jobNode.getOutput().get(label)){
+                channel.getInputJobs().removeIf(jn -> jn.getId().equals(jobNodeId));
+                if(channel.getInputJobs().size() == 0){
+                    channelController.deleteChannelById(projectId, channel.getId());
+                }
+            }
+        }
+        repositoryFactory.getJobNodesRepository().deleteJobNodeById(jobNodeId);
     }
 
 
