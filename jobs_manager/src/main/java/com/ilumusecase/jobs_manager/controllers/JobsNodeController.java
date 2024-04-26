@@ -2,7 +2,6 @@ package com.ilumusecase.jobs_manager.controllers;
 
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -73,8 +72,133 @@ public class JobsNodeController {
         );
     }
 
+    @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/add/input/{label}")
+    public void addInputLabel(@PathVariable("projectId") String projectId, @PathVariable("jobNodeId") String jobNodeId, @PathVariable("label") String label){
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        if( !jobNode.getProject().getId().equals(projectId)){
+            throw new RuntimeException();
+        }
+
+        if( jobNode.getInput().containsKey(label)){
+            throw new RuntimeException();
+        }  
+
+        jobNode.getInput().put(label, new ArrayList<>());
+        repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+    }
+
+    @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/add/output/{label}")
+    public void addOutputChannel(@PathVariable("projectId") String projectId, @PathVariable("jobNodeId") String jobNodeId, @PathVariable("label") String label){
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        if( !jobNode.getProject().getId().equals(projectId)){
+            throw new RuntimeException();
+        }
+
+        if( jobNode.getOutput().containsKey(label)){
+            throw new RuntimeException();
+        }  
+
+        jobNode.getOutput().put(label, new ArrayList<>());
+        repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+    }
+
+
+    @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/remove/input/{label}")
+    public void removeInputLabel(@PathVariable("projectId") String projectId, @PathVariable("jobNodeId") String jobNodeId, @PathVariable("label") String label){
+        
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        if( !jobNode.getProject().getId().equals(projectId)){
+            throw new RuntimeException();
+        }
+
+        if( !jobNode.getInput().containsKey(label)){
+            throw new RuntimeException();
+        }  
+
+        for(Channel channel : jobNode.getInput().get(label)){
+            channel.getOutputJobs().removeIf(jn -> jn.getId().equals(jobNodeId));
+
+            
+
+            if(channel.getOutputJobs().size() == 0){
+                
+                // if the channel if part of project input, we skip it
+                boolean isProjectInput = false;
+                for(String key : project.getInputChannels().keySet()){
+                    if(project.getInputChannels().get(key).getId().equals(channel.getId())){
+                        isProjectInput = true;
+                        break;
+                    }
+                }
+
+                //otherwise delete it
+                if(!isProjectInput){
+                    channelController.deleteChannelById(projectId, channel.getId());
+                }else{
+                    repositoryFactory.getChannelsRepository().updateChannelFull(channel);
+                }
+                
+            }else{
+                repositoryFactory.getChannelsRepository().updateChannelFull(channel);
+            }
+
+
+        }
+
+        repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+
+    }
+
+    @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/remove/output/{label}")
+    public void removeOutputLabel(@PathVariable("projectId") String projectId, @PathVariable("jobNodeId") String jobNodeId, @PathVariable("label") String label){
+        
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        if( !jobNode.getProject().getId().equals(projectId)){
+            throw new RuntimeException();
+        }
+
+        if( !jobNode.getOutput().containsKey(label)){
+            throw new RuntimeException();
+        }  
+
+        for(Channel channel : jobNode.getOutput().get(label)){
+            channel.getInputJobs().removeIf(jn -> jn.getId().equals(jobNodeId));
+
+            
+
+            if(channel.getInputJobs().size() == 0){
+                
+                // if the channel if part of project input, we skip it
+                boolean isProjectInput = false;
+                for(String key : project.getOutputChannels().keySet()){
+                    if(project.getOutputChannels().get(key).getId().equals(channel.getId())){
+                        isProjectInput = true;
+                        break;
+                    }
+                }
+
+                //otherwise delete it
+                if(!isProjectInput){
+                    channelController.deleteChannelById(projectId, channel.getId());
+                }else{
+                    repositoryFactory.getChannelsRepository().updateChannelFull(channel);
+                }
+                
+            }else{
+                repositoryFactory.getChannelsRepository().updateChannelFull(channel);
+            }
+        }
+
+        repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+
+
+    }
+
+
     @PutMapping("/projects/{project_id}/job_nodes/connect")
-    public MappingJacksonValue connectJobNodes(
+    public void connectJobNodes(
         @PathVariable("project_id") String projectId,
         @RequestParam("input_job_node_id") String inputJobNodeId,
         @RequestParam("output_job_node_id") String outputJobNodeId,
@@ -96,87 +220,85 @@ public class JobsNodeController {
         }
 
         // firstly, check if the parameters are alright
-        if(projectOutputLabel != null && outputJob != null){
-            Channel channel = project.getOutputChannels().get(projectOutputLabel);
-            if(outputJobNodeLabel != null && 
-                outputJob.getOutput().get(outputJobNodeLabel).stream().anyMatch(ch -> ch.getId().equals(channel.getId()))
-            ){
+
+        // funciton works in one of three options or few of them, depending on parameters given
+        if( !(
+            outputJob != null && outputJobNodeLabel != null && projectOutputLabel != null
+            ||
+            inputJob != null && inputJobNodeLabel != null && projectInputLabel != null
+            ||
+            outputJob != null && inputJob != null && inputJobNodeLabel != null && outputJobNodeLabel != null
+        )){
+            throw new RuntimeException();
+        }
+
+        // check first and second mods:
+        if(outputJob != null && outputJobNodeLabel != null && projectOutputLabel != null){
+            if(!project.getOutputChannels().containsKey(projectOutputLabel)){
+                throw new RuntimeException();
+            }
+            if( !outputJob.getOutput().containsKey(outputJobNodeLabel)){
                 throw new RuntimeException();
             }
         }
 
-        if(projectInputLabel != null && inputJob != null){
-            Channel channel = project.getInputChannels().get(projectInputLabel);
-            if(inputJobNodeLabel != null && 
-                inputJob.getInput().get(inputJobNodeLabel).stream().anyMatch(ch -> ch.getId().equals(channel.getId()))
-            ){
+        if(inputJob != null && inputJobNodeLabel != null && projectInputLabel != null){
+            if(!project.getInputChannels().containsKey(projectInputLabel)){
+                throw new RuntimeException();
+            }
+            if( !inputJob.getInput().containsKey(inputJobNodeLabel)){
                 throw new RuntimeException();
             }
         }
+
+        // check third mod:
+        if(inputJob != null && inputJobNodeLabel != null && outputJob != null && outputJobNodeLabel != null){
+            if(!inputJob.getInput().containsKey(inputJobNodeLabel)){
+                throw new RuntimeException();
+            }
+            
+            if(!outputJob.getOutput().containsKey(outputJobNodeLabel)){
+                throw new RuntimeException();
+            }
+        }
+
 
         //connect output job node to output project label
-        if(projectOutputLabel != null && outputJob != null){
-
-
-            //if it is no connected yet, 
+        if(projectOutputLabel != null && outputJob != null && outputJobNodeLabel != null){
 
             Channel channel = project.getOutputChannels().get(projectOutputLabel);
-            if(outputJobNodeLabel != null){
-                outputJob.getOutput().get(outputJobNodeLabel).add(channel);
-            }else{
-                List<Channel> newOutputJobLabel = new ArrayList<>();
-                newOutputJobLabel.add(channel);
-                outputJob.getOutput().put(channel.getId() + "_" + projectOutputLabel, newOutputJobLabel);
-            }
+
+            outputJob.getOutput().get(outputJobNodeLabel).add(channel);
+            channel.getInputJobs().add(outputJob);
+
+            repositoryFactory.getChannelsRepository().updateChannelFull(channel);
             repositoryFactory.getJobNodesRepository().updateJobNodeFull(outputJob);
         }
 
         //connect input job node to input project label
-        if(projectInputLabel != null && inputJob != null){
+        if(projectInputLabel != null && inputJob != null && inputJobNodeLabel != null){
             Channel channel = project.getInputChannels().get(projectInputLabel);
-            if(inputJobNodeLabel != null){
-                inputJob.getInput().get(inputJobNodeLabel).add(channel);
-            }else{
-                List<Channel> newInputJobLabel = new ArrayList<>();
-                newInputJobLabel.add(channel);
-                outputJob.getOutput().put(channel.getId() + "_" + projectInputLabel, newInputJobLabel);
-            }
+
+            inputJob.getInput().get(inputJobNodeLabel).add(channel);
+            channel.getOutputJobs().add(inputJob);
+
+            repositoryFactory.getChannelsRepository().updateChannelFull(channel);
             repositoryFactory.getJobNodesRepository().updateJobNodeFull(inputJob);
         }
 
         //connect input and output jobs
-        if(inputJob != null && outputJob != null){
+        if(inputJob != null && inputJobNodeLabel != null &&  outputJob != null && outputJobNodeLabel != null){
             Channel channel = repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
 
-        
-            if(inputJobNodeLabel != null){
-                if(inputJob.getInput().containsKey(inputJobNodeLabel)){
-                    inputJob.getInput().put(inputJobNodeLabel, new ArrayList<>());
-                }
-                inputJob.getInput().get(inputJobNodeLabel).add(channel);        
-            }else{
-                List<Channel> labelList = new ArrayList<>();
-                labelList.add(channel);
-                inputJob.getInput().put(channel.getId(), labelList);
-            }
+            inputJob.getInput().get(inputJobNodeLabel).add(channel); 
+            outputJob.getOutput().get(outputJobNodeLabel).add(channel);  
+            channel.getInputJobs().add(outputJob);
+            channel.getOutputJobs().add(inputJob);
 
-            if(outputJobNodeLabel != null){
-                if(outputJob.getOutput().containsKey(outputJobNodeLabel)){
-                    outputJob.getOutput().put(outputJobNodeLabel, new ArrayList<>());
-                }
-                outputJob.getOutput().get(outputJobNodeLabel).add(channel);        
-            }else{
-                List<Channel> labelList = new ArrayList<>();
-                labelList.add(channel);
-                outputJob.getOutput().put(channel.getId(), labelList);
-            }
-
+            repositoryFactory.getChannelsRepository().updateChannelFull(channel);
             repositoryFactory.getJobNodesRepository().updateJobNodeFull(inputJob);
             repositoryFactory.getJobNodesRepository().updateJobNodeFull(outputJob);
         }
-
-
-        return null;
     }
 
     @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}")
