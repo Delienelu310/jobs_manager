@@ -6,9 +6,11 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ilumusecase.jobs_manager.channelLaunchers.ChannelLauncherFactory;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.Channel;
@@ -23,6 +25,8 @@ public class ChannelController {
     private RepositoryFactory repositoryFactory;
     @Autowired
     private JsonMappersFactory jsonMappersFactory;
+    @Autowired
+    private ChannelLauncherFactory channelLauncherFactory;
 
 
     @GetMapping("/channels")
@@ -99,6 +103,28 @@ public class ChannelController {
         }
 
         repositoryFactory.getChannelsRepository().deleteChannelById(channelId);
+    }
+
+    @PutMapping("/projects/{project_id}/channels/{channel_id}/start")
+    public void startChannel(@PathVariable("project_id") String projectId, @PathVariable("channel_id") String channelId){
+        Channel channel = repositoryFactory.getChannelsRepository().retrieveById(channelId);
+        if( !channel.getProject().getId().equals(projectId) ){
+            throw new RuntimeException();
+        }
+
+        channelLauncherFactory.getChannelLauncher(channel.getChannelDetails().getType())
+            .launchChannel(channel);
+    }
+
+    @PutMapping("/projects/{project_id}/channels/{channel_id}/stop")
+    public void stopChannel(@PathVariable("project_id") String projectId, @PathVariable("channel_id") String channelId){
+        Channel channel = repositoryFactory.getChannelsRepository().retrieveById(channelId);
+        if( !channel.getProject().getId().equals(projectId) ){
+            throw new RuntimeException();
+        }
+
+        channelLauncherFactory.getChannelLauncher(channel.getChannelDetails().getType())
+            .stopChannel(channel);
     }
 
 }

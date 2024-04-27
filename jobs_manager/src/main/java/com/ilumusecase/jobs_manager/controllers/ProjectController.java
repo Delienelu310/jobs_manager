@@ -122,13 +122,19 @@ public class ProjectController {
     }
 
     @PutMapping("/projects/{id}/start/channels")
-    public void startChannels(@PathVariable("id") Long id){
-
+    public void startChannels(@PathVariable("id") String id){
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
+        for(Channel channel : project.getChannels()){
+            channelController.startChannel(id, channel.getId());
+        }
     }
 
     @PutMapping("/projects/{id}/stop/channels")
-    public void stopChannels(@PathVariable("id") Long id){
-
+    public void stopChannels(@PathVariable("id") String id){
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
+        for(Channel channel : project.getChannels()){
+            channelController.stopChannel(id, channel.getId());
+        }
     }
 
     @PutMapping("/projects/{id}")
