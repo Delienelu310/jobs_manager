@@ -1,25 +1,20 @@
 package com.ilumusecase.jobs_manager.channelLaunchers;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaAdmin;
+import org.springframework.stereotype.Component;
 
 import com.ilumusecase.jobs_manager.resources.Channel;
 
+@Component("kafka")
 public class KafkaChannelLauncher implements ChannelLauncher{
     
-
+    @Autowired
     private KafkaAdmin kafkaAdmin;
-    {
-        Map<String, Object> configs = new HashMap<>();
-        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        kafkaAdmin = new KafkaAdmin(configs);
-    }
+
     @Override
     public void launchChannel(Channel channel) {
         
