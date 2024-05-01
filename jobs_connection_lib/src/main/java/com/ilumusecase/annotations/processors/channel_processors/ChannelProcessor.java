@@ -4,7 +4,8 @@ import com.ilumusecase.resources.ChannelDTO;
 
 public interface ChannelProcessor {
     
-    // public DataSet<Row> retrieveInputDataSet(ChannelDTO channelData);
-    // public void connectToOutputChannel( ChannelDTO channelDTO, DataSet<Row> dataset);
+    // temporary i used Object, in future replace object with DataSet<Row> or sparkSession
+    public Object retrieveInputDataSet(ChannelDTO channelData);
+    public void connectToOutputChannel( ChannelDTO channelDTO, Object dataset);
 
 }
