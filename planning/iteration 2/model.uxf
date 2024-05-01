@@ -1,0 +1,32 @@
+<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>260</x><y>300</y><w>110</w><h>90</h></coordinates><panel_attributes>&lt;&lt;Annotation&gt;&gt;
+InputChannel
+--
+-label</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>420</x><y>300</y><w>130</w><h>90</h></coordinates><panel_attributes>&lt;&lt;Annotation&gt;&gt;
+OutputChannel
+--
+-label</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>590</x><y>300</y><w>190</w><h>90</h></coordinates><panel_attributes>&lt;&lt;Annotation&gt;&gt;
+JobNode
+--
+-projectId: String
+-jobNodeId: String
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>360</x><y>520</y><w>210</w><h>150</h></coordinates><panel_attributes>ProjectAnnotationProcessor
+--
+- projectData: ProjectDTO 
+- jobNodeData: JobNodeDTO 
+- channelsData: Map&lt;String, ChannelDTO&gt;
+
+--
++start(clazz: class): void
++finish(clazz: class): void
+
+-processJobNodeAnnotation(): void
+-processInputAnnotations(): void</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>770</x><y>460</y><w>480</w><h>80</h></coordinates><panel_attributes>&lt;&lt;Interface&gt;&gt;
+ChannelAnnotationProcessor
+--
+- retrieveInputDataSet(channelData: ChannelDTO): DataSet&lt;Row&gt;
+- connectToOutputChannel(channelData: ChannelDTO, dataset: DataSet&lt;Row&gt;:: void</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>890</x><y>630</y><w>220</w><h>30</h></coordinates><panel_attributes>KafkaChannelAnnotationProcessor
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>980</x><y>530</y><w>40</w><h>120</h></coordinates><panel_attributes>lt=&lt;&lt;.</panel_attributes><additional_attributes>20;10;10;100</additional_attributes></element><element><id>Relation</id><coordinates><x>560</x><y>490</y><w>230</w><h>70</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;50;210;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>30</x><y>520</y><w>270</w><h>110</h></coordinates><panel_attributes>DataSupplierClient
+--
++getProjectById(id : String): ProjectDTO
++getJobNodeDTO(id: String): JobNodeDTO
++getChannelDTO(id: String): ChannelDTO</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>60</x><y>310</y><w>100</w><h>30</h></coordinates><panel_attributes>ProjectDTO</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>60</x><y>380</y><w>100</w><h>30</h></coordinates><panel_attributes>ChannelDTO</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>60</x><y>440</y><w>100</w><h>30</h></coordinates><panel_attributes>JobNodeDTO</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>290</x><y>540</y><w>90</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>70;10;10;10</additional_attributes></element></diagram>
