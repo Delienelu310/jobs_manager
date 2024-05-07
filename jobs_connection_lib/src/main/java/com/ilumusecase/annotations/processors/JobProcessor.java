@@ -1,4 +1,4 @@
-package com.ilumusecase.annotations.processors.channel_processors;
+package com.ilumusecase.annotations.processors;
 
 import java.util.Map;
 
@@ -6,6 +6,8 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 
+import com.ilumusecase.annotations.processors.channel_processors.ChannelProcessor;
+import com.ilumusecase.annotations.processors.channel_processors.KafkaChannelProcessor;
 import com.ilumusecase.annotations.resources.InputChannel;
 import com.ilumusecase.annotations.resources.JobNode;
 import com.ilumusecase.annotations.resources.OutputChannel;
@@ -66,13 +68,20 @@ public class JobProcessor {
             List<Dataset<Row>> inputDatasets = new ArrayList<>();
 
             for(ChannelDTO channel : jobNodeDTO.input.get(inputChannel.label()).channelList){
+
+                System.out.println("Trying to connect to channel : " + channel.id);
+
                 ChannelProcessor channelProcessor = channelProcessors.get(channel.channelDetails.type);
                 Dataset<Row> dataset = channelProcessor.retrieveInputDataSet(channel, this.sparkSession);
             
                 inputDatasets.add(dataset);
+
+                System.out.println("Added dataset: " + channel.id);
             }
 
             Dataset<Row> finalDataset = inputDatasets.stream().reduce( (ds1, ds2) -> ds1.union(ds2) ).get();
+
+            System.out.println("Prepared dataset " + inputChannel.label());
 
             field.setAccessible(true);
             try{

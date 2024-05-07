@@ -19,14 +19,14 @@ public class KafkaChannelLauncher implements ChannelLauncher{
     public void launchChannel(Channel channel) {
         
         short a = 1;
-        NewTopic newTopic = new NewTopic("internal_" + channel.getId(), 3, a);
+        NewTopic newTopic = new NewTopic("internal-" + channel.getId(), 3, a);
         kafkaAdmin.createOrModifyTopics(newTopic);
     }
     @Override
     public void stopChannel(Channel channel) {
        
         try (AdminClient adminClient = AdminClient.create(kafkaAdmin.getConfigurationProperties())) {
-            adminClient.deleteTopics(Collections.singletonList("internal_" + channel.getId()));
+            adminClient.deleteTopics(Collections.singletonList("internal-" + channel.getId()));
         }
     }
 

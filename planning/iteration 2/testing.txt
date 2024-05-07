@@ -1,0 +1,6 @@
+TODO:
+1. Write a simple apache spark script with 3.5.1 dependencies
+2. Install java 17 and try to configure it the right way until the script works
+3. Launch kafka channel 
+4. Launch  mongo db and jobs manager
+5. Try to activate the apache spark script with annotations, debug the lib

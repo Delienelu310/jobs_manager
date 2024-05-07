@@ -67,7 +67,7 @@ public class DataSupplierClient {
         return null;
     }
     
-    public ProjectDTO retrieveProjectById(String id) throws JsonMappingException, JsonProcessingException{
+    public ProjectDTO retrieveProjectById(String id) throws Exception{
 
         String resposne = retrieveJsonString("/projects/" + id);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -75,14 +75,14 @@ public class DataSupplierClient {
         return projectDTO;
     }
 
-    public JobNodeDTO retrieveJobNode(String projectId, String nodeId) throws JsonMappingException, JsonProcessingException{
+    public JobNodeDTO retrieveJobNode(String projectId, String nodeId) throws Exception{
         String resposne = retrieveJsonString("/projects/" + projectId + "/job_nodes/" + nodeId);
         ObjectMapper objectMapper = new ObjectMapper();
         JobNodeDTO jobNodeDTO = objectMapper.readValue(resposne, JobNodeDTO.class);
         return jobNodeDTO;
     }
     
-    public ChannelDTO retrieveChannel(String projectId, String channelId) throws JsonMappingException, JsonProcessingException{
+    public ChannelDTO retrieveChannel(String projectId, String channelId) throws Exception{
         String resposne = retrieveJsonString("/projects/" + projectId + "/channels/" + channelId);
         ObjectMapper objectMapper = new ObjectMapper();
         ChannelDTO channelDTO = objectMapper.readValue(resposne, ChannelDTO.class);
