@@ -10,8 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.stereotype.Component;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
+import com.ilumusecase.jobs_manager.repositories.mongodb.MongoRepository;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -36,16 +38,15 @@ public class JWTSecurityConfiguration {
 
     public JWTSecurityConfiguration(RepositoryFactory repositoryFactory) {
         this.repositoryFactory = repositoryFactory;
+    //     UserDetails adminUser = User
+    //         .withUsername("admin")
+    //         .password("admin")
+    //         .passwordEncoder(str -> passwordEncoder().encode(str))
+    //         .roles("ADMIN")
+    //         .build()
+    //     ;
 
-        UserDetails adminUser = User
-            .withUsername("admin")
-            .password("admin")
-            .passwordEncoder(str -> passwordEncoder().encode(str))
-            .roles("ADMIN")
-            .build()
-        ;
-
-        repositoryFactory.getUserDetailsManager().createUser(adminUser);
+    //     repositoryFactory.getUserDetailsManager().createUser(adminUser);
     }
 
     @Bean

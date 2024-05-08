@@ -1,6 +1,8 @@
 package com.ilumusecase.jobs_manager.resources;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
@@ -35,6 +37,13 @@ public class JobNode {
 
     @DBRef(lazy = true)
     private Map<AppUser, PrivilegeList<JobNodePrivilege>> privileges = new HashMap<>();
+
+
+    @DBRef(lazy = true)
+    private JobEntity currentJob = null;
+
+    @DBRef(lazy = true)
+    private List<JobEntity> jobsQueue = new LinkedList<>();
 
     
 }

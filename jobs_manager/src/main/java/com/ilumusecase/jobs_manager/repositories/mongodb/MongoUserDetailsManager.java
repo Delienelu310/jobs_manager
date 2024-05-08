@@ -10,6 +10,7 @@ import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.Mongo
 import com.ilumusecase.jobs_manager.resources.AppUser;
 import com.ilumusecase.jobs_manager.resources.AppUserDetails;
 
+
 public class MongoUserDetailsManager implements UserDetailsManager{
 
     private MongoAppUser mongoAppUser;
