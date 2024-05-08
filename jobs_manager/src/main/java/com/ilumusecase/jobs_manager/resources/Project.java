@@ -37,4 +37,7 @@ public class Project {
     @DBRef(lazy=true)
     @JsonFilter("plug-channel")
     private Map<String, Channel> outputChannels = new HashMap<>();
+
+    @DBRef(lazy = true)
+    private Map<AppUser, PrivilegeList<ProjectPrivilege>> privileges = new HashMap<>();
 }

@@ -32,5 +32,9 @@ public class JobNode {
     @DBRef(lazy = true)
     private Map<String, ChannelList> output = new HashMap<>();
 
+
+    @DBRef(lazy = true)
+    private Map<AppUser, PrivilegeList<JobNodePrivilege>> privileges = new HashMap<>();
+
     
 }
