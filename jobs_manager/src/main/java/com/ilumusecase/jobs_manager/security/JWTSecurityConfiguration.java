@@ -5,6 +5,9 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPublicKey;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,6 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 
+import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.repositories.mongodb.MongoRepository;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -33,21 +37,11 @@ import org.springframework.security.provisioning.UserDetailsManager;
 @Configuration
 public class JWTSecurityConfiguration {
 
+    @Autowired
     private RepositoryFactory repositoryFactory;
 
+    private Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
 
-    public JWTSecurityConfiguration(RepositoryFactory repositoryFactory) {
-        this.repositoryFactory = repositoryFactory;
-    //     UserDetails adminUser = User
-    //         .withUsername("admin")
-    //         .password("admin")
-    //         .passwordEncoder(str -> passwordEncoder().encode(str))
-    //         .roles("ADMIN")
-    //         .build()
-    //     ;
-
-    //     repositoryFactory.getUserDetailsManager().createUser(adminUser);
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
@@ -78,6 +72,16 @@ public class JWTSecurityConfiguration {
 
     @Bean
     public UserDetailsManager getUserDetailsManager(){
+
+        UserDetails adminUser = User
+            .withUsername("admin")
+            .password("admin")
+            .passwordEncoder(str -> this.passwordEncoder().encode(str))
+            .roles("ADMIN")
+            .build()
+        ;
+
+        repositoryFactory.getUserDetailsManager().createUser(adminUser);
         return repositoryFactory.getUserDetailsManager();
     }
 

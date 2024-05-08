@@ -2,10 +2,13 @@ package com.ilumusecase.jobs_manager.repositories.mongodb;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.provisioning.UserDetailsManager;
 
+import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.MongoAppUser;
 import com.ilumusecase.jobs_manager.resources.AppUser;
 import com.ilumusecase.jobs_manager.resources.AppUserDetails;
@@ -34,19 +37,25 @@ public class MongoUserDetailsManager implements UserDetailsManager{
         throw new UnsupportedOperationException("Unimplemented method 'changePassword'");
     }
 
+    private Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
+
     @Override
     public void createUser(UserDetails user) {
-        AppUser appUser = (AppUser)user;
+
+        logger.info(user.getUsername());
+
+        AppUser appUser = new AppUser();
+        appUser.setNewState(user);
 
         mongoAppUser.save(appUser);
     }
 
-    public void createUserWithDetails(UserDetails userDetails, AppUserDetails appUserDetails){
-        AppUser appUser = (AppUser)userDetails;
-        appUser.setAppUserDetails(appUserDetails);
+    // public void createUserWithDetails(UserDetails userDetails, AppUserDetails appUserDetails){
+    //     AppUser appUser = (AppUser)userDetails;
+    //     appUser.setAppUserDetails(appUserDetails);
 
-        mongoAppUser.save(appUser);
-    }
+    //     mongoAppUser.save(appUser);
+    // }
 
     @Override
     public void deleteUser(String username) {
