@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Repository;
 
+import com.ilumusecase.jobs_manager.repositories.interfaces.AppUserRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ChannelListRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ChannelsRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.JobNodesRepository;
@@ -46,7 +47,7 @@ public class MongoRepository implements RepositoryFactory{
     }
 
     @Override
-    public UserDetailsManager getUserDetailsManager() {
+    public AppUserRepository getUserDetailsManager() {
         return new MongoUserDetailsManager(mongoAppUser);
     }
 

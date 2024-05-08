@@ -13,8 +13,15 @@ public class JsonMappersFactory {
     private ChannelJsonMapper channelJsonMapper;
     @Autowired
     private JobNodeJsonMapper jobNodeJsonMapper;
+    @Autowired
+    private AppUserJsonMapper appUserJsonMapper;
+    @Autowired
+    private JobEntityMapper jobEntityMapper;
 
     
+    public JobEntityMapper getJobEntityMapper() {
+        return jobEntityMapper;
+    }
     public JobNodeJsonMapper getJobNodeJsonMapper() {
         return jobNodeJsonMapper;
     }
@@ -23,6 +30,10 @@ public class JsonMappersFactory {
     }
     public ChannelJsonMapper getChannelJsonMapper() {
         return channelJsonMapper;
+    }
+    
+    public AppUserJsonMapper getAppUserJsonMapper() {
+        return appUserJsonMapper;
     }
     
 }

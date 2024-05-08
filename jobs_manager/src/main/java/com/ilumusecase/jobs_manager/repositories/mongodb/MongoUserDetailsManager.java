@@ -1,20 +1,17 @@
 package com.ilumusecase.jobs_manager.repositories.mongodb;
 
+import java.util.List;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.provisioning.UserDetailsManager;
 
-import com.ilumusecase.jobs_manager.JobsManagerApplication;
+import com.ilumusecase.jobs_manager.repositories.interfaces.AppUserRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.MongoAppUser;
 import com.ilumusecase.jobs_manager.resources.AppUser;
-import com.ilumusecase.jobs_manager.resources.AppUserDetails;
 
 
-public class MongoUserDetailsManager implements UserDetailsManager{
+public class MongoUserDetailsManager implements AppUserRepository{
 
     private MongoAppUser mongoAppUser;
 
@@ -37,12 +34,9 @@ public class MongoUserDetailsManager implements UserDetailsManager{
         throw new UnsupportedOperationException("Unimplemented method 'changePassword'");
     }
 
-    private Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
-
     @Override
     public void createUser(UserDetails user) {
 
-        logger.info(user.getUsername());
 
         AppUser appUser = new AppUser();
         appUser.setNewState(user);
@@ -50,12 +44,6 @@ public class MongoUserDetailsManager implements UserDetailsManager{
         mongoAppUser.save(appUser);
     }
 
-    // public void createUserWithDetails(UserDetails userDetails, AppUserDetails appUserDetails){
-    //     AppUser appUser = (AppUser)userDetails;
-    //     appUser.setAppUserDetails(appUserDetails);
-
-    //     mongoAppUser.save(appUser);
-    // }
 
     @Override
     public void deleteUser(String username) {
@@ -64,20 +52,36 @@ public class MongoUserDetailsManager implements UserDetailsManager{
 
     @Override
     public void updateUser(UserDetails user) {
-        Optional<AppUser> appUser = mongoAppUser.findByUsername(user.getUsername());
-        if(appUser.isEmpty()) throw new RuntimeException();
+        AppUser appUser = mongoAppUser.findByUsername(user.getUsername()).orElseThrow(RuntimeException::new);
 
-        AppUser newUser = (AppUser)user;
-        newUser.setAppUserDetails(appUser.get().getAppUserDetails());
-        newUser.setId(appUser.get().getId());
-
-        mongoAppUser.save(newUser);
+        appUser.setNewState(user);
+        mongoAppUser.save(appUser);
 
     }
 
     @Override
     public boolean userExists(String username) {
        return mongoAppUser.findByUsername(username).isPresent();
+    }
+
+    @Override
+    public List<AppUser> retrieveUsers() {
+        return mongoAppUser.findAll();
+    }
+
+    @Override
+    public AppUser retrieveUserById(String id) {
+        return mongoAppUser.findById(id).orElseThrow(RuntimeException::new);
+    }
+
+    @Override
+    public void deleteUserById(String id) {
+        mongoAppUser.deleteById(id);
+    }
+
+    @Override
+    public AppUser saveAppUser(AppUser user) {
+        return mongoAppUser.save(user);
     }
     
 }
