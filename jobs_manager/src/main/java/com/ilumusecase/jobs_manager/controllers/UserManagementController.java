@@ -48,7 +48,7 @@ public class UserManagementController {
     }
 
     @PostMapping("/users")
-    @PreAuthorize("ADMIN")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public MappingJacksonValue createNewUser(@RequestBody AppUser appUser, @PathParam("role") String[] roles){
 
         for(int i = 0; i < roles.length; i++){

@@ -1,7 +1,6 @@
 package com.ilumusecase.jobs_manager.repositories.mongodb;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Repository;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.AppUserRepository;
