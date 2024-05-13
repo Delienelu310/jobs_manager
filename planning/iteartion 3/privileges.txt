@@ -1,0 +1,35 @@
+This file contains lists of actions that each single user can perform depending on privileges they have
+
+
+Global roles:
+ADMIN
+    - manages moderators
+    - creates users, deletes them, updates their details
+    - the same privileges as all of the below with no restrictions
+MODERATOR - the same as admin, but cannot manage moderators
+MANAGER
+    - creates projects
+    - for their own projects: 
+        - deletes them  
+        - updates them
+        - has ADMIN privileges in Project scope
+WORKER
+
+
+Project privileges:
+ADMIN
+    - can update project details
+    - can add endpoints to project
+    - can add job nodes
+    - can update privileges
+MODERATOR
+    - can do the same as admin except adding/removing moderators and admins
+WORKER
+    - can view the project details and architecture, but not the exact details like jobs queues and etc
+    - can update jobnodes, that it has access to
+VIEWER
+    - can only view the project 
+
+JobNode privileges:
+CONTRIBUTOR - can view jobnode details and add jobs to the queue
+VIEWER - can only view the jobnode details

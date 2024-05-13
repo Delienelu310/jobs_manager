@@ -1,8 +1,11 @@
 package com.ilumusecase.jobs_manager.controllers;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.AppUser;
+import com.ilumusecase.jobs_manager.security.Roles;
 
 import jakarta.websocket.server.PathParam;
 
@@ -48,18 +52,20 @@ public class UserManagementController {
     }
 
     @PostMapping("/users")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public MappingJacksonValue createNewUser(@RequestBody AppUser appUser, @PathParam("role") String[] roles){
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
+    public MappingJacksonValue createNewUser(Authentication authentication, @RequestBody AppUser appUser, @PathParam("role") Roles[] roles){
 
-        for(int i = 0; i < roles.length; i++){
-            roles[i] = "ROLE_" + roles[i].toUpperCase();
+        String[] rolesFiltered = new String[roles.length];
+        int i = 0;
+        for(Roles role : roles){
+            rolesFiltered[i] = role.toString();           
         }
 
         UserDetails userDetails = User
             .withUsername(appUser.getUsername())
             .password(appUser.getPassword())
             .passwordEncoder(str -> passwordEncoder.encode(str))
-            .roles(roles) 
+            .roles(rolesFiltered) 
             .build();
 
         appUser.setId(null);
@@ -70,14 +76,27 @@ public class UserManagementController {
     }
 
     @DeleteMapping("/users/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     public void deleteUser(@PathVariable("id") String id){
+
+        AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(id);
+        if(appUser.getAuthorities().stream().anyMatch(auth -> auth.toString().equals("ROLE_ADMIN") || auth.toString().equals("ROLE_MODERATOR"))){
+            throw new RuntimeException("Endpoint cannot be used to delete moderator");
+        }
+
         repositoryFactory.getUserDetailsManager().deleteUserById(id);
     }
 
     @PutMapping("/users/{id}")
-    public MappingJacksonValue udpateUserDetails(@RequestBody AppUser appUser, @PathVariable("id") String id){
-        
-    
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
+    public MappingJacksonValue udpateUserDetails(Authentication authentication, @RequestBody AppUser appUser, @PathVariable("id") String id){
+          
+        AppUser dbAppUser = repositoryFactory.getUserDetailsManager().retrieveUserById(id);
+        if(dbAppUser.getAuthorities().stream().anyMatch(auth -> auth.toString().equals("ROLE_ADMIN") || auth.toString().equals("ROLE_MODERATOR"))){
+            throw new RuntimeException("Endpoint cannot be used to delete moderator");
+        }
+
+        // ?
         UserDetails userDetails = User.withUsername(appUser.getUsername())
             .password(id)
             .passwordEncoder(str -> passwordEncoder.encode(str))

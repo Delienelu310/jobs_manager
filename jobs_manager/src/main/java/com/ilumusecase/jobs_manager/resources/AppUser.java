@@ -8,8 +8,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
@@ -21,7 +23,8 @@ public class AppUser implements UserDetails {
     @Id
     private String id;
     private AppUserDetails appUserDetails;
-
+    
+    @Indexed(unique = true)
     private String username;
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
@@ -65,6 +68,23 @@ public class AppUser implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        AppUser other = (AppUser) obj;
+        return id == other.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
 }

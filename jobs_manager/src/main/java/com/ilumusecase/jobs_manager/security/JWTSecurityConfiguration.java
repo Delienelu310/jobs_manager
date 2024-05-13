@@ -73,6 +73,12 @@ public class JWTSecurityConfiguration {
     @Bean
     public UserDetailsManager getUserDetailsManager(){
 
+        // the roles:
+        // ADMIN - has access throughout all of the application, can create and delete moderators
+        // MODERATOR - has the same privileges as ADMIN, but cannot manage moderators - just admin helpers
+        // MANAGER - can create projects and maange them
+        // WORKER - cannot create projects, but can update projects, if the MANAGER has granted him with privileges
+
         UserDetails adminUser = User
             .withUsername("admin")
             .password("admin")

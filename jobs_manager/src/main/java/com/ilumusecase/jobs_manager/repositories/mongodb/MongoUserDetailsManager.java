@@ -28,6 +28,14 @@ public class MongoUserDetailsManager implements AppUserRepository{
         return appUser.get();
     }
 
+    public AppUser findByUsername(String username){
+        Optional<AppUser> appUser = mongoAppUser.findByUsername(username);
+
+        if(appUser.isEmpty()) throw new UsernameNotFoundException(username);
+
+        return appUser.get();
+    }
+
     @Override
     public void changePassword(String oldPassword, String newPassword) {
         // TODO Auto-generated method stub

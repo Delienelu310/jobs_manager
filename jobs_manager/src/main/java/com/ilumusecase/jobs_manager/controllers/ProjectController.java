@@ -2,6 +2,7 @@ package com.ilumusecase.jobs_manager.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,10 +13,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
+import com.ilumusecase.jobs_manager.resources.AppUser;
 import com.ilumusecase.jobs_manager.resources.Channel;
 import com.ilumusecase.jobs_manager.resources.ChannelDetails;
 import com.ilumusecase.jobs_manager.resources.Project;
 import com.ilumusecase.jobs_manager.resources.ProjectDetails;
+import com.ilumusecase.jobs_manager.resources.ProjectPrivilege;
 
 @RestController
 public class ProjectController {
@@ -29,28 +32,81 @@ public class ProjectController {
     private ChannelController channelController;
     
     @GetMapping("/projects")
-    public MappingJacksonValue getAllProjects(){
+    public MappingJacksonValue getAllProjects(Authentication authentication){
+
+        //if the user if admin of the whole application, return all of the projects
+        if(authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))){
+            return jsonMappersFactory.getProjectJsonMapper().getFullProjectList(
+                repositoryFactory.getProjectRepository().retrieveAllProjects()
+            );
+        }
+
+        //otherwise return the list of projects, that user has access to
+
+        String username = authentication.getName();
+        AppUser appUser = repositoryFactory.getUserDetailsManager().findByUsername(username);
+
+        
         return jsonMappersFactory.getProjectJsonMapper().getFullProjectList(
-            repositoryFactory.getProjectRepository().retrieveAllProjects()
+            repositoryFactory.getProjectRepository().retrieveAllProjects().stream().filter(project -> 
+                project.getPrivileges().keySet().contains(appUser)
+            ).toList()
         );
+
+        
+        
     }
 
     @GetMapping("/projects/{id}")
-    public MappingJacksonValue getProjectById(@PathVariable("id") String id){
-        return jsonMappersFactory.getProjectJsonMapper().getFullProject(
-            repositoryFactory.getProjectRepository().retrieveProjectById(id)
-        );
+    public MappingJacksonValue getProjectById(Authentication authentication, @PathVariable("id") String id){
+
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
+
+        if(
+            !authentication.getAuthorities().stream().anyMatch(auth -> auth.toString().equals("ROLE_MODERATOR") || auth.toString().equals("ROLE_ADMIN"))
+            &&
+            !project.getPrivileges().containsKey(repositoryFactory.getUserDetailsManager().findByUsername(authentication.getName()))
+        ){
+            throw new RuntimeException("User cannot access current object");
+        }
+
+        return jsonMappersFactory.getProjectJsonMapper().getFullProject(project);
     }
 
     @PostMapping("/projects")
-    public MappingJacksonValue createProject(@RequestBody ProjectDetails projectDetails){
+    public MappingJacksonValue createProject(Authentication authentication, @RequestBody ProjectDetails projectDetails){
+
+        if(
+            !authentication.getAuthorities().stream().anyMatch(auth -> auth.toString().equals("ROLE_ADMIN") 
+                || auth.toString().equals("ROLE_MODERATOR")
+                || auth.toString().equals("ROLE_MANAGER")
+            )
+        ){
+            throw new RuntimeException("You dont have privileges to create project");
+        }
+
         return jsonMappersFactory.getProjectJsonMapper().getFullProject(
             repositoryFactory.getProjectRepository().createProject(projectDetails)
         );
     }
 
     @DeleteMapping("/projects/{id}")
-    public void deleteProject(@PathVariable("id") String id){
+    public void deleteProject(Authentication authentication, @PathVariable("id") String id){
+
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
+        AppUser user = repositoryFactory.getUserDetailsManager().findByUsername(authentication.getName());
+        if(
+            !authentication.getAuthorities().stream().anyMatch(auth -> 
+                auth.toString().equals("ROLE_ADMIN") 
+                || auth.toString().equals("ROLE_MODERATOR")
+            )
+            &&
+            !project.getPrivileges().get(user).getList().stream().anyMatch(pr -> pr == ProjectPrivilege.ADMIN)
+        ){
+            throw new RuntimeException("You dont have privileges to delete project");
+        }
+
+
         repositoryFactory.getProjectRepository().deleteProject(id);
     }
 
