@@ -79,7 +79,7 @@ public class AppUser implements UserDetails {
             return false;
         }
         AppUser other = (AppUser) obj;
-        return id == other.id;
+        return id == other.getId();
     }
 
     @Override
