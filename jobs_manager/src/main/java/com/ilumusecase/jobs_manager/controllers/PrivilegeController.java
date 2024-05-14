@@ -9,7 +9,6 @@ import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.AppUser;
 import com.ilumusecase.jobs_manager.resources.JobNode;
 import com.ilumusecase.jobs_manager.resources.JobNodePrivilege;
-import com.ilumusecase.jobs_manager.resources.PrivilegeList;
 import com.ilumusecase.jobs_manager.resources.Project;
 import com.ilumusecase.jobs_manager.resources.ProjectPrivilege;
 
@@ -33,10 +32,15 @@ public class PrivilegeController {
 
         AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(userId);
 
-        jobNode.getPrivileges().putIfAbsent(appUser, new PrivilegeList<>());
-        jobNode.getPrivileges().get(appUser).getList().add(privilege);
-
-        repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+        if(!jobNode.getPrivileges().containsKey(appUser.getUsername())){
+            jobNode.getPrivileges().put(appUser.getUsername(), 
+                repositoryFactory.getJobNodePrivilegeList().create()
+            );
+            repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+        }
+        
+        jobNode.getPrivileges().get(appUser.getUsername()).getList().add(privilege);
+        repositoryFactory.getJobNodePrivilegeList().update(jobNode.getPrivileges().get(appUser.getUsername()));
     }
 
     @PutMapping("/project/{project_id}/job_node/{job_node_id}/privilege/remove/{user_id}/{privilege}")
@@ -52,11 +56,11 @@ public class PrivilegeController {
 
         AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(userId);
 
-        if( !jobNode.getPrivileges().containsKey(appUser)) throw new RuntimeException();
+        if( !jobNode.getPrivileges().containsKey(appUser.getUsername())) throw new RuntimeException();
 
-        jobNode.getPrivileges().get(appUser).getList().remove(privilege);
+        jobNode.getPrivileges().get(appUser.getUsername()).getList().remove(privilege);
 
-        repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+        repositoryFactory.getJobNodePrivilegeList().update(jobNode.getPrivileges().get(appUser.getUsername()));
     }
 
     @PutMapping("/project/{project_id}/privilege/add/{user_id}/{privilege}")
@@ -65,14 +69,19 @@ public class PrivilegeController {
         @PathVariable("user_id") String userId,
         @PathVariable("privilege") ProjectPrivilege privilege
     ){
-        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(userId);
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
 
         AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(userId);
+        if(!project.getPrivileges().containsKey(appUser.getUsername())){
+            project.getPrivileges().put(appUser.getUsername(), 
+                repositoryFactory.getProjectPrivilegeList().create()
+            );
+            repositoryFactory.getProjectRepository().updateProjectFull(project);
+        }
+        
+        project.getPrivileges().get(appUser.getUsername()).getList().add(privilege);
 
-        project.getPrivileges().putIfAbsent(appUser, new PrivilegeList<>());
-        project.getPrivileges().get(appUser).getList().add(privilege);
-
-        repositoryFactory.getProjectRepository().updateProjectFull(project);
+        repositoryFactory.getProjectPrivilegeList().update(project.getPrivileges().get(appUser.getUsername()));
     }
 
 
@@ -82,13 +91,13 @@ public class PrivilegeController {
         @PathVariable("user_id") String userId,
         @PathVariable("privilege") ProjectPrivilege privilege
     ){
-        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(userId);
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
 
         AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(userId);
 
-        project.getPrivileges().get(appUser).getList().remove(privilege);
+        project.getPrivileges().get(appUser.getUsername()).getList().remove(privilege);
 
-        repositoryFactory.getProjectRepository().updateProjectFull(project);
+        repositoryFactory.getProjectPrivilegeList().update(project.getPrivileges().get(appUser.getUsername()));
     }
 
 }

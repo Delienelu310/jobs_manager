@@ -40,7 +40,7 @@ public class Project {
     private Map<String, Channel> outputChannels = new HashMap<>();
 
     @DBRef(lazy = true)
-    private Map<AppUser, PrivilegeList<ProjectPrivilege>> privileges = new HashMap<>();
+    private Map<String, PrivilegeList<ProjectPrivilege>> privileges = new HashMap<>();
 
     @Override
     public boolean equals(Object obj) {

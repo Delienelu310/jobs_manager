@@ -36,7 +36,7 @@ public class JobNode {
 
 
     @DBRef(lazy = true)
-    private Map<AppUser, PrivilegeList<JobNodePrivilege>> privileges = new HashMap<>();
+    private Map<String, PrivilegeList<JobNodePrivilege>> privileges = new HashMap<>();
 
 
     @DBRef(lazy = true)

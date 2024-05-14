@@ -1,10 +1,7 @@
 package com.ilumusecase.jobs_manager.controllers;
 
-import java.util.Arrays;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,20 +48,47 @@ public class UserManagementController {
         );
     }
 
+   
+    @PostMapping("/moderators")
+    public MappingJacksonValue createModerator(@RequestBody AppUser appUser){
+
+        UserDetails userDetails = User
+            .withUsername(appUser.getUsername())
+            .password(appUser.getPassword())
+            .passwordEncoder(str -> passwordEncoder.encode(str))
+            .roles("MODERATOR") 
+            .build();
+
+        appUser.setNewState(userDetails);
+        return jsonMappersFactory.getAppUserJsonMapper().getFulLAppUser(
+            repositoryFactory.getUserDetailsManager().saveAppUser(appUser)
+        );
+    }
+
+    @DeleteMapping("/moderators/{username}")
+    public void deleteModerator(@PathVariable("username") String username){
+        AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(username);
+        if(!appUser.getAuthorities().stream().anyMatch(auth ->  auth.toString().equals("ROLE_MODERATOR"))){
+            throw new RuntimeException("Endpoint must be used to delete moderator");
+        }
+
+        repositoryFactory.getUserDetailsManager().deleteUserById(username);
+    }
+
     @PostMapping("/users")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
-    public MappingJacksonValue createNewUser(Authentication authentication, @RequestBody AppUser appUser, @PathParam("role") Roles[] roles){
+    public MappingJacksonValue createNewUser( @RequestBody AppUser appUser, @PathParam("roles") Roles[] roles){
 
         String[] rolesFiltered = new String[roles.length];
         int i = 0;
         for(Roles role : roles){
-            rolesFiltered[i] = role.toString();           
+            rolesFiltered[i] = role.toString();   
+            i++;        
         }
 
         UserDetails userDetails = User
             .withUsername(appUser.getUsername())
             .password(appUser.getPassword())
-            // .passwordEncoder(str -> passwordEncoder.encode(str))
+            .passwordEncoder(str -> passwordEncoder.encode(str))
             .roles(rolesFiltered) 
             .build();
 
@@ -75,7 +99,6 @@ public class UserManagementController {
     }
 
     @DeleteMapping("/users/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     public void deleteUser(@PathVariable("id") String id){
 
         AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(id);
@@ -87,7 +110,6 @@ public class UserManagementController {
     }
 
     @PutMapping("/users/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     public MappingJacksonValue udpateUserDetails(Authentication authentication, @RequestBody AppUser appUser, @PathVariable("id") String id){
           
         AppUser dbAppUser = repositoryFactory.getUserDetailsManager().retrieveUserById(id);
