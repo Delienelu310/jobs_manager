@@ -19,14 +19,14 @@ public class PrivilegeController {
     private RepositoryFactory repositoryFactory;
     
 
-    @PutMapping("/project/{project_id}/job_node/{job_node_id}/privilege/add/{user_id}/{privilege}")
+    @PutMapping("/project/{project_id}/job_nodes/{job_node_id}/privilege/add/{user_id}/{privilege}")
     public void addPrivilegeToJobNode(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("user_id") String userId,
         @PathVariable("privilege") JobNodePrivilege privilege
     ){
-        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(userId);
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         if( !project.getId().equals(jobNode.getProject().getId())) throw new RuntimeException();
 
@@ -43,14 +43,14 @@ public class PrivilegeController {
         repositoryFactory.getJobNodePrivilegeList().update(jobNode.getPrivileges().get(appUser.getUsername()));
     }
 
-    @PutMapping("/project/{project_id}/job_node/{job_node_id}/privilege/remove/{user_id}/{privilege}")
+    @PutMapping("/project/{project_id}/job_nodes/{job_node_id}/privilege/remove/{user_id}/{privilege}")
     public void removePrivilegeFromJobNode(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("user_id") String userId,
         @PathVariable("privilege") JobNodePrivilege privilege
     ){
-        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(userId);
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         if( !project.getId().equals(jobNode.getProject().getId())) throw new RuntimeException();
 
