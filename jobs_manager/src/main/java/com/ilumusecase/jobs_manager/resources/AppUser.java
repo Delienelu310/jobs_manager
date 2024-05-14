@@ -20,11 +20,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 public class AppUser implements UserDetails {
 
-    @Id
-    private String id;
+    
     private AppUserDetails appUserDetails;
     
-    @Indexed(unique = true)
+    @Id
     private String username;
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
@@ -79,12 +78,12 @@ public class AppUser implements UserDetails {
             return false;
         }
         AppUser other = (AppUser) obj;
-        return id == other.getId();
+        return username == other.getUsername();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(username);
     }
 
 }

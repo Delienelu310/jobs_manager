@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
 @RestController
 public class JWTAuthenticationController {
 
@@ -21,7 +22,9 @@ public class JWTAuthenticationController {
 
     @PostMapping("/authenticate")
     public String authenticate(Authentication authencation){
-        return createToken(authencation);
+        String token = createToken(authencation);
+        
+        return token;
     }
 
     private String createToken(Authentication authentication){

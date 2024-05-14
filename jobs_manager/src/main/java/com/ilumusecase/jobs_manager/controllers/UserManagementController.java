@@ -64,11 +64,10 @@ public class UserManagementController {
         UserDetails userDetails = User
             .withUsername(appUser.getUsername())
             .password(appUser.getPassword())
-            .passwordEncoder(str -> passwordEncoder.encode(str))
+            // .passwordEncoder(str -> passwordEncoder.encode(str))
             .roles(rolesFiltered) 
             .build();
 
-        appUser.setId(null);
         appUser.setNewState(userDetails);
         return jsonMappersFactory.getAppUserJsonMapper().getFulLAppUser(
             repositoryFactory.getUserDetailsManager().saveAppUser(appUser)
@@ -104,7 +103,7 @@ public class UserManagementController {
 
         appUser.setUsername(userDetails.getUsername());
         appUser.setPassword(userDetails.getPassword());
-        appUser.setId(id);
+        // appUser.setId(id);
     
         
         return jsonMappersFactory.getAppUserJsonMapper().getFulLAppUser(appUser);

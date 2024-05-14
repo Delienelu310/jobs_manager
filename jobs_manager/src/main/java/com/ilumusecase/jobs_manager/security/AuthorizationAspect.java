@@ -45,7 +45,7 @@ public class AuthorizationAspect {
     }
     
 
-    @Pointcut("exectuion(* com.ilumusecase.jobs_manager.controllers..*(..))")
+    @Pointcut("execution(* com.ilumusecase.jobs_manager.controllers..*(..))")
     public void allControllersPointcut(){}
 
     private boolean authorizeModerator(Authentication authentication){

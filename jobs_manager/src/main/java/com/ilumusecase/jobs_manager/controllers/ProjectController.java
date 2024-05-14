@@ -32,26 +32,26 @@ public class ProjectController {
     private ChannelController channelController;
     
     @GetMapping("/projects")
-    public MappingJacksonValue getAllProjects(Authentication authentication){
-
+    public MappingJacksonValue getAllProjects(){
+        // Authentication authentication
         //if the user if admin of the whole application, return all of the projects
-        if(authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))){
+        // if(authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))){
             return jsonMappersFactory.getProjectJsonMapper().getFullProjectList(
                 repositoryFactory.getProjectRepository().retrieveAllProjects()
             );
-        }
+        // }
 
         //otherwise return the list of projects, that user has access to
 
-        String username = authentication.getName();
-        AppUser appUser = repositoryFactory.getUserDetailsManager().findByUsername(username);
+        // String username = authentication.getName();
+        // AppUser appUser = repositoryFactory.getUserDetailsManager().findByUsername(username);
 
         
-        return jsonMappersFactory.getProjectJsonMapper().getFullProjectList(
-            repositoryFactory.getProjectRepository().retrieveAllProjects().stream().filter(project -> 
-                project.getPrivileges().keySet().contains(appUser)
-            ).toList()
-        );
+        // return jsonMappersFactory.getProjectJsonMapper().getFullProjectList(
+        //     repositoryFactory.getProjectRepository().retrieveAllProjects().stream().filter(project -> 
+        //         project.getPrivileges().keySet().contains(appUser)
+        //     ).toList()
+        // );
 
         
         

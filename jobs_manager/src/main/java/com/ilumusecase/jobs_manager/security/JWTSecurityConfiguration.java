@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -55,7 +56,7 @@ public class JWTSecurityConfiguration {
             session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS
         ));
-        // http.httpBasic();
+        http.httpBasic(Customizer.withDefaults());
         http.csrf().disable();
 
         http.headers().frameOptions().sameOrigin();
