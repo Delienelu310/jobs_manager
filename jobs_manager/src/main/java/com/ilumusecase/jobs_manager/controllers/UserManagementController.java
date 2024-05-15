@@ -18,6 +18,8 @@ import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.AppUser;
 import com.ilumusecase.jobs_manager.security.Roles;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthAdminRoleOnly;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.DisableDefaultAuth;
 
 import jakarta.websocket.server.PathParam;
 
@@ -35,6 +37,7 @@ public class UserManagementController {
     
 
     @GetMapping("/users")
+    @DisableDefaultAuth
     public MappingJacksonValue retrieveAllUsers(){
         return jsonMappersFactory.getAppUserJsonMapper().getFullAppUserList(
             repositoryFactory.getUserDetailsManager().retrieveUsers()
@@ -42,6 +45,7 @@ public class UserManagementController {
     }
 
     @GetMapping("/users/{id}")
+    @DisableDefaultAuth
     public MappingJacksonValue retrieveUserById(@PathVariable("id") String id){
         return jsonMappersFactory.getAppUserJsonMapper().getFulLAppUser(
             repositoryFactory.getUserDetailsManager().retrieveUserById(id)
@@ -50,6 +54,8 @@ public class UserManagementController {
 
    
     @PostMapping("/moderators")
+    @AuthAdminRoleOnly
+    @DisableDefaultAuth
     public MappingJacksonValue createModerator(@RequestBody AppUser appUser){
 
         UserDetails userDetails = User
@@ -66,6 +72,8 @@ public class UserManagementController {
     }
 
     @DeleteMapping("/moderators/{username}")
+    @DisableDefaultAuth
+    @AuthAdminRoleOnly
     public void deleteModerator(@PathVariable("username") String username){
         AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(username);
         if(!appUser.getAuthorities().stream().anyMatch(auth ->  auth.toString().equals("ROLE_MODERATOR"))){
@@ -76,6 +84,7 @@ public class UserManagementController {
     }
 
     @PostMapping("/users")
+    @DisableDefaultAuth
     public MappingJacksonValue createNewUser( @RequestBody AppUser appUser, @PathParam("roles") Roles[] roles){
 
         String[] rolesFiltered = new String[roles.length];
@@ -99,25 +108,24 @@ public class UserManagementController {
     }
 
     @DeleteMapping("/users/{id}")
+    @DisableDefaultAuth
     public void deleteUser(@PathVariable("id") String id){
-
-        AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(id);
+        AppUser appUser = repositoryFactory.getUserDetailsManager().findByUsername(id);
         if(appUser.getAuthorities().stream().anyMatch(auth -> auth.toString().equals("ROLE_ADMIN") || auth.toString().equals("ROLE_MODERATOR"))){
             throw new RuntimeException("Endpoint cannot be used to delete moderator");
         }
-
         repositoryFactory.getUserDetailsManager().deleteUserById(id);
     }
 
     @PutMapping("/users/{id}")
+    @DisableDefaultAuth
     public MappingJacksonValue udpateUserDetails(Authentication authentication, @RequestBody AppUser appUser, @PathVariable("id") String id){
           
         AppUser dbAppUser = repositoryFactory.getUserDetailsManager().retrieveUserById(id);
         if(dbAppUser.getAuthorities().stream().anyMatch(auth -> auth.toString().equals("ROLE_ADMIN") || auth.toString().equals("ROLE_MODERATOR"))){
-            throw new RuntimeException("Endpoint cannot be used to delete moderator");
+            throw new RuntimeException("Endpoint cannot be used to update moderator");
         }
 
-        // ?
         UserDetails userDetails = User.withUsername(appUser.getUsername())
             .password(id)
             .passwordEncoder(str -> passwordEncoder.encode(str))
@@ -125,8 +133,6 @@ public class UserManagementController {
 
         appUser.setUsername(userDetails.getUsername());
         appUser.setPassword(userDetails.getPassword());
-        // appUser.setId(id);
-    
         
         return jsonMappersFactory.getAppUserJsonMapper().getFulLAppUser(appUser);
     }

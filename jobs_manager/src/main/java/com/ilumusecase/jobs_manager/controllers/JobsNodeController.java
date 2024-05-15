@@ -22,7 +22,14 @@ import com.ilumusecase.jobs_manager.resources.ChannelDetails;
 import com.ilumusecase.jobs_manager.resources.ChannelList;
 import com.ilumusecase.jobs_manager.resources.JobNode;
 import com.ilumusecase.jobs_manager.resources.JobNodeDetails;
+import com.ilumusecase.jobs_manager.resources.JobNodePrivilege;
 import com.ilumusecase.jobs_manager.resources.Project;
+import com.ilumusecase.jobs_manager.resources.ProjectPrivilege;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeJobRoles;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.DisableDefaultAuth;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
 
 @RestController
@@ -37,6 +44,7 @@ public class JobsNodeController {
     private ChannelController channelController;
 
     @GetMapping("/job_nodes")
+    @DisableDefaultAuth
     public MappingJacksonValue retrieveAllNodes(){
         return jsonMappersFactory.getJobNodeJsonMapper().getFullJobNodeList(
             repositoryFactory.getJobNodesRepository().retrieveAll()
@@ -44,21 +52,31 @@ public class JobsNodeController {
     }
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}")
-    public MappingJacksonValue retrieveById(@PathVariable("project_id") String projectId, @PathVariable("job_node_id") String jobNodeId){
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.VIEWER, ProjectPrivilege.CONTRIBUTOR})
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.VIEWER, JobNodePrivilege.CONTRIBUTOR})
+    public MappingJacksonValue retrieveById(
+        @ProjectId @PathVariable("project_id") String projectId, 
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId
+    ){
         return jsonMappersFactory.getJobNodeJsonMapper().getFullJobNode( 
             repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
         );
     }
 
     @GetMapping("/projects/{project_id}/job_nodes")
-    public MappingJacksonValue retrieveJobNodesByProjectId(@PathVariable("project_id") String projectId){
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.VIEWER, ProjectPrivilege.CONTRIBUTOR})
+    public MappingJacksonValue retrieveJobNodesByProjectId(@ProjectId @PathVariable("project_id") String projectId){
         return jsonMappersFactory.getJobNodeJsonMapper().getFullJobNodeList(
             repositoryFactory.getJobNodesRepository().retrieveByProjectId(projectId)
         );
     }
 
     @PostMapping("/projects/{project_id}/job_nodes")
-    public MappingJacksonValue createJobNode(@PathVariable("project_id") String projectId, @RequestBody JobNodeDetails jobNodeDetails){
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    public MappingJacksonValue createJobNode(
+        @ProjectId @PathVariable("project_id") String projectId, 
+        @RequestBody JobNodeDetails jobNodeDetails
+    ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().createJobNode( project, jobNodeDetails);
 
@@ -71,7 +89,12 @@ public class JobsNodeController {
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}")
-    public MappingJacksonValue updateJobNodeDetails(@PathVariable("project_id") String projectId, @PathVariable("job_node_id") String jobNodeId, @RequestBody JobNodeDetails jobNodeDetails){
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    public MappingJacksonValue updateJobNodeDetails(
+        @ProjectId @PathVariable("project_id") String projectId, 
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
+        @RequestBody JobNodeDetails jobNodeDetails
+    ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         if(!project.getJobNodes().stream().anyMatch(jn -> jn.getId().equals(jobNodeId))){
             throw new RuntimeException();
@@ -83,7 +106,12 @@ public class JobsNodeController {
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/add/input/{label}")
-    public void addInputLabel(@PathVariable("project_id") String projectId, @PathVariable("job_node_id") String jobNodeId, @PathVariable("label") String label){
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    public void addInputLabel(
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
+        @PathVariable("label") String label
+    ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         if( !jobNode.getProject().getId().equals(projectId)){
             throw new RuntimeException();
@@ -99,7 +127,12 @@ public class JobsNodeController {
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/add/output/{label}")
-    public void addOutputChannel(@PathVariable("project_id") String projectId, @PathVariable("job_node_id") String jobNodeId, @PathVariable("label") String label){
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    public void addOutputChannel(
+        @ProjectId @PathVariable("project_id") String projectId, 
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
+        @PathVariable("label") String label
+    ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         if( !jobNode.getProject().getId().equals(projectId)){
             throw new RuntimeException();
@@ -116,7 +149,12 @@ public class JobsNodeController {
 
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/remove/input/{label}")
-    public void removeInputLabel(@PathVariable("project_id") String projectId, @PathVariable("job_node_id") String jobNodeId, @PathVariable("label") String label){
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    public void removeInputLabel(
+        @ProjectId @PathVariable("project_id") String projectId, 
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
+        @PathVariable("label") String label
+    ){
         
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
@@ -165,7 +203,12 @@ public class JobsNodeController {
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/remove/output/{label}")
-    public void removeOutputLabel(@PathVariable("project_id") String projectId, @PathVariable("job_node_id") String jobNodeId, @PathVariable("label") String label){
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    public void removeOutputLabel(
+        @ProjectId @PathVariable("project_id") String projectId, 
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
+        @PathVariable("label") String label
+    ){
         
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
@@ -216,8 +259,9 @@ public class JobsNodeController {
 
 
     @PutMapping("/projects/{project_id}/job_nodes/connect")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
     public void connectJobNodes(
-        @PathVariable(value="project_id") String projectId,
+        @ProjectId @PathVariable(value="project_id") String projectId,
         @RequestParam(required = false, value="input_job_node_id") String inputJobNodeId,
         @RequestParam(required = false, value="output_job_node_id") String outputJobNodeId,
         @RequestParam(required = false, value="input_label") String inputJobNodeLabel,
@@ -328,7 +372,11 @@ public class JobsNodeController {
     }
 
     @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}")
-    public void deleteJobNode(@PathVariable("project_id") String projectId, @PathVariable("job_node_id") String jobNodeId){
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    public void deleteJobNode(
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId
+    ){
 
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
