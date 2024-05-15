@@ -13,11 +13,14 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.security.authorizationAnnotationsHandlers.AnnotationHandlerInterface;
 import com.ilumusecase.jobs_manager.security.authorizationAnnotationsHandlers.AuthAnnotationHandlerFactory;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthAdminRoleOnly;
@@ -28,6 +31,8 @@ import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.Igno
 @Aspect
 @Component
 public class AuthorizationAspect {
+
+    Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
 
     @Autowired 
     private AuthAnnotationHandlerFactory authAnnotationHandlerFactory;
@@ -57,11 +62,13 @@ public class AuthorizationAspect {
     }
 
     private boolean authorizeDefault(Method method){
-        return true;
+        return false;
     }
 
     @Before("allControllersPointcut()")
     public void authorizeControllerRequest(JoinPoint joinPoint){
+
+        logger.info("Aspect was actually called: ");
 
         Method method = getJoinPointMethod(joinPoint).orElseThrow(RuntimeException::new);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -86,10 +93,12 @@ public class AuthorizationAspect {
             Optional<AnnotationHandlerInterface> annotationHandlerInterface = authAnnotationHandlerFactory.getAuthAnnotationHandler(annotation.annotationType());
             if(annotationHandlerInterface.isEmpty()) continue;
 
+            logger.info(annotation.annotationType().getSimpleName());
+            logger.info(annotationHandlerInterface.get().getClass().getSimpleName());
             if(annotationHandlerInterface.get().authorize(joinPoint, method, annotation, authentication)) return;
         }
 
-        return;
+        throw new RuntimeException();
     }
     
 }

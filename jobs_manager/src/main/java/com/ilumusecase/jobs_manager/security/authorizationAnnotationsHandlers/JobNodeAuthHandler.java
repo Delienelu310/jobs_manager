@@ -52,7 +52,7 @@ public class JobNodeAuthHandler implements AnnotationHandlerInterface{
 
         if(!jobNode.getProject().equals(project)) throw new RuntimeException();
         
-        return jobNode.getPrivileges().get(appUser).getList().stream().anyMatch(role -> {
+        return jobNode.getPrivileges().get(appUser.getUsername()).getList().stream().anyMatch(role -> {
             for(JobNodePrivilege projectPrivilege : authorizeProjectRoles.roles()){
                 if(projectPrivilege == role) return true;
             }

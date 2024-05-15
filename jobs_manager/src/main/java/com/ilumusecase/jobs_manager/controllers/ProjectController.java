@@ -16,9 +16,15 @@ import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.AppUser;
 import com.ilumusecase.jobs_manager.resources.Channel;
 import com.ilumusecase.jobs_manager.resources.ChannelDetails;
+import com.ilumusecase.jobs_manager.resources.PrivilegeList;
 import com.ilumusecase.jobs_manager.resources.Project;
 import com.ilumusecase.jobs_manager.resources.ProjectDetails;
 import com.ilumusecase.jobs_manager.resources.ProjectPrivilege;
+import com.ilumusecase.jobs_manager.security.Roles;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeRoles;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.IgnoreAuthAspect;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
 @RestController
 public class ProjectController {
@@ -32,32 +38,34 @@ public class ProjectController {
     private ChannelController channelController;
     
     @GetMapping("/projects")
-    public MappingJacksonValue getAllProjects(){
-        // Authentication authentication
+    @IgnoreAuthAspect
+    public MappingJacksonValue getAllProjects(Authentication authentication){
+       
         //if the user if admin of the whole application, return all of the projects
-        // if(authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))){
+        if(authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN") || auth.getAuthority().equals("ROLE_MODERATOR"))){
             return jsonMappersFactory.getProjectJsonMapper().getFullProjectList(
                 repositoryFactory.getProjectRepository().retrieveAllProjects()
             );
-        // }
+        }
 
         //otherwise return the list of projects, that user has access to
 
-        // String username = authentication.getName();
-        // AppUser appUser = repositoryFactory.getUserDetailsManager().findByUsername(username);
+        String username = authentication.getName();
+        AppUser appUser = repositoryFactory.getUserDetailsManager().findByUsername(username);
 
         
-        // return jsonMappersFactory.getProjectJsonMapper().getFullProjectList(
-        //     repositoryFactory.getProjectRepository().retrieveAllProjects().stream().filter(project -> 
-        //         project.getPrivileges().keySet().contains(appUser)
-        //     ).toList()
-        // );
+        return jsonMappersFactory.getProjectJsonMapper().getFullProjectList(
+            repositoryFactory.getProjectRepository().retrieveAllProjects().stream().filter(project -> 
+                project.getPrivileges().keySet().contains(appUser.getUsername())
+            ).toList()
+        );
 
         
         
     }
 
     @GetMapping("/projects/{id}")
+    @IgnoreAuthAspect
     public MappingJacksonValue getProjectById(Authentication authentication, @PathVariable("id") String id){
 
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
@@ -65,7 +73,7 @@ public class ProjectController {
         if(
             !authentication.getAuthorities().stream().anyMatch(auth -> auth.toString().equals("ROLE_MODERATOR") || auth.toString().equals("ROLE_ADMIN"))
             &&
-            !project.getPrivileges().containsKey(repositoryFactory.getUserDetailsManager().findByUsername(authentication.getName()))
+            !project.getPrivileges().containsKey(authentication.getName())
         ){
             throw new RuntimeException("User cannot access current object");
         }
@@ -74,44 +82,32 @@ public class ProjectController {
     }
 
     @PostMapping("/projects")
+    @AuthorizeRoles(roles={Roles.MANAGER})
     public MappingJacksonValue createProject(Authentication authentication, @RequestBody ProjectDetails projectDetails){
 
-        if(
-            !authentication.getAuthorities().stream().anyMatch(auth -> auth.toString().equals("ROLE_ADMIN") 
-                || auth.toString().equals("ROLE_MODERATOR")
-                || auth.toString().equals("ROLE_MANAGER")
-            )
-        ){
-            throw new RuntimeException("You dont have privileges to create project");
-        }
+        // add user as adming of the project
+        Project project = repositoryFactory.getProjectRepository().createProject(projectDetails);
 
-        return jsonMappersFactory.getProjectJsonMapper().getFullProject(
-            repositoryFactory.getProjectRepository().createProject(projectDetails)
-        );
+        PrivilegeList<ProjectPrivilege> privilegeList = repositoryFactory.getProjectPrivilegeList().create();
+        privilegeList.getList().add(ProjectPrivilege.ADMIN);
+        repositoryFactory.getProjectPrivilegeList().update(privilegeList);
+
+        project.getPrivileges().put(authentication.getName(), privilegeList);
+        project = repositoryFactory.getProjectRepository().updateProjectFull(project);
+
+        return jsonMappersFactory.getProjectJsonMapper().getFullProject(project);
     }
 
     @DeleteMapping("/projects/{id}")
-    public void deleteProject(Authentication authentication, @PathVariable("id") String id){
-
-        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
-        AppUser user = repositoryFactory.getUserDetailsManager().findByUsername(authentication.getName());
-        if(
-            !authentication.getAuthorities().stream().anyMatch(auth -> 
-                auth.toString().equals("ROLE_ADMIN") 
-                || auth.toString().equals("ROLE_MODERATOR")
-            )
-            &&
-            !project.getPrivileges().get(user).getList().stream().anyMatch(pr -> pr == ProjectPrivilege.ADMIN)
-        ){
-            throw new RuntimeException("You dont have privileges to delete project");
-        }
-
+    @AuthorizeProjectRoles(roles={ProjectPrivilege.ADMIN})
+    public void deleteProject( @ProjectId @PathVariable("id") String id){
 
         repositoryFactory.getProjectRepository().deleteProject(id);
     }
 
     @PutMapping("/projects/{id}/input/add/{label}")
-    public MappingJacksonValue addInputChannel(@PathVariable("id") String id, @PathVariable("label") String label, @RequestBody ChannelDetails channelDetails){
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    public MappingJacksonValue addInputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label, @RequestBody ChannelDetails channelDetails){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
         Channel channel =  repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
 
@@ -127,7 +123,8 @@ public class ProjectController {
     }
 
     @PutMapping("/projects/{id}/input/remove/{label}")
-    public MappingJacksonValue removeInputChannel(@PathVariable("id") String id, @PathVariable("label") String label){
+    @AuthorizeProjectRoles(roles= { ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR })
+    public MappingJacksonValue removeInputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
 
         if(  !project.getInputChannels().containsKey(label) || project.getInputChannels().get(label) == null){
@@ -144,7 +141,8 @@ public class ProjectController {
     }
 
     @PutMapping("/projects/{id}/output/add/{label}")
-    public MappingJacksonValue addOutputChannel(@PathVariable("id") String id, @PathVariable("label") String label, @RequestBody ChannelDetails channelDetails){
+    @AuthorizeProjectRoles(roles= { ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR })
+    public MappingJacksonValue addOutputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label, @RequestBody ChannelDetails channelDetails){
 
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
         Channel channel =  repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
@@ -161,7 +159,8 @@ public class ProjectController {
     }
 
     @PutMapping("/projects/{id}/output/remove/{label}")
-    public MappingJacksonValue removeOutputChannel(@PathVariable("id") String id, @PathVariable("label") String label){
+    @AuthorizeProjectRoles(roles= { ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR })
+    public MappingJacksonValue removeOutputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
 
         if(  !project.getOutputChannels().containsKey(label) || project.getOutputChannels().get(label) == null){
@@ -178,7 +177,8 @@ public class ProjectController {
     }
 
     @PutMapping("/projects/{id}/start/channels")
-    public void startChannels(@PathVariable("id") String id){
+    @AuthorizeProjectRoles(roles= { ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR })
+    public void startChannels(@ProjectId @PathVariable("id") String id){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
         for(Channel channel : project.getChannels()){
             channelController.startChannel(id, channel.getId());
@@ -186,7 +186,8 @@ public class ProjectController {
     }
 
     @PutMapping("/projects/{id}/stop/channels")
-    public void stopChannels(@PathVariable("id") String id){
+    @AuthorizeProjectRoles(roles= { ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR })
+    public void stopChannels(@ProjectId @PathVariable("id") String id){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
         for(Channel channel : project.getChannels()){
             channelController.stopChannel(id, channel.getId());
@@ -194,7 +195,8 @@ public class ProjectController {
     }
 
     @PutMapping("/projects/{id}")
-    public Project updateProject(@PathVariable("id") String id, @RequestBody ProjectDetails projectDetails){
+    @AuthorizeProjectRoles(roles= { ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR })
+    public Project updateProject(@ProjectId @PathVariable("id") String id, @RequestBody ProjectDetails projectDetails){
         return repositoryFactory.getProjectRepository().updateProject(id, projectDetails);
     }
 
