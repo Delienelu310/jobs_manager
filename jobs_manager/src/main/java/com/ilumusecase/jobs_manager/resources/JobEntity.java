@@ -17,6 +17,7 @@ public class JobEntity {
 
     private String groupId;
     //className is author_username + authorCounter
+    private String extension;
 
     private JobDetails jobDetails;
 

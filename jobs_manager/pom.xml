@@ -43,6 +43,13 @@
 			<artifactId>kafka-clients</artifactId>
 		</dependency> 
 
+		<!-- minio -->
+		<dependency>
+			<groupId>io.minio</groupId>
+			<artifactId>minio</artifactId>
+			<version>8.5.2</version>
+		</dependency>
+
 		<!-- databases -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
