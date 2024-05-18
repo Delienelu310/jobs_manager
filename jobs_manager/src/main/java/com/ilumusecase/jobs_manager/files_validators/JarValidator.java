@@ -31,7 +31,7 @@ public class JarValidator implements FilesValidator{
             return Optional.empty();
         }
         
-        if(result) return Optional.of("com.ilumusecase.scripts." + expectedClass + ".class");
+        if(result) return Optional.of("com.ilumusecase.scripts." + expectedClass);
         else return Optional.empty();
     }
     

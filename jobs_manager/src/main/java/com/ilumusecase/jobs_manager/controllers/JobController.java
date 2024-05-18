@@ -86,9 +86,6 @@ public class JobController {
             .getValidator(extenstion).orElseThrow(RuntimeException::new)
             .validate(file, "Main_" + appUser.getUsername() + 
                 "_" + appUser.getAppUserDetails().getJobCreatedCounter());
-    
-        if(classPath.isEmpty()) throw new RuntimeException();
-
 
         //save the job entiity
         
@@ -97,6 +94,7 @@ public class JobController {
         jobDetails.setDescription(description);
 
         JobEntity jobEntity = new JobEntity();
+        jobEntity.setClassPath(classPath.orElseThrow(RuntimeException::new));
         jobEntity.setExtension(extenstion);
         jobEntity.setJobDetails(jobDetails);
         jobEntity.setProject(project);
