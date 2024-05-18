@@ -22,6 +22,8 @@ public class JobNode {
     @Id
     private String id;
 
+    private String currentGroupId;
+    
     private JobNodeDetails jobNodeDetails;
 
     @DBRef

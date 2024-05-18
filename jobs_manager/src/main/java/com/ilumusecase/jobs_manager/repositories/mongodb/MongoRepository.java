@@ -7,6 +7,7 @@ import com.ilumusecase.jobs_manager.repositories.interfaces.AppUserRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ChannelListRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ChannelsRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.JobNodesRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.JobRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.PrivilegeListRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ProjectRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
@@ -31,6 +32,8 @@ public class MongoRepository implements RepositoryFactory{
     private ProjectPrivilegeListMongoRepository projectPrivilegeListMongoRepository;
     @Autowired
     private JobNodePrivilegeListMongoRepository jobNodePrivilegeListMongoRepository;
+    @Autowired
+    private JobMongoRepository jobMongoRepository;
 
     @Override
     public JobNodesRepository getJobNodesRepository() {
@@ -65,6 +68,11 @@ public class MongoRepository implements RepositoryFactory{
     @Override
     public PrivilegeListRepository<JobNodePrivilege> getJobNodePrivilegeList() {
         return this.jobNodePrivilegeListMongoRepository;
+    }
+
+    @Override
+    public JobRepository getJobRepository() {
+        return this.jobMongoRepository;
     }
 
   

@@ -15,7 +15,8 @@ public class JobEntity {
     @Id
     private String id;
 
-    private String ilumId;
+    private String groupId;
+    //className is author_username + authorCounter
 
     private JobDetails jobDetails;
 

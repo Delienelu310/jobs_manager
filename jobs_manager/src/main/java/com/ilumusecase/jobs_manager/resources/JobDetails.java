@@ -8,5 +8,9 @@ import lombok.NoArgsConstructor;
 public class JobDetails {
 
     private String name;
+    private String description;
+
+    private String quality;
+    private String effectivity;
     
 }

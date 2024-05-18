@@ -12,4 +12,5 @@ public interface RepositoryFactory {
     public AppUserRepository getUserDetailsManager();
     public PrivilegeListRepository<ProjectPrivilege> getProjectPrivilegeList();
     public PrivilegeListRepository<JobNodePrivilege> getJobNodePrivilegeList();
+    public JobRepository getJobRepository();
 } 

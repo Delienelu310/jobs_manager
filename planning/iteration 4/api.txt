@@ -1,0 +1,30 @@
+problems:
+
+1. you cannot add new jobs to existing group
+2. to execute classes are required. That means that there might be 2 similar classes
+
+
+what i need to do:
+when admin presses start jobnode/start to the project, it must take all the jobs and fit them into jobs field of
+the form to create new group of jobs
+
+the problem: how do i validate and maintain the jar files?
+
+okay, i know how to solve the issue
+1. The contributor has its jar file or python file and gives path of it to the manager applciation
+2. After that manager applciation inspect the jar files and analizes if it has the class of required name
+3. then it uploads jar file onto s3 container
+4. finally, when time comes to create a group, it downloads files into runtime memory like a binary string and uses it to create
+groupd via api
+
+
+
+also i need method to:
+1. execute job - group id and class name requried only
+2. stop job - group id and class name required only
+3. stop group/archive job - group id required
+4. get group by group id
+5. get group list
+6. return results of job instances work
+
+

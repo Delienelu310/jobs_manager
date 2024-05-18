@@ -1,0 +1,23 @@
+
+DONE:
+
+step 1: experimenting
+1. install helm 
+2. install cluster on minikube  
+3. try out simple script outside of jobs manager 
+4. try to expose ilum-core and use basic curl to use get requests
+5. write a more complex spring boot app to submit and execute job
+
+step 2: creating job resource
+6. plan - what exactly method should i create
+
+TODO:
+
+
+step 3: creating job manager - component responsible for talking to ilum-core
+
+step 4: create api
+
+step 5: create scheduler and logic for job queue management
+
+
