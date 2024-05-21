@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
+import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.Channel;
 import com.ilumusecase.jobs_manager.resources.ChannelDetails;
@@ -42,6 +43,9 @@ public class JobsNodeController {
 
     @Autowired
     private ChannelController channelController;
+
+    @Autowired
+    private Manager manager;
 
     @GetMapping("/job_nodes")
     @DisableDefaultAuth
@@ -435,6 +439,18 @@ public class JobsNodeController {
         repositoryFactory.getJobNodesRepository().deleteJobNodeById(jobNodeId);
     }
 
+    @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/start")
+    public void startJobNode(
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId
+    ){
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+
+        String groupId = manager.createGroup(jobNode);
+
+        jobNode.setCurrentGroupId(groupId);
+        repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+    }
 
 
     

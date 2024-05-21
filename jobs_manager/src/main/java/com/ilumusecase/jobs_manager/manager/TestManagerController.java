@@ -15,9 +15,9 @@ public class TestManagerController {
         return manager.hello();
     }
 
-    @GetMapping("/test-manager/group")
-    public String createGroup(){
-        return manager.createGroup();
-    }
+    // @GetMapping("/test-manager/group")
+    // public String createGroup(){
+    //     return manager.createGroup();
+    // }
 
 }

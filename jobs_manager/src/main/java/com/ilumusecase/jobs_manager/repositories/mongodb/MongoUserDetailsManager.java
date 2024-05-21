@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import com.ilumusecase.jobs_manager.repositories.interfaces.AppUserRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.MongoAppUser;
 import com.ilumusecase.jobs_manager.resources.AppUser;
+import com.ilumusecase.jobs_manager.resources.AppUserDetails;
 
 
 public class MongoUserDetailsManager implements AppUserRepository{
@@ -48,6 +49,10 @@ public class MongoUserDetailsManager implements AppUserRepository{
 
         AppUser appUser = new AppUser();
         appUser.setNewState(user);
+
+        AppUserDetails defaultAppUserDetails = new AppUserDetails();
+        defaultAppUserDetails.setJobCreatedCounter(0);
+        appUser.setAppUserDetails(defaultAppUserDetails);
 
         mongoAppUser.save(appUser);
     }

@@ -33,8 +33,9 @@ public class JobS3Client {
             InputStream inputStream = new ByteArrayInputStream(multipartFile.getBytes());
     
             minioClient.putObject(PutObjectArgs.builder()
-                .bucket("projects/" + jobEntity.getProject().getId() + "/job_nodes/" + jobEntity.getJobNode() + "/jobs/" )
-                .object("Main_" + jobEntity.getAuthor().getUsername() + "_" + jobEntity.getAuthor().getAppUserDetails().getJobCreatedCounter() + "." + extension)
+                .bucket("jobsmanager")
+                .object("projects/" + jobEntity.getProject().getId() + "/job_nodes/" + jobEntity.getJobNode().getId() + "/jobs/"  +
+                    jobEntity.getId() + "." + extension)
                 .stream(inputStream, inputStream.available(), -1)
                 .build());
             
@@ -48,8 +49,9 @@ public class JobS3Client {
         try{
             GetObjectResponse getObjectResponse = minioClient.getObject(
                 GetObjectArgs.builder()
-                    .bucket("projects/" + jobEntity.getProject().getId() + "/job_nodes/" + jobEntity.getJobNode() + "/jobs/" )
-                    .object("Main_" + jobEntity.getAuthor().getUsername() + "_" + jobEntity.getAuthor().getAppUserDetails().getJobCreatedCounter() + "." + extension)
+                    .bucket("jobsmanager")
+                    .object("projects/" + jobEntity.getProject().getId() + "/job_nodes/" + jobEntity.getJobNode().getId() + "/jobs/" + 
+                       jobEntity.getId() + "." + extension)
                     .build()
             );
 
