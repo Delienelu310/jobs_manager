@@ -16,11 +16,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.ilumusecase.jobs_manager.JobsManagerApplication;
+import com.ilumusecase.jobs_manager.resources.IlumGroup;
 import com.ilumusecase.jobs_manager.resources.JobEntity;
-import com.ilumusecase.jobs_manager.resources.JobNode;
 import com.ilumusecase.jobs_manager.s3clients.S3ClientFactory;
-
-import reactor.core.publisher.Mono;
 
 @Service
 public class Manager {
@@ -34,19 +32,7 @@ public class Manager {
 
     private WebClient webClient = WebClient.create();
 
-    public String hello(){
-
-        Mono<String> responseMono = webClient
-            .get()
-            .uri("http://localhost:9888/api/v1/cluster")
-            .retrieve()
-            .bodyToMono(String.class);
-
-        return responseMono.block(); 
-    
-    }
-
-    public String createGroup(JobNode jobNode){
+    public String createGroup(IlumGroup ilumGroup){
 
         
         MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
@@ -55,8 +41,8 @@ public class Manager {
         extensionMap.put("jar", "jars");
         extensionMap.put("py", "files");
 
-        for(JobEntity jobEntity : jobNode.getJobsQueue()){
-            byte[] bytes = s3ClientFactory.getJobS3Client().downloadJob(jobEntity, jobEntity.getExtension()).orElseThrow(RuntimeException::new);
+        for(JobEntity jobEntity : ilumGroup.getJobs()){
+            byte[] bytes = s3ClientFactory.getJobS3Client().downloadJob(jobEntity).orElseThrow(RuntimeException::new);
             ByteArrayResource byteArrayResource = new ByteArrayResource(bytes) {
                 @Override
                 public String getFilename() {
@@ -66,7 +52,7 @@ public class Manager {
             bodyMap.add(extensionMap.get(jobEntity.getExtension()), byteArrayResource);
         }
         bodyMap.add("scale", "1");
-        bodyMap.add("name", jobNode.getId());
+        bodyMap.add("name", ilumGroup.getJobNode().getId());
         bodyMap.add("clusterName", "default");
 
 
@@ -80,7 +66,7 @@ public class Manager {
     }
 
     public String submitJob(JobEntity jobEntity){
-        String url = "http://localhost:9888/api/v1/group/" + jobEntity.getJobNode().getCurrentGroupId() + "/job/submit";
+        String url = "http://localhost:9888/api/v1/group/" + jobEntity.getJobNode().getCurrentGroup().getIlumId() + "/job/submit";
 
         String jsonData = "{" + 
             "\"type\": \"interactive_job_execute\"," + 
@@ -95,6 +81,17 @@ public class Manager {
             .bodyToMono(JsonNode.class).block().get("jobInstanceId").asText();
 
         return ilumId;
+    }
+
+    public JsonNode getJobInfo(JobEntity jobEntity){
+        String url = "http://localhost:9888/api/v1/job/" + jobEntity.getIlumId();
+
+        JsonNode jsonNode = webClient.get()
+            .uri(url)
+            .retrieve()
+            .bodyToMono(JsonNode.class).block();
+        return jsonNode;
+        
     }
 
     public void stopJob(JobEntity jobEntity){

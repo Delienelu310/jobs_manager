@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJacksonValue;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,12 +23,12 @@ import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
 import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.AppUser;
+import com.ilumusecase.jobs_manager.resources.IlumGroup;
 import com.ilumusecase.jobs_manager.resources.JobDetails;
 import com.ilumusecase.jobs_manager.resources.JobEntity;
 import com.ilumusecase.jobs_manager.resources.JobNode;
 import com.ilumusecase.jobs_manager.resources.Project;
 import com.ilumusecase.jobs_manager.s3clients.S3ClientFactory;
-import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.IgnoreAuthAspect;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
@@ -119,6 +118,7 @@ public class JobController {
         jobEntity = repositoryFactory.getJobRepository().updateJobFull(jobEntity);
 
         //add job entity to queue 
+        jobNode.getJobs().add(jobEntity);
         jobNode.getJobsQueue().add(jobEntity);
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
 
@@ -133,34 +133,72 @@ public class JobController {
         
     }
 
-    @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/job/run_next")
-    public void runNextJob(
+    // @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/job/run_next")
+    // public void runNextJob(
+    //     @ProjectId @PathVariable("project_id") String projectId,
+    //     @JobNodeId @PathVariable("job_node_id") String jobNodeId
+    // ){
+    //     JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+
+    //     JobEntity jobEntity = jobNode.getJobsQueue().remove(0);
+    //     jobNode.setCurrentJob(jobEntity);
+    //     String ilumId = manager.submitJob(jobNode.getCurrentJob());
+
+    //     repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+    
+    //     jobEntity.setIlumId(ilumId);
+    //     repositoryFactory.getJobRepository().updateJobFull(jobEntity);
+    // }
+
+    // @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/job/stop_current")
+    // public void stopCurrentJob(
+    //     @ProjectId @PathVariable("project_id") String projectId,
+    //     @JobNodeId @PathVariable("job_node_id") String jobNodeId
+    // ){
+    //     JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+
+    //     if(jobNode == null){
+    //         throw new RuntimeException();
+    //     }
+    //     manager.stopJob(jobNode.getCurrentJob());
+
+    //     JobEntity jobEntity = jobNode.getCurrentJob();
+    //     jobNode.getJobsDone().add(jobEntity);
+    //     jobNode.setCurrentJob(null);
+    //     repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+    
+    // }
+
+    @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_queue/remove/{job_id}")
+    public void removeJobFromQueue(
         @ProjectId @PathVariable("project_id") String projectId,
-        @JobNodeId @PathVariable("job_node_id") String jobNodeId
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
+        @PathVariable("job_id") String jobId
     ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
-        JobEntity jobEntity = jobNode.getJobsQueue().remove(0);
-        jobNode.setCurrentJob(jobEntity);
-        String ilumId = manager.submitJob(jobNode.getCurrentJob());
+        JobEntity jobEntity = repositoryFactory.getJobRepository().retrieveJobEntity(jobId);
+        IlumGroup ilumGroup = jobNode.getCurrentGroup();
+
+        //in ilum group
+        //if the job is currently running, stop it
+        if(jobEntity.equals(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()))){
+            manager.stopJob(jobEntity);
+        }
+
+        //if the job is in upcomming queue
+        for(int i = ilumGroup.getCurrentIndex() + 1; i < ilumGroup.getJobs().size(); i++){
+            if(ilumGroup.getJobs().get(i).equals(jobEntity)){
+                ilumGroup.getJobs().remove(i);
+                i--;
+            }
+        }
+        ilumGroup = repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
+
+        //inside of job node
+        jobNode.getJobsQueue().removeIf(jb -> jb.equals(jobEntity));
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
-    
-        jobEntity.setIlumId(ilumId);
-        repositoryFactory.getJobRepository().updateJobFull(jobEntity);
+
     }
-
-    @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/job/stop_current")
-    public void stopCurrentJob(
-        @ProjectId @PathVariable("project_id") String projectId,
-        @JobNodeId @PathVariable("job_node_id") String jobNodeId
-    ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
-
-        manager.stopJob(jobNode.getCurrentJob());
-        jobNode.setCurrentJob(null);
-        repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
-    
-    }
-
 
     @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs/{job_id}")
     public void deleteJob(
@@ -168,7 +206,23 @@ public class JobController {
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("job_id") String jobId
     ){
-        //...
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobEntity jobEntity = repositoryFactory.getJobRepository().retrieveJobEntity(jobId);
+
+        if(jobNode.getCurrentGroup() != null && jobNode.getCurrentGroup().getJobs().contains(jobEntity)){
+            throw new RuntimeException();
+        }
+
+        jobNode.getJobsQueue().removeIf(jb -> jb.equals(jobEntity));
+        jobNode.getJobs().removeIf(jb -> jb.equals(jobEntity));
+
+        repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+
+        s3ClientFactory.getJobS3Client().deleteJob(jobEntity);
+
+        repositoryFactory.getJobRepository().deleteJob(jobId);
+
+        
     }
 
 

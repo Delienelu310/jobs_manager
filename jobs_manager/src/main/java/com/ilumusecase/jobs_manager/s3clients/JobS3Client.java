@@ -15,6 +15,7 @@ import io.minio.GetObjectArgs;
 import io.minio.GetObjectResponse;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 
 @Component
 public class JobS3Client {
@@ -44,20 +45,35 @@ public class JobS3Client {
         }
     }
 
-    public Optional<byte[]> downloadJob(JobEntity jobEntity, String extension){
+    public Optional<byte[]> downloadJob(JobEntity jobEntity){
       
         try{
             GetObjectResponse getObjectResponse = minioClient.getObject(
                 GetObjectArgs.builder()
                     .bucket("jobsmanager")
                     .object("projects/" + jobEntity.getProject().getId() + "/job_nodes/" + jobEntity.getJobNode().getId() + "/jobs/" + 
-                       jobEntity.getId() + "." + extension)
+                       jobEntity.getId() + "." + jobEntity.getExtension())
                     .build()
             );
 
             return Optional.of(getObjectResponse.readAllBytes());
         }catch(Exception e){
             return Optional.empty();
+        }
+    }
+
+    public void deleteJob(JobEntity jobEntity){
+        try{
+            minioClient.removeObject(
+                RemoveObjectArgs.builder()
+                    .bucket("jobsmanager")
+                    .object("projects/" + jobEntity.getProject().getId() + "/job_nodes/" + jobEntity.getJobNode().getId() + "/jobs/" + 
+                       jobEntity.getId() + "." + jobEntity.getExtension())
+                    .build()
+            );
+
+        }catch(Exception e){
+            throw new RuntimeException();
         }
     }
 }

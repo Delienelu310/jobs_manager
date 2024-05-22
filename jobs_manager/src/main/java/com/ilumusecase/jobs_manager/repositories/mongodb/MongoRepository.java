@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.AppUserRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ChannelListRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ChannelsRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.IlumGroupRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.JobNodesRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.JobRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.PrivilegeListRepository;
@@ -34,6 +35,8 @@ public class MongoRepository implements RepositoryFactory{
     private JobNodePrivilegeListMongoRepository jobNodePrivilegeListMongoRepository;
     @Autowired
     private JobMongoRepository jobMongoRepository;
+    @Autowired
+    private IlumGroupRepository ilumGroupRepository;
 
     @Override
     public JobNodesRepository getJobNodesRepository() {
@@ -73,6 +76,11 @@ public class MongoRepository implements RepositoryFactory{
     @Override
     public JobRepository getJobRepository() {
         return this.jobMongoRepository;
+    }
+
+    @Override
+    public IlumGroupRepository getIlumGroupRepository() {
+        return this.ilumGroupRepository;
     }
 
   
