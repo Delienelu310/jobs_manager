@@ -4,8 +4,6 @@ import com.ilumusecase.annotations.processors.JobProcessor;
 import com.ilumusecase.annotations.resources.InputChannel;
 import com.ilumusecase.annotations.resources.JobNode;
 
-
-
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.sql.Dataset;
@@ -15,10 +13,7 @@ import org.apache.spark.sql.streaming.OutputMode;
 import org.apache.spark.sql.streaming.StreamingQuery;
 import org.apache.spark.sql.streaming.StreamingQueryException;
 
-@JobNode(
-    projectId = "663a3cf1507e6f2ba7f7d165",
-    jobNodeId = "663a3d28507e6f2ba7f7d166"
-)
+@JobNode
 public class App {
 
     @InputChannel(label = "xyz")
@@ -37,7 +32,7 @@ public class App {
         ;
 
 
-        JobProcessor jobProcessor = new JobProcessor(App.class, session);
+        JobProcessor jobProcessor = new JobProcessor(App.class, session, null);
         jobProcessor.start();
 
         System.out.println(input.toString());

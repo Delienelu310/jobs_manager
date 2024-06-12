@@ -10,6 +10,7 @@ import com.ilumusecase.annotations.processors.channel_processors.ChannelProcesso
 import com.ilumusecase.annotations.processors.channel_processors.KafkaChannelProcessor;
 import com.ilumusecase.annotations.resources.InputChannel;
 import com.ilumusecase.annotations.resources.JobNode;
+import com.ilumusecase.annotations.resources.JobNodeMod;
 import com.ilumusecase.annotations.resources.OutputChannel;
 import com.ilumusecase.data_supplier.DataSupplierClient;
 import com.ilumusecase.resources.ChannelDTO;
@@ -19,6 +20,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 
 public class JobProcessor {
 
@@ -32,21 +34,27 @@ public class JobProcessor {
     private JobNodeDTO jobNodeDTO;
     private Class<?> clazz;
     private SparkSession sparkSession;
+    private Map<String, Object> config;
 
 
-    public JobProcessor(Class<?> clazz, SparkSession session){
+    public JobProcessor(Class<?> clazz, SparkSession session, Map<String, Object> config){
         if(!clazz.isAnnotationPresent(JobNode.class)){
             throw new RuntimeException();
         }
+        if((JobNodeMod)config.get("mod") != JobNodeMod.NORMAL){
+            throw new RuntimeException();
+        }
+
+        String projectId = (String)config.get("projectId");
+        String jobNodeId = (String)config.get("jobNodeId");
+
+        
 
         this.clazz = clazz;
         this.sparkSession = session;
-
-        JobNode annotation = clazz.getAnnotation(JobNode.class);
-
+        this.config = config;
+        
         // Access annotation values
-        String projectId = annotation.projectId();
-        String jobNodeId = annotation.jobNodeId();
         this.jobNodeDTO = null;
         try{
             this.jobNodeDTO = dataSupplierClient.retrieveJobNode(projectId, jobNodeId);
@@ -57,6 +65,7 @@ public class JobProcessor {
     }
 
     public void start(){
+        
         Field[] fields = clazz.getDeclaredFields();
         for(Field field : fields){
             if( ! field.isAnnotationPresent(InputChannel.class)){
@@ -67,12 +76,14 @@ public class JobProcessor {
             
             List<Dataset<Row>> inputDatasets = new ArrayList<>();
 
+            
+        
             for(ChannelDTO channel : jobNodeDTO.input.get(inputChannel.label()).channelList){
 
                 System.out.println("Trying to connect to channel : " + channel.id);
 
                 ChannelProcessor channelProcessor = channelProcessors.get(channel.channelDetails.type);
-                Dataset<Row> dataset = channelProcessor.retrieveInputDataSet(channel, this.sparkSession);
+                Dataset<Row> dataset = channelProcessor.retrieveInputDataSet(channel, this.sparkSession, config);
             
                 inputDatasets.add(dataset);
 
@@ -114,7 +125,7 @@ public class JobProcessor {
                 ChannelProcessor channelProcessor = channelProcessors.get(channel.channelDetails.type);
                 
                 try {
-                    channelProcessor.connectToOutputChannel(channel, dataset, this.sparkSession);
+                    channelProcessor.connectToOutputChannel(channel, dataset, this.sparkSession, config);
                 } catch (Exception e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
