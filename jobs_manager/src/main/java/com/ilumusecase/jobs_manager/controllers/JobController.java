@@ -133,42 +133,6 @@ public class JobController {
         
     }
 
-    // @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/job/run_next")
-    // public void runNextJob(
-    //     @ProjectId @PathVariable("project_id") String projectId,
-    //     @JobNodeId @PathVariable("job_node_id") String jobNodeId
-    // ){
-    //     JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
-
-    //     JobEntity jobEntity = jobNode.getJobsQueue().remove(0);
-    //     jobNode.setCurrentJob(jobEntity);
-    //     String ilumId = manager.submitJob(jobNode.getCurrentJob());
-
-    //     repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
-    
-    //     jobEntity.setIlumId(ilumId);
-    //     repositoryFactory.getJobRepository().updateJobFull(jobEntity);
-    // }
-
-    // @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/job/stop_current")
-    // public void stopCurrentJob(
-    //     @ProjectId @PathVariable("project_id") String projectId,
-    //     @JobNodeId @PathVariable("job_node_id") String jobNodeId
-    // ){
-    //     JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
-
-    //     if(jobNode == null){
-    //         throw new RuntimeException();
-    //     }
-    //     manager.stopJob(jobNode.getCurrentJob());
-
-    //     JobEntity jobEntity = jobNode.getCurrentJob();
-    //     jobNode.getJobsDone().add(jobEntity);
-    //     jobNode.setCurrentJob(null);
-    //     repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
-    
-    // }
-
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_queue/remove/{job_id}")
     public void removeJobFromQueue(
         @ProjectId @PathVariable("project_id") String projectId,

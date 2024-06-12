@@ -65,13 +65,28 @@ public class Manager {
             .bodyToMono(JsonNode.class).block().get("groupId").asText();
     }
 
-    public String submitJob(JobEntity jobEntity){
+    private String mapToJson(Map<String, String> map){
+        StringBuilder result = new StringBuilder();
+        result.append("{ ");
+        for(String key : map.keySet()){
+            result.append("\"" + key);
+            result.append(key);
+            result.append("\": \"");
+            result.append(map.get(key));
+            result.append("\", ");
+        }
+        result.delete(result.length() - 1, result.length());
+        result.append("}");
+        return result.toString();
+    }
+
+    public String submitJob(JobEntity jobEntity, Map<String, String> config){
         String url = "http://localhost:9888/api/v1/group/" + jobEntity.getJobNode().getCurrentGroup().getIlumId() + "/job/submit";
 
         String jsonData = "{" + 
             "\"type\": \"interactive_job_execute\"," + 
             "\"jobClass\":\"" + jobEntity.getClassPath() + "\"," +
-            "\"jobConfig\":{}" +
+            "\"jobConfig\":" + mapToJson(config) +
         "}";
         String ilumId = webClient.post()
             .uri(url)

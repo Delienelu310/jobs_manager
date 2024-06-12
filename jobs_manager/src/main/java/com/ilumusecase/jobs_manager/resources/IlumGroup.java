@@ -20,11 +20,15 @@ public class IlumGroup {
     private String ilumId;
 
     private int currentIndex = 0;
+    private int currentTestingIndex = 0;
 
     @DBRef(lazy = true)
     private JobNode jobNode;
 
     @DBRef(lazy = true)    
     private List<JobEntity> jobs = new ArrayList<>();
+
+    @DBRef(lazy = true)
+    private List<JobEntity> testingJobs = new ArrayList<>();
     
 }

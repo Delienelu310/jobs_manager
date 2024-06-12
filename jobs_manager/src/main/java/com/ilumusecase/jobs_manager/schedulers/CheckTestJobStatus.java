@@ -1,6 +1,7 @@
 package com.ilumusecase.jobs_manager.schedulers;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -16,8 +17,7 @@ import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.IlumGroup;
 
 @Component
-public class CheckJobStatus implements Job{
-
+public class CheckTestJobStatus implements Job {
     @Autowired
     private Manager manager;
     @Autowired
@@ -33,7 +33,7 @@ public class CheckJobStatus implements Job{
         String ilumGroupId = jobDataMap.getString("ilumGroupId");
         IlumGroup ilumGroup = repositoryFactory.getIlumGroupRepository().retrieveById(ilumGroupId);
 
-        JsonNode jobInfo = manager.getJobInfo(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()));
+        JsonNode jobInfo = manager.getJobInfo(ilumGroup.getTestingJobs().get(ilumGroup.getCurrentTestingIndex()));
 
         String state = jobInfo.get("state").asText();
 
@@ -45,46 +45,25 @@ public class CheckJobStatus implements Job{
         //3. execute next job or exit, if there`s no jobs left
 
 
-        try {
-            jobEntityScheduler.deleteJobEntityStop(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()));
-        } catch (SchedulerException e) {
-            throw new RuntimeException();
-        }
-
-        if(ilumGroup.getCurrentTestingIndex() == -1){
-            ilumGroup.setCurrentTestingIndex(0);
-            try {
-                jobEntityScheduler.startJobTestStatusCheckScheduler(ilumGroup);
-            } catch (SchedulerException e) {
-                throw new RuntimeException();
-            }
-            repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
-        }
-   
-        if(ilumGroup.getCurrentTestingIndex() < ilumGroup.getTestingJobs().size() ) return;
-        ilumGroup.setCurrentTestingIndex(-1);
-        ilumGroup.setCurrentIndex(ilumGroup.getCurrentIndex() + 1);
-
+        ilumGroup.setCurrentTestingIndex(ilumGroup.getCurrentTestingIndex() + 1);
 
         
 
-        if(ilumGroup.getCurrentIndex() < ilumGroup.getJobs().size()){
-            manager.submitJob(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()), new HashMap<>());
-            try {
-                jobEntityScheduler.scheduleJobEntityStop(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()));
-            } catch (SchedulerException e) {
-                throw new RuntimeException();
-            }
+        if(ilumGroup.getCurrentTestingIndex() < ilumGroup.getTestingJobs().size()){
+            Map<String, String> config = new HashMap<>();
+            manager.submitJob(ilumGroup.getTestingJobs().get(ilumGroup.getCurrentTestingIndex()), config);
+            
         }else{
             try {
-                jobEntityScheduler.deleteGroupStatusCheckScheduler(ilumGroup);
+                jobEntityScheduler.deleteJobTestStatusCheckScheduler(ilumGroup);
             } catch (SchedulerException e) { 
                 throw new RuntimeException();
             }
+
+            
         }
-        repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
+
 
 
     }
-    
 }

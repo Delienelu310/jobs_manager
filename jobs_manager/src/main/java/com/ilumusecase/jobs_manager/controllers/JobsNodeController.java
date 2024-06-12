@@ -1,5 +1,7 @@
 package com.ilumusecase.jobs_manager.controllers;
 
+import java.util.HashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -459,6 +461,7 @@ public class JobsNodeController {
 
         IlumGroup ilumGroup = new IlumGroup();
         ilumGroup.setJobs(jobNode.getJobsQueue());
+        ilumGroup.setTestingJobs(jobNode.getTestingJobs());
         ilumGroup.setCurrentIndex(0);
         ilumGroup.setJobNode(jobNode);
 
@@ -474,7 +477,7 @@ public class JobsNodeController {
         //2. start jobs execution cycle
         //a. start execution of first job
 
-        manager.submitJob(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()));
+        manager.submitJob(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()), new HashMap<>());
         try{
             jobEntityScheduler.startGroupStatusCheckScheduler(ilumGroup);
             jobEntityScheduler.scheduleJobEntityStop(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()));

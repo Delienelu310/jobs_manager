@@ -61,8 +61,30 @@ public class JobEntityScheduler {
 
     }
 
+    public void startJobTestStatusCheckScheduler(IlumGroup ilumGroup) throws SchedulerException{
+        JobDetail jobDetail = JobBuilder.newJob(CheckTestJobStatus.class)
+            .withIdentity(new JobKey(Integer.toString(ilumGroup.getCurrentIndex()), ilumGroup.getId()))
+            .storeDurably()
+            .build();
+
+        SimpleScheduleBuilder simpleScheduleBuilder = SimpleScheduleBuilder.simpleSchedule()
+			.withIntervalInSeconds(10)
+			.repeatForever();
+
+		Trigger trigger = TriggerBuilder.newTrigger()
+            .forJob(jobDetail)
+            .withSchedule(simpleScheduleBuilder)
+            .build();
+
+        scheduler.scheduleJob(jobDetail, trigger);
+    }
+
     public void deleteGroupStatusCheckScheduler(IlumGroup ilumGroup) throws SchedulerException{
         scheduler.deleteJob(new JobKey(ilumGroup.getId(), ilumGroup.getJobNode().getId()));
+    }
+
+    public void deleteJobTestStatusCheckScheduler(IlumGroup ilumGroup) throws SchedulerException{
+        scheduler.deleteJob(new JobKey(Integer.toString(ilumGroup.getCurrentIndex()), ilumGroup.getId()));
     }
 
 }
