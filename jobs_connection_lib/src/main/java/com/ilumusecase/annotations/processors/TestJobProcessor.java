@@ -48,6 +48,7 @@ public class TestJobProcessor {
         this.clazz = clazz;
         this.sparkSession = session;
         this.config = config;
+
         
         // Access annotation values
         this.jobNodeDTO = null;

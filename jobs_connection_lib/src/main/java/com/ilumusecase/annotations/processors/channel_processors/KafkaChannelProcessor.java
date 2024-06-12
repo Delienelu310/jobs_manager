@@ -1,5 +1,8 @@
 package com.ilumusecase.annotations.processors.channel_processors;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import org.apache.spark.sql.Dataset;
@@ -7,7 +10,6 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.streaming.StreamingQuery;
 
-import com.ilumusecase.annotations.resources.JobNodeMod;
 import com.ilumusecase.resources.ChannelDTO;
 
 public class KafkaChannelProcessor  implements ChannelProcessor{
@@ -28,33 +30,38 @@ public class KafkaChannelProcessor  implements ChannelProcessor{
     @Override
     public void connectToOutputChannel(ChannelDTO channelDTO, Dataset<Row> dataset, SparkSession session, Map<String, Object> config) throws Exception{
         
-        
-        JobNodeMod mod = (JobNodeMod)config.get("mod");
-        if(mod == JobNodeMod.NORMAL){
-            StreamingQuery query = dataset.writeStream()
-                .format("kafka")
-                .option("kafka.bootstrap.servers", "localhost:9092")
-                .option("topic", "internal-" + channelDTO.id)
-                .start();
+        StreamingQuery query = dataset.writeStream()
+            .format("kafka")
+            .option("kafka.bootstrap.servers", "localhost:9092")
+            .option("topic", "internal-" + channelDTO.id)
+            .start();
 
-            query.awaitTermination();
-        }else{
-            throw new RuntimeException();
-        }
+        query.awaitTermination();
 
-        
             
     }
 
     @Override
     public Dataset<Row> retrieveOutputDatasetFull(ChannelDTO channelData, SparkSession session, Map<String, Object> config) {
-        return session.read()
+        String startTime = (String)config.get("startTime");
+        String endTime = (String)config.get("endTime");
+        String timeFormat = (String)config.get("timeFormat");
+            
+        Dataset<Row> dataset = session.read()
             .format("kafka")
             .option("kafka.bootstrap.servers", "localhost:9092")
             .option("subscribe", "internal-" + channelData.id)
             .option("startingOffsets", "earliest")
             .option("endingOffsets", "latest")
             .load();
+        return dataset
+            .filter(dataset.col("timestamp").cast("long").between(
+                LocalDateTime.parse(startTime, DateTimeFormatter.ofPattern(timeFormat)).toEpochSecond(ZoneOffset.UTC),
+                LocalDateTime.parse(endTime, DateTimeFormatter.ofPattern(timeFormat)).toEpochSecond(ZoneOffset.UTC)
+            ));
+
+            
+    
     }
 
    
