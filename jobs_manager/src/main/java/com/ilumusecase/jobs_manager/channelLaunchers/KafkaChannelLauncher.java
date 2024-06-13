@@ -19,14 +19,48 @@ public class KafkaChannelLauncher implements ChannelLauncher{
     public void launchChannel(Channel channel) {
         
         short a = 1;
-        NewTopic newTopic = new NewTopic("internal-" + channel.getId(), 3, a);
+
+        String name = "internal_" + channel.getId();
+        
+        for(String label : channel.getProject().getInputChannels().keySet()){
+            if(channel.getProject().getInputChannels().get(label).getId().equals(channel.getId())){
+                name = "project_" + channel.getProject().getId() + "_input_" + label;
+                break;
+            }
+        }
+
+        for(String label : channel.getProject().getOutputChannels().keySet()){
+            if(channel.getProject().getOutputChannels().get(label).getId().equals(channel.getId())){
+                name = "project_" + channel.getProject().getId() + "_input_" + label;
+                break;
+            }
+        }
+
+        NewTopic newTopic = new NewTopic(name, 3, a);
         kafkaAdmin.createOrModifyTopics(newTopic);
     }
     @Override
     public void stopChannel(Channel channel) {
        
         try (AdminClient adminClient = AdminClient.create(kafkaAdmin.getConfigurationProperties())) {
-            adminClient.deleteTopics(Collections.singletonList("internal-" + channel.getId()));
+
+            String name = "internal_" + channel.getId();
+
+            for(String label : channel.getProject().getInputChannels().keySet()){
+                if(channel.getProject().getInputChannels().get(label).getId().equals(channel.getId())){
+                    name = "project_" + channel.getProject().getId() + "_input_" + label;
+                    break;
+                }
+            }
+    
+            for(String label : channel.getProject().getOutputChannels().keySet()){
+                if(channel.getProject().getOutputChannels().get(label).getId().equals(channel.getId())){
+                    name = "project_" + channel.getProject().getId() + "_input_" + label;
+                    break;
+                }
+            }
+
+            adminClient.deleteTopics(Collections.singletonList(name));
         }
     }
 

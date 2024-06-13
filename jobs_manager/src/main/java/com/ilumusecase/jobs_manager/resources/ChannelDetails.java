@@ -8,4 +8,5 @@ import lombok.NoArgsConstructor;
 public class ChannelDetails {
     private String name;
     private String type;
+    private String headers;
 }

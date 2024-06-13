@@ -37,12 +37,13 @@ public class TestJobProcessor {
         if(!clazz.isAnnotationPresent(TestJob.class)){
             throw new RuntimeException();
         }
-        if((JobNodeMod)config.get("mod") != JobNodeMod.TEST){
+        if(JobNodeMod.valueOf((String)config.get("mod")) != JobNodeMod.TEST){
             throw new RuntimeException();
         }
 
         String projectId = (String)config.get("projectId");
         String jobNodeId = (String)config.get("jobNodeId");
+        String token = (String)config.get("token");
 
 
         this.clazz = clazz;
@@ -53,7 +54,7 @@ public class TestJobProcessor {
         // Access annotation values
         this.jobNodeDTO = null;
         try{
-            this.jobNodeDTO = dataSupplierClient.retrieveJobNode(projectId, jobNodeId);
+            this.jobNodeDTO = dataSupplierClient.retrieveJobNode(projectId, jobNodeId, token);
         }catch(Exception e){
             System.out.println("to handle exception");
             throw new RuntimeException();

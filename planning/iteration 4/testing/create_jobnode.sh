@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# token: YWRtaW46YWRtaW4=
+
 curl -X POST \
     -H "Authorization: Basic $1" \
     -H "Content-Type: application/json" \

@@ -15,14 +15,15 @@ import com.ilumusecase.resources.ProjectDTO;
 
 public class DataSupplierClient {
 
-    private final String prefix = "http://localhost:8080";
+    private final String prefix = "http://localhost:5000";
 
-    public String retrieveJsonString(String path){
+    public String retrieveJsonString(String path, String token){
         try{
             URL url = new URL(prefix + path);
             System.out.println(url.toString());
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
+            connection.setRequestProperty("Authorization", token);
 
             if(connection.getResponseCode() < 200 || connection.getResponseCode() >= 300){
                 System.out.println(connection.getErrorStream().toString());
@@ -67,23 +68,23 @@ public class DataSupplierClient {
         return null;
     }
     
-    public ProjectDTO retrieveProjectById(String id) throws Exception{
+    public ProjectDTO retrieveProjectById(String id, String token) throws Exception{
 
-        String resposne = retrieveJsonString("/projects/" + id);
+        String resposne = retrieveJsonString("/projects/" + id, token);
         ObjectMapper objectMapper = new ObjectMapper();
         ProjectDTO projectDTO = objectMapper.readValue(resposne, ProjectDTO.class);
         return projectDTO;
     }
 
-    public JobNodeDTO retrieveJobNode(String projectId, String nodeId) throws Exception{
-        String resposne = retrieveJsonString("/projects/" + projectId + "/job_nodes/" + nodeId);
+    public JobNodeDTO retrieveJobNode(String projectId, String nodeId, String token) throws Exception{
+        String resposne = retrieveJsonString("/projects/" + projectId + "/job_nodes/" + nodeId, token);
         ObjectMapper objectMapper = new ObjectMapper();
         JobNodeDTO jobNodeDTO = objectMapper.readValue(resposne, JobNodeDTO.class);
         return jobNodeDTO;
     }
     
-    public ChannelDTO retrieveChannel(String projectId, String channelId) throws Exception{
-        String resposne = retrieveJsonString("/projects/" + projectId + "/channels/" + channelId);
+    public ChannelDTO retrieveChannel(String projectId, String channelId, String token) throws Exception{
+        String resposne = retrieveJsonString("/projects/" + projectId + "/channels/" + channelId, token);
         ObjectMapper objectMapper = new ObjectMapper();
         ChannelDTO channelDTO = objectMapper.readValue(resposne, ChannelDTO.class);
         return channelDTO;
