@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.ilumusecase.jobs_manager.resources.JobEntity;
+import com.ilumusecase.jobs_manager.resources.JobsFile;
 
 import io.minio.GetObjectArgs;
 import io.minio.GetObjectResponse;
@@ -23,20 +23,14 @@ public class JobS3Client {
     @Autowired
     private MinioClient minioClient;
 
-    public void uploadJob(JobEntity jobEntity, MultipartFile multipartFile){
+    public void uploadJob(JobsFile jobsFile, MultipartFile multipartFile){
         try{
-
-            String filename = multipartFile.getOriginalFilename();
-
-            if(filename == null || filename.lastIndexOf(".") == -1) throw new RuntimeException();
-            String extension = filename.substring(filename.lastIndexOf(".") + 1);
-
             InputStream inputStream = new ByteArrayInputStream(multipartFile.getBytes());
     
             minioClient.putObject(PutObjectArgs.builder()
                 .bucket("jobsmanager")
-                .object("projects/" + jobEntity.getProject().getId() + "/job_nodes/" + jobEntity.getJobNode().getId() + "/jobs/"  +
-                    jobEntity.getId() + "." + extension)
+                .object("projects/" + jobsFile.getJobNode().getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/"  +
+                    jobsFile.getId() + "." + jobsFile.getExtension())
                 .stream(inputStream, inputStream.available(), -1)
                 .build());
             
@@ -45,14 +39,14 @@ public class JobS3Client {
         }
     }
 
-    public Optional<byte[]> downloadJob(JobEntity jobEntity){
+    public Optional<byte[]> downloadJob(JobsFile jobsFile){
       
         try{
             GetObjectResponse getObjectResponse = minioClient.getObject(
                 GetObjectArgs.builder()
                     .bucket("jobsmanager")
-                    .object("projects/" + jobEntity.getProject().getId() + "/job_nodes/" + jobEntity.getJobNode().getId() + "/jobs/" + 
-                       jobEntity.getId() + "." + jobEntity.getExtension())
+                    .object("projects/" + jobsFile.getJobNode().getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/" + 
+                       jobsFile.getId() + "." + jobsFile.getExtension())
                     .build()
             );
 
@@ -62,13 +56,13 @@ public class JobS3Client {
         }
     }
 
-    public void deleteJob(JobEntity jobEntity){
+    public void deleteJob(JobsFile jobsFile){
         try{
             minioClient.removeObject(
                 RemoveObjectArgs.builder()
                     .bucket("jobsmanager")
-                    .object("projects/" + jobEntity.getProject().getId() + "/job_nodes/" + jobEntity.getJobNode().getId() + "/jobs/" + 
-                       jobEntity.getId() + "." + jobEntity.getExtension())
+                    .object("projects/" + jobsFile.getJobNode().getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/" + 
+                       jobsFile.getId() + "." + jobsFile.getExtension())
                     .build()
             );
 

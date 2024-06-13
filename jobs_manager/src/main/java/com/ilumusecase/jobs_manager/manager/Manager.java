@@ -42,14 +42,14 @@ public class Manager {
         extensionMap.put("py", "files");
 
         for(JobEntity jobEntity : ilumGroup.getJobs()){
-            byte[] bytes = s3ClientFactory.getJobS3Client().downloadJob(jobEntity).orElseThrow(RuntimeException::new);
+            byte[] bytes = s3ClientFactory.getJobS3Client().downloadJob(jobEntity.getJobsFile()).orElseThrow(RuntimeException::new);
             ByteArrayResource byteArrayResource = new ByteArrayResource(bytes) {
                 @Override
                 public String getFilename() {
-                    return jobEntity.getId() + "." + jobEntity.getExtension();
+                    return jobEntity.getId() + "." + jobEntity.getJobsFile().getExtension();
                 }
             };
-            bodyMap.add(extensionMap.get(jobEntity.getExtension()), byteArrayResource);
+            bodyMap.add(extensionMap.get(jobEntity.getJobsFile().getExtension()), byteArrayResource);
         }
         bodyMap.add("scale", "1");
         bodyMap.add("name", ilumGroup.getJobNode().getId());
@@ -81,7 +81,7 @@ public class Manager {
     }
 
     public String submitJob(JobEntity jobEntity, Map<String, String> config){
-        String url = "http://localhost:9888/api/v1/group/" + jobEntity.getJobNode().getCurrentGroup().getIlumId() + "/job/submit";
+        String url = "http://localhost:9888/api/v1/group/" + jobEntity.getJobsFile().getJobNode().getCurrentGroup().getIlumId() + "/job/submit";
 
         String jsonData = "{" + 
             "\"type\": \"interactive_job_execute\"," + 

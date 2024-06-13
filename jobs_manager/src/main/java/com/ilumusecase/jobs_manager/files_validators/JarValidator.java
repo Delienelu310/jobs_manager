@@ -2,37 +2,44 @@ package com.ilumusecase.jobs_manager.files_validators;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.Optional;
+import java.util.List;
 import java.util.jar.JarFile;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ilumusecase.jobs_manager.resources.JobNode;
+
 @Component
 public class JarValidator implements FilesValidator{
 
-    @Override
-    public Optional<String> validate(MultipartFile multipartFile, String expectedClass) {
-  
+    public List<String> retrieveFileClasses(MultipartFile multipartFile){
         File file = new File(multipartFile.getOriginalFilename());
-        try (FileOutputStream fos = new FileOutputStream(file)) {
+        try(FileOutputStream fos = new FileOutputStream(file); ) {
             fos.write(multipartFile.getBytes());
+            try(JarFile jarFile = new JarFile(file)){
+                
+                return jarFile.stream().map(e -> e.getName()).filter(e -> e.endsWith(".class")).toList();
+            }   
+            
         }catch(Exception exception){
-            return Optional.empty();
+            throw new RuntimeException();
         }
-        
+    }
 
-        boolean result = false;
-        try {
-            JarFile jarFile = new JarFile(file);
-            result = jarFile.stream().anyMatch(entry -> entry.getName().replaceAll("/", ".").equals( "com.ilumusecase.scripts." + expectedClass + ".class"));
-            jarFile.close();
-        }catch(Exception e){
-            return Optional.empty();
-        }
+    @Override
+    public boolean validate(MultipartFile multipartFile, JobNode jobNode, List<String> jobClasses) {
+  
+        boolean result = true;
+  
+        //1. check if classes in job nodes are in the jobClasses list
+        //2. check if classes in current file are in the active classes of jobnode 
+        List<String> classes = retrieveFileClasses(multipartFile);
         
-        if(result) return Optional.of("com.ilumusecase.scripts." + expectedClass);
-        else return Optional.empty();
+        result = result && !classes.stream().anyMatch(cl -> jobNode.getJobClasses().contains(cl));
+        result = result && !jobClasses.stream().anyMatch(cl -> jobNode.getUsedClassnames().containsKey(cl));
+    
+        return result;
     }
     
 }

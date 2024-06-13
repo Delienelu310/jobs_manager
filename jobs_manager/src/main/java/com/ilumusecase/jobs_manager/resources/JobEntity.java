@@ -19,20 +19,14 @@ public class JobEntity {
 
     private String groupId;
     private String ilumId;
-    private String extension;
+
     private String classPath;
+    @DBRef(lazy = true)
+    private JobsFile jobsFile;
 
     private String state;
 
-    private JobDetails jobDetails;
     private JobResult jobResult;
-
-    @DBRef
-    private JobNode jobNode;
-    @DBRef
-    private Project project;
-    @DBRef 
-    private AppUser author;
 
 
     @Override

@@ -9,6 +9,7 @@ import com.ilumusecase.jobs_manager.repositories.interfaces.ChannelsRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.IlumGroupRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.JobNodesRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.JobRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.JobsFileRepositoryInterface;
 import com.ilumusecase.jobs_manager.repositories.interfaces.PrivilegeListRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ProjectRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
@@ -37,6 +38,8 @@ public class MongoRepository implements RepositoryFactory{
     private JobMongoRepository jobMongoRepository;
     @Autowired
     private IlumGroupRepository ilumGroupRepository;
+    @Autowired
+    private JobsFileMongo jobsFileMongo;
 
     @Override
     public JobNodesRepository getJobNodesRepository() {
@@ -81,6 +84,11 @@ public class MongoRepository implements RepositoryFactory{
     @Override
     public IlumGroupRepository getIlumGroupRepository() {
         return this.ilumGroupRepository;
+    }
+
+    @Override
+    public JobsFileRepositoryInterface getJobsFileRepositoryInterface() {
+        return this.jobsFileMongo;
     }
 
   

@@ -1,9 +1,11 @@
 package com.ilumusecase.jobs_manager.resources;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -44,7 +46,7 @@ public class JobNode {
     private IlumGroup currentGroup;
 
     @DBRef(lazy = true)
-    private List<JobEntity> jobs = new LinkedList<>();
+    private List<JobsFile> jobsFiles = new LinkedList<>();
     
     @DBRef(lazy = true)
     private List<JobEntity> testingJobs = new LinkedList<>();
@@ -52,5 +54,8 @@ public class JobNode {
     @DBRef(lazy = true)
     private List<JobEntity> jobsQueue = new LinkedList<>();
 
-    
+
+    private Map<String, Integer> usedClassnames = new HashMap<>();
+    private Set<String> jobClasses = new HashSet<>();
+
 }

@@ -14,4 +14,5 @@ public interface RepositoryFactory {
     public PrivilegeListRepository<JobNodePrivilege> getJobNodePrivilegeList();
     public JobRepository getJobRepository();
     public IlumGroupRepository getIlumGroupRepository();
+    public JobsFileRepositoryInterface getJobsFileRepositoryInterface();
 } 

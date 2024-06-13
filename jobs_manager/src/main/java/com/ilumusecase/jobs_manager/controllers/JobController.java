@@ -1,6 +1,7 @@
 package com.ilumusecase.jobs_manager.controllers;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ import com.ilumusecase.jobs_manager.resources.IlumGroup;
 import com.ilumusecase.jobs_manager.resources.JobDetails;
 import com.ilumusecase.jobs_manager.resources.JobEntity;
 import com.ilumusecase.jobs_manager.resources.JobNode;
+import com.ilumusecase.jobs_manager.resources.JobsFile;
 import com.ilumusecase.jobs_manager.resources.Project;
 import com.ilumusecase.jobs_manager.s3clients.S3ClientFactory;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
@@ -82,24 +84,28 @@ public class JobController {
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @RequestParam("files") MultipartFile file,
         @RequestParam("name") String name,
-        @RequestParam("description") String description
-        
+        @RequestParam("description") String description,
+        @RequestParam("job_classes") String jobClasses
     ){
         
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         AppUser appUser = repositoryFactory.getUserDetailsManager().findByUsername(authentication.getName());
 
+        if(!project.getId().equals(jobNode.getId())) throw new RuntimeException();
 
+
+        List<String> jobClassesList = Stream.of(jobClasses.split(",")).toList();
+        
         // check if file has required class 
         String filename = file.getOriginalFilename();
         if(filename == null || filename.lastIndexOf(".") == -1) throw new RuntimeException();
         String extenstion = filename.substring(filename.lastIndexOf(".") + 1);
         
-        Optional<String> classPath = filesValidatorFactory
+        if(!filesValidatorFactory
             .getValidator(extenstion).orElseThrow(RuntimeException::new)
-            .validate(file, "Main_" + appUser.getUsername() + 
-                "_" + appUser.getAppUserDetails().getJobCreatedCounter());
+            .validate(file, jobNode, jobClassesList)
+        ) throw new RuntimeException();
 
         //save the job entiity
         
@@ -107,30 +113,40 @@ public class JobController {
         jobDetails.setName(name);
         jobDetails.setDescription(description);
 
-        JobEntity jobEntity = new JobEntity();
-        jobEntity.setClassPath(classPath.orElseThrow(RuntimeException::new));
-        jobEntity.setExtension(extenstion);
-        jobEntity.setJobDetails(jobDetails);
-        jobEntity.setProject(project);
-        jobEntity.setJobNode(jobNode);
-        jobEntity.setAuthor(appUser);
+        JobsFile jobsFile = new JobsFile();
+        jobsFile.setJobDetails(jobDetails);
+        jobsFile.setExtension(extenstion);
+        jobsFile.setAuthor(appUser);
+        jobsFile.setJobNode(jobNode);
+        jobsFile.setJobClassesPaths(jobClassesList);
+        jobsFile.setAllClasses(
+            filesValidatorFactory.getValidator(extenstion).orElseThrow(RuntimeException::new)
+            .retrieveFileClasses(file)
+        );
 
-        jobEntity = repositoryFactory.getJobRepository().updateJobFull(jobEntity);
+        jobsFile = repositoryFactory.getJobsFileRepositoryInterface().updateJobsFileFull(jobsFile);
 
-        //add job entity to queue 
-        jobNode.getJobs().add(jobEntity);
-        jobNode.getJobsQueue().add(jobEntity);
+        //add jobs file to job node
+        jobNode.getJobsFiles().add(jobsFile);
+        for(String className : jobsFile.getAllClasses()){
+            if(!jobNode.getUsedClassnames().containsKey(className)){
+                jobNode.getUsedClassnames().put(className, 1);
+            }else{
+                jobNode.getUsedClassnames().put(className, jobNode.getUsedClassnames().get(className) + 1);
+            }
+        }
+        for(String className : jobsFile.getJobClassesPaths()){
+            jobNode.getJobClasses().add(className);
+        }
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
 
         //send file to s3
-        s3ClientFactory.getJobS3Client().uploadJob(jobEntity, file);
+        s3ClientFactory.getJobS3Client().uploadJob(jobsFile, file);
 
-        appUser.getAppUserDetails().setJobCreatedCounter(appUser.getAppUserDetails().getJobCreatedCounter() + 1);
         repositoryFactory.getUserDetailsManager().saveAppUser(appUser);
 
-        return jsonMappersFactory.getJobEntityMapper().getFullJobEntity(jobEntity);
-        
-        
+        return jsonMappersFactory.getJobsFileJsonMapper().getFullJobsFile(jobsFile);
+   
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_queue/remove/{job_id}")
@@ -171,18 +187,28 @@ public class JobController {
         @PathVariable("job_id") String jobId
     ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
-        JobEntity jobEntity = repositoryFactory.getJobRepository().retrieveJobEntity(jobId);
+        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobId);
 
-        if(jobNode.getCurrentGroup() != null && jobNode.getCurrentGroup().getJobs().contains(jobEntity)){
+        if(jobNode.getCurrentGroup() != null){
             throw new RuntimeException();
         }
 
-        jobNode.getJobsQueue().removeIf(jb -> jb.equals(jobEntity));
-        jobNode.getJobs().removeIf(jb -> jb.equals(jobEntity));
+        jobNode.getJobsQueue().removeIf(jb -> jb.getJobsFile().equals(jobsFile));
+        jobNode.getJobsFiles().removeIf(jb -> jb.equals(jobsFile));
+        for(String className : jobsFile.getAllClasses()){
+            if(jobNode.getUsedClassnames().get(className).equals(1)){
+                jobNode.getUsedClassnames().remove(className);
+            }else{
+                jobNode.getUsedClassnames().put(className, jobNode.getUsedClassnames().get(className) + 1);
+            }
+        }
+        for(String className : jobsFile.getJobClassesPaths()){
+            jobNode.getJobClasses().remove(className);
+        }
 
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
 
-        s3ClientFactory.getJobS3Client().deleteJob(jobEntity);
+        s3ClientFactory.getJobS3Client().deleteJob(jobsFile);
 
         repositoryFactory.getJobRepository().deleteJob(jobId);
 
