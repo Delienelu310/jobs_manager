@@ -5,7 +5,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
-import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -49,17 +48,17 @@ public class KafkaChannelProcessor  implements ChannelProcessor{
     @Override
     public Dataset<Row> retrieveInputDataSet(ChannelDTO channelData, SparkSession session, Map<String, Object> config){
 
-        System.out.println("The chosen kafka channel: " + "internal-" + channelData.id);
+        System.out.println("The chosen kafka channel: " + "internal_" + channelData.id);
 
         Dataset<Row> dataset =  session.readStream()
             .format("kafka")
             .option("kafka.bootstrap.servers", "localhost:9092")
-            .option("subscribe", "internal-" + channelData.id)
+            .option("subscribe", "internal_" + channelData.id)
             .load();
 
         dataset.createOrReplaceTempView("Channel" + channelData.id);
 
-        dataset = session.sql("SELECT CAST(value AS STRING) FROM temp");
+        dataset = session.sql("SELECT CAST(value AS STRING) FROM Channel" + channelData.id);
 
         dataset = convertCSVToColumns(dataset, channelData.channelDetails.headers);
 
@@ -74,7 +73,8 @@ public class KafkaChannelProcessor  implements ChannelProcessor{
         StreamingQuery query = dataset.writeStream()
             .format("kafka")
             .option("kafka.bootstrap.servers", "localhost:9092")
-            .option("topic", "internal-" + channelDTO.id)
+            .option("topic", "internal_" + channelDTO.id)
+            .option("checkpointLocation", "/tmp/spark/checkpoints/" + channelDTO.id)
             .start();
 
         query.awaitTermination();
@@ -91,7 +91,7 @@ public class KafkaChannelProcessor  implements ChannelProcessor{
         Dataset<Row> dataset = session.read()
             .format("kafka")
             .option("kafka.bootstrap.servers", "localhost:9092")
-            .option("subscribe", "internal-" + channelData.id)
+            .option("subscribe", "internal_" + channelData.id)
             .option("startingOffsets", "earliest")
             .option("endingOffsets", "latest")
             .load();
@@ -103,7 +103,7 @@ public class KafkaChannelProcessor  implements ChannelProcessor{
 
         dataset.createOrReplaceTempView("Channel" + channelData.id);
 
-        dataset = session.sql("SELECT CAST(value AS STRING) FROM temp");
+        dataset = session.sql("SELECT CAST(value AS STRING) FROM Channel" + channelData.id);
 
         dataset = convertCSVToColumns(dataset, channelData.channelDetails.headers);
 

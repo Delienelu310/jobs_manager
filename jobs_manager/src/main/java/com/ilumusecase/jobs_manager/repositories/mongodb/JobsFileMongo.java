@@ -3,11 +3,13 @@ package com.ilumusecase.jobs_manager.repositories.mongodb;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.JobsFileRepositoryInterface;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.MongoJobsFile;
 import com.ilumusecase.jobs_manager.resources.JobsFile;
 
+@Repository
 public class JobsFileMongo implements JobsFileRepositoryInterface {
 
     @Autowired

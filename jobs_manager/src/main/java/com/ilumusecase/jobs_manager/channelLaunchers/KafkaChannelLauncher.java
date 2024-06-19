@@ -22,19 +22,19 @@ public class KafkaChannelLauncher implements ChannelLauncher{
 
         String name = "internal_" + channel.getId();
         
-        for(String label : channel.getProject().getInputChannels().keySet()){
-            if(channel.getProject().getInputChannels().get(label).getId().equals(channel.getId())){
-                name = "project_" + channel.getProject().getId() + "_input_" + label;
-                break;
-            }
-        }
+        // for(String label : channel.getProject().getInputChannels().keySet()){
+        //     if(channel.getProject().getInputChannels().get(label).getId().equals(channel.getId())){
+        //         name = "project_" + channel.getProject().getId() + "_input_" + label;
+        //         break;
+        //     }
+        // }
 
-        for(String label : channel.getProject().getOutputChannels().keySet()){
-            if(channel.getProject().getOutputChannels().get(label).getId().equals(channel.getId())){
-                name = "project_" + channel.getProject().getId() + "_input_" + label;
-                break;
-            }
-        }
+        // for(String label : channel.getProject().getOutputChannels().keySet()){
+        //     if(channel.getProject().getOutputChannels().get(label).getId().equals(channel.getId())){
+        //         name = "project_" + channel.getProject().getId() + "_input_" + label;
+        //         break;
+        //     }
+        // }
 
         NewTopic newTopic = new NewTopic(name, 3, a);
         kafkaAdmin.createOrModifyTopics(newTopic);

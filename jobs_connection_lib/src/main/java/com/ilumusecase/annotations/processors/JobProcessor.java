@@ -59,6 +59,7 @@ public class JobProcessor {
         try{
             this.jobNodeDTO = dataSupplierClient.retrieveJobNode(projectId, jobNodeId, token);
         }catch(Exception e){
+            e.printStackTrace();
             System.out.println("to handle exception");
             throw new RuntimeException();
         }
