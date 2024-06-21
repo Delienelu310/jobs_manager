@@ -28,6 +28,8 @@ public class Manager {
 
     @Autowired
     public S3ClientFactory s3ClientFactory;
+
+    
     
 
     private WebClient webClient = WebClient.create();

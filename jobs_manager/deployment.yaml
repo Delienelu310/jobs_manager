@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jobs-manager
+  labels:
+    app: jobs-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jobs-manager
+  template:
+    metadata:
+      labels:
+        app: jobs-manager
+    spec:
+      containers:
+        - name: jobs-manager-container
+          image: jobs_manager:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ILUM_CORE_URL
+              value: http://ilum-core:9888
+            - name: MINIO_ENDPOINT
+              value: http://ilum-minio:9000
+            - name: MINIO_USERNAME
+              value: minioadmin
+            - name: MINIO_PASSWORD
+              value: minioadmin
+            - name: MONGODB_HOST
+              value: ilum-mongodb-headless  
+            - name: MONGODB_DATABASE
+              value: jobs_manager_db
+            - name: MONGODB_PORT
+              value: '27017'
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: ilum-kafka:9092
+            - name: QUARTZ_MONGO_URI
+              value: mongodb://ilum-mongodb-headless:27017
+            - name: QUARTZ_MONGO_DATABASE
+              value: jobs_manager_db
+            
