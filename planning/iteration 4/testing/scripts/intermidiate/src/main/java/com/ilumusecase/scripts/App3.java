@@ -24,7 +24,7 @@ import org.apache.spark.sql.types.DataTypes;
 
 
 @JobNode
-public final class App1 implements Job {
+public final class App3 implements Job {
 
     @InputChannel(label="digit")
     public static Dataset<Row> input;
@@ -68,9 +68,9 @@ public final class App1 implements Job {
             public String call(String num) throws Exception {
                 int digit = Integer.parseInt(num);
 
-                if(digit >= 6){
+                if(digit >= 7){
                     return "high";
-                }else if(digit >= 3){
+                }else if(digit >= 5){
                     return "middle";
                 }else{
                     return "small";
@@ -82,12 +82,12 @@ public final class App1 implements Job {
         sparkSession.udf().register("evaluate", evaluator, DataTypes.StringType);
         
         try {
-            input.createTempView("MyDigits");
+            input.createTempView("MyDigits3");
         } catch (AnalysisException e) {
             e.printStackTrace();
         }
 
-        output = sparkSession.sql("SELECT number, evaluate(number) as somedata FROM MyDigits");
+        output = sparkSession.sql("SELECT number, evaluate(number) as somedata FROM MyDigits3");
 
         jobProcessor.finish();
 

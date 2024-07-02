@@ -30,7 +30,7 @@ spec:
             - name: MINIO_PASSWORD
               value: minioadmin
             - name: MONGODB_HOST
-              value: ilum-mongodb-headless  
+              value: my-new-mongodb-service
             - name: MONGODB_DATABASE
               value: jobs_manager_db
             - name: MONGODB_PORT

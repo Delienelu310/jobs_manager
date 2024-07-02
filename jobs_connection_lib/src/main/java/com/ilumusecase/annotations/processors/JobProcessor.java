@@ -8,6 +8,7 @@ import org.apache.spark.sql.SparkSession;
 
 import com.ilumusecase.annotations.processors.channel_processors.ChannelProcessor;
 import com.ilumusecase.annotations.processors.channel_processors.KafkaChannelProcessor;
+import com.ilumusecase.annotations.processors.channel_processors.MinioChannelProcessor;
 import com.ilumusecase.annotations.resources.InputChannel;
 import com.ilumusecase.annotations.resources.JobNode;
 import com.ilumusecase.annotations.resources.JobNodeMod;
@@ -24,11 +25,12 @@ import java.util.List;
 
 public class JobProcessor {
 
-    private DataSupplierClient dataSupplierClient = new DataSupplierClient();
+    private DataSupplierClient dataSupplierClient;
     
     private Map<String, ChannelProcessor> channelProcessors= new HashMap<>();
     {
         channelProcessors.put("kafka", new KafkaChannelProcessor());    
+        channelProcessors.put("minio", new MinioChannelProcessor());
     }
 
     private JobNodeDTO jobNodeDTO;
@@ -38,6 +40,10 @@ public class JobProcessor {
 
 
     public JobProcessor(Class<?> clazz, SparkSession session, Map<String, Object> config){
+
+        String prefix = (String)config.get("prefix");
+        this.dataSupplierClient = new DataSupplierClient(prefix);
+
         if(!clazz.isAnnotationPresent(JobNode.class)){
             throw new RuntimeException();
         }
@@ -59,9 +65,10 @@ public class JobProcessor {
         try{
             this.jobNodeDTO = dataSupplierClient.retrieveJobNode(projectId, jobNodeId, token);
         }catch(Exception e){
-            e.printStackTrace();
+            RuntimeException exception = new RuntimeException(e.getMessage());
+            exception.setStackTrace(e.getStackTrace());
             System.out.println("to handle exception");
-            throw new RuntimeException();
+            throw exception;
         }
     }
 

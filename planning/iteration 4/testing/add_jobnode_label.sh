@@ -2,4 +2,4 @@
 
 curl -X PUT \
     -H "Authorization: Basic $1" \
-    "localhost:5000/projects/$2/job_nodes/$3/add/input/$4"
+    "localhost:8080/projects/$2/job_nodes/$3/add/input/$4"

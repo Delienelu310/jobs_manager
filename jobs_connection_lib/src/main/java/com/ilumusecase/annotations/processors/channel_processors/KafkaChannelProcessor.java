@@ -48,11 +48,13 @@ public class KafkaChannelProcessor  implements ChannelProcessor{
     @Override
     public Dataset<Row> retrieveInputDataSet(ChannelDTO channelData, SparkSession session, Map<String, Object> config){
 
+        String bootstrapServer = (String)config.get("bootstrapServer");
+
         System.out.println("The chosen kafka channel: " + "internal_" + channelData.id);
 
         Dataset<Row> dataset =  session.readStream()
             .format("kafka")
-            .option("kafka.bootstrap.servers", "localhost:9092")
+            .option("kafka.bootstrap.servers", bootstrapServer)
             .option("subscribe", "internal_" + channelData.id)
             .load();
 
@@ -68,11 +70,14 @@ public class KafkaChannelProcessor  implements ChannelProcessor{
     @Override
     public void connectToOutputChannel(ChannelDTO channelDTO, Dataset<Row> dataset, SparkSession session, Map<String, Object> config) throws Exception{
         
+
+
+        String bootstrapServer = (String)config.get("bootstrapServer");
         dataset = collapseColumnsToCSV(dataset);
 
         StreamingQuery query = dataset.writeStream()
             .format("kafka")
-            .option("kafka.bootstrap.servers", "localhost:9092")
+            .option("kafka.bootstrap.servers", bootstrapServer)
             .option("topic", "internal_" + channelDTO.id)
             .option("checkpointLocation", "/tmp/spark/checkpoints/" + channelDTO.id)
             .start();
@@ -84,13 +89,15 @@ public class KafkaChannelProcessor  implements ChannelProcessor{
 
     @Override
     public Dataset<Row> retrieveOutputDatasetFull(ChannelDTO channelData, SparkSession session, Map<String, Object> config) {
+
+        String bootstrapServer = (String)config.get("bootstrapServer");
         String startTime = (String)config.get("startTime");
         String endTime = (String)config.get("endTime");
         String timeFormat = (String)config.get("timeFormat");
             
         Dataset<Row> dataset = session.read()
             .format("kafka")
-            .option("kafka.bootstrap.servers", "localhost:9092")
+            .option("kafka.bootstrap.servers", bootstrapServer)
             .option("subscribe", "internal_" + channelData.id)
             .option("startingOffsets", "earliest")
             .option("endingOffsets", "latest")

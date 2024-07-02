@@ -5,5 +5,5 @@
 curl -X POST \
     -H "Authorization: Basic $1" \
     -H "Content-Type: application/json" \
-    -d '{"name":"somename"}' \
-    "localhost:8080/projects/$2/job_nodes"
+    -d '{"name":"somename", "description": "somedescription"}' \
+    "localhost:8080/projects"

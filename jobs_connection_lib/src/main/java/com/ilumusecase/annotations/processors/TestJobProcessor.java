@@ -12,6 +12,7 @@ import org.apache.spark.sql.SparkSession;
 
 import com.ilumusecase.annotations.processors.channel_processors.ChannelProcessor;
 import com.ilumusecase.annotations.processors.channel_processors.KafkaChannelProcessor;
+import com.ilumusecase.annotations.processors.channel_processors.MinioChannelProcessor;
 import com.ilumusecase.annotations.resources.JobNodeMod;
 import com.ilumusecase.annotations.resources.OutputChannelTestDataset;
 import com.ilumusecase.annotations.resources.TestJob;
@@ -20,11 +21,12 @@ import com.ilumusecase.resources.ChannelDTO;
 import com.ilumusecase.resources.JobNodeDTO;
 
 public class TestJobProcessor {
-    private DataSupplierClient dataSupplierClient = new DataSupplierClient();
+    private DataSupplierClient dataSupplierClient;
     
     private Map<String, ChannelProcessor> channelProcessors= new HashMap<>();
     {
-        channelProcessors.put("kafka", new KafkaChannelProcessor());    
+        channelProcessors.put("kafka", new KafkaChannelProcessor());  
+        channelProcessors.put("minio", new MinioChannelProcessor());  
     }
 
     private JobNodeDTO jobNodeDTO;
@@ -34,6 +36,10 @@ public class TestJobProcessor {
 
 
     public TestJobProcessor(Class<?> clazz, SparkSession session, Map<String, Object> config){
+
+        String prefix = (String)config.get("prefix");
+        this.dataSupplierClient = new DataSupplierClient(prefix);
+
         if(!clazz.isAnnotationPresent(TestJob.class)){
             throw new RuntimeException();
         }

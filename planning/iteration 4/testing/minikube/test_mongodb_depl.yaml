@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-new-mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-new-mongodb
+  template:
+    metadata:
+      labels:
+        app: my-new-mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:latest
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: mongo-ephemeral-storage
+          mountPath: /data/db
+      volumes:
+      - name: mongo-ephemeral-storage
+        emptyDir: {}

@@ -6,8 +6,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ilumusecase.resources.ChannelDTO;
 import com.ilumusecase.resources.JobNodeDTO;
@@ -15,7 +13,11 @@ import com.ilumusecase.resources.ProjectDTO;
 
 public class DataSupplierClient {
 
-    private final String prefix = "http://localhost:5000";
+    private final String prefix;
+
+    public DataSupplierClient(String prefix){
+        this.prefix = prefix;
+    }
 
     public String retrieveJsonString(String path, String token){
         try{
@@ -52,7 +54,9 @@ public class DataSupplierClient {
 
             
         } catch (IOException e) {
-            throw new InvalidPathException();
+            InvalidPathException invalidPathException = new InvalidPathException(e.getMessage());
+            invalidPathException.setStackTrace(e.getStackTrace());
+            throw invalidPathException;
         }
     }
 
