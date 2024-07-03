@@ -15,12 +15,13 @@ public class S3Configuration {
     private String username;
     @Value("${minio.password}")
     private String password;
-    
+
     @Bean
     public MinioClient minioClient(){
         return MinioClient.builder()
             .endpoint(endpoint)
             .credentials(username, password)
+            
             .build();
     }
 }

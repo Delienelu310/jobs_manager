@@ -6,6 +6,7 @@ import java.util.Optional;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,13 +24,16 @@ public class JobS3Client {
     @Autowired
     private MinioClient minioClient;
 
+    @Value("${minio.bucket}")
+    private String bucket;
+
     public void uploadJob(JobsFile jobsFile, MultipartFile multipartFile){
         try{
             InputStream inputStream = new ByteArrayInputStream(multipartFile.getBytes());
     
             minioClient.putObject(PutObjectArgs.builder()
-                .bucket("jobsmanager")
-                .object("projects/" + jobsFile.getJobNode().getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/"  +
+                .bucket(bucket)
+                .object("jars/projects/" + jobsFile.getJobNode().getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/"  +
                     jobsFile.getId() + "." + jobsFile.getExtension())
                 .stream(inputStream, inputStream.available(), -1)
                 .build());
@@ -44,8 +48,8 @@ public class JobS3Client {
         try{
             GetObjectResponse getObjectResponse = minioClient.getObject(
                 GetObjectArgs.builder()
-                    .bucket("jobsmanager")
-                    .object("projects/" + jobsFile.getJobNode().getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/" + 
+                    .bucket(bucket)
+                    .object("jars/projects/" + jobsFile.getJobNode().getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/" + 
                        jobsFile.getId() + "." + jobsFile.getExtension())
                     .build()
             );
@@ -60,8 +64,8 @@ public class JobS3Client {
         try{
             minioClient.removeObject(
                 RemoveObjectArgs.builder()
-                    .bucket("jobsmanager")
-                    .object("projects/" + jobsFile.getJobNode().getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/" + 
+                    .bucket(bucket)
+                    .object("jars/projects/" + jobsFile.getJobNode().getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/" + 
                        jobsFile.getId() + "." + jobsFile.getExtension())
                     .build()
             );

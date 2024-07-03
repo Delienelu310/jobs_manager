@@ -1,12 +1,15 @@
 package com.ilumusecase.jobs_manager.manager;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -26,13 +29,27 @@ public class Manager {
 
     Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
 
+    @Value("ilum.core.endpoint")
+    private String endpoint;
+    @Value("ilum.core.version-path")
+    private String versionPath;
+
     @Autowired
     public S3ClientFactory s3ClientFactory;
 
-    
+    @Autowired
+    private ResourceLoader resourceLoader;
     
 
     private WebClient webClient = WebClient.create();
+
+    private byte[] loadJobConnectionLib(){
+        try {
+            return resourceLoader.getResource("classpath:jobs_connection_lib.jar").getContentAsByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException("The jobs_connection_lib.jar was not found");
+        }
+    }
 
     public String createGroup(IlumGroup ilumGroup){
 
@@ -53,12 +70,20 @@ public class Manager {
             };
             bodyMap.add(extensionMap.get(jobEntity.getJobsFile().getExtension()), byteArrayResource);
         }
+        //add jobs_connection_lib 
+        bodyMap.add("jars", new ByteArrayResource(loadJobConnectionLib()){
+            @Override
+                public String getFilename() {
+                    return "jobs_connection_lib.jar";
+                }
+        });
+
         bodyMap.add("scale", "1");
         bodyMap.add("name", ilumGroup.getJobNode().getId());
         bodyMap.add("clusterName", "default");
 
 
-        String url = "http://localhost:9888/api/v1/group";
+        String url = endpoint + versionPath + "group";
         return webClient.post()
             .uri(url)
             .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -83,7 +108,7 @@ public class Manager {
     }
 
     public String submitJob(JobEntity jobEntity, Map<String, String> config){
-        String url = "http://localhost:9888/api/v1/group/" + jobEntity.getJobsFile().getJobNode().getCurrentGroup().getIlumId() + "/job/submit";
+        String url = endpoint + versionPath + "group/" + jobEntity.getJobsFile().getJobNode().getCurrentGroup().getIlumId() + "/job/submit";
 
         String jsonData = "{" + 
             "\"type\": \"interactive_job_execute\"," + 
@@ -101,7 +126,7 @@ public class Manager {
     }
 
     public JsonNode getJobInfo(JobEntity jobEntity){
-        String url = "http://localhost:9888/api/v1/job/" + jobEntity.getIlumId();
+        String url = endpoint + versionPath + "job/" + jobEntity.getIlumId();
 
         JsonNode jsonNode = webClient.get()
             .uri(url)
@@ -113,7 +138,7 @@ public class Manager {
 
     public void stopJob(JobEntity jobEntity){
 
-        String url = "http://localhost:9888/api/v1/job/" + jobEntity.getIlumId() + "/stop";
+        String url = endpoint + versionPath + "job/" + jobEntity.getIlumId() + "/stop";
         webClient.post()
             .uri(url)
             .retrieve()
