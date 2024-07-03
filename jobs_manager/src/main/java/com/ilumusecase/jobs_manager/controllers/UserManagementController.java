@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
-import com.ilumusecase.jobs_manager.resources.AppUser;
+import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
 import com.ilumusecase.jobs_manager.security.Roles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthAdminRoleOnly;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.DisableDefaultAuth;

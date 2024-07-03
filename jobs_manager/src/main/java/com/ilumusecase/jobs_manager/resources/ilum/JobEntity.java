@@ -1,4 +1,4 @@
-package com.ilumusecase.jobs_manager.resources;
+package com.ilumusecase.jobs_manager.resources.ilum;
 
 import java.util.Objects;
 
@@ -20,9 +20,10 @@ public class JobEntity {
     private String groupId;
     private String ilumId;
 
-    private String classPath;
     @DBRef(lazy = true)
-    private JobsFile jobsFile;
+    private JobScript jobScript;
+    private String configuration;
+    private JobEntityDetails jobEntityDetails;
 
     private String state;
 

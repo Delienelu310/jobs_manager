@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.security.provisioning.UserDetailsManager;
 
-import com.ilumusecase.jobs_manager.resources.AppUser;
+import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
 
 public interface AppUserRepository extends UserDetailsManager{
     

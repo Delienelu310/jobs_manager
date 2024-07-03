@@ -6,11 +6,11 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.ilumusecase.jobs_manager.resources.abstraction.Channel;
+import com.ilumusecase.jobs_manager.resources.ilum.JobScript;
 
 @Repository
-public interface MongoChannel extends MongoRepository<Channel, String> {
-    @Query("{'project.id': ?0}")
-    List<Channel> findByProjectId(String projectId);
+public interface MongoJobScripts extends MongoRepository<JobScript, String> {
     
+    @Query("{ 'jobsFiles.id': ?0 }")
+    public List<JobScript> retrieveByJobsFileId(String jobsFileId);
 }

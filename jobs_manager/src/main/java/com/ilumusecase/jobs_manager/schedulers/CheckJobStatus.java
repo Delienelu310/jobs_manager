@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
-import com.ilumusecase.jobs_manager.resources.IlumGroup;
+import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
 
 @Component
 public class CheckJobStatus implements Job{

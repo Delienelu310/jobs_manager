@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
-import com.ilumusecase.jobs_manager.resources.AppUser;
+import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
 
 @Repository
 public interface MongoAppUser extends MongoRepository<AppUser, String>{

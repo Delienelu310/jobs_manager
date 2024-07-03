@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
-import com.ilumusecase.jobs_manager.resources.JobEntity;
+import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
 
 @Component
 public class StopJobEntity implements Job{

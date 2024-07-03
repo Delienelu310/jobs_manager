@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
-import com.ilumusecase.jobs_manager.resources.AppUser;
-import com.ilumusecase.jobs_manager.resources.JobNode;
-import com.ilumusecase.jobs_manager.resources.JobNodePrivilege;
-import com.ilumusecase.jobs_manager.resources.Project;
-import com.ilumusecase.jobs_manager.resources.ProjectPrivilege;
+import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
+import com.ilumusecase.jobs_manager.resources.abstraction.Project;
+import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
+import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
+import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
 
 @RestController

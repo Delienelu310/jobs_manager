@@ -9,13 +9,14 @@ import com.ilumusecase.jobs_manager.repositories.interfaces.ChannelsRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.IlumGroupRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.JobNodesRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.JobRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.JobScriptRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.JobsFileRepositoryInterface;
 import com.ilumusecase.jobs_manager.repositories.interfaces.PrivilegeListRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ProjectRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.MongoAppUser;
-import com.ilumusecase.jobs_manager.resources.JobNodePrivilege;
-import com.ilumusecase.jobs_manager.resources.ProjectPrivilege;
+import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
+import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 
 @Repository
 public class MongoRepository implements RepositoryFactory{
@@ -40,6 +41,8 @@ public class MongoRepository implements RepositoryFactory{
     private IlumGroupRepository ilumGroupRepository;
     @Autowired
     private JobsFileMongo jobsFileMongo;
+    @Autowired
+    private JobScriptsMongoRepository jobScriptsMongoRepository;
 
     @Override
     public JobNodesRepository getJobNodesRepository() {
@@ -89,6 +92,11 @@ public class MongoRepository implements RepositoryFactory{
     @Override
     public JobsFileRepositoryInterface getJobsFileRepositoryInterface() {
         return this.jobsFileMongo;
+    }
+
+    @Override
+    public JobScriptRepository getJobScriptRepository() {
+        return jobScriptsMongoRepository;
     }
 
   

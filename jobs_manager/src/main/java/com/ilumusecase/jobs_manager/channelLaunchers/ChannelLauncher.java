@@ -1,6 +1,6 @@
 package com.ilumusecase.jobs_manager.channelLaunchers;
 
-import com.ilumusecase.jobs_manager.resources.Channel;
+import com.ilumusecase.jobs_manager.resources.abstraction.Channel;
 
 public interface ChannelLauncher {
     public void launchChannel(Channel channel);

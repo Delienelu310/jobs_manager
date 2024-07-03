@@ -1,4 +1,4 @@
-package com.ilumusecase.jobs_manager.resources;
+package com.ilumusecase.jobs_manager.resources.abstraction;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

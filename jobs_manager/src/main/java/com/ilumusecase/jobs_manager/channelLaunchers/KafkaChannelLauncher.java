@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.stereotype.Component;
 
-import com.ilumusecase.jobs_manager.resources.Channel;
+import com.ilumusecase.jobs_manager.resources.abstraction.Channel;
 
 @Component("kafka")
 public class KafkaChannelLauncher implements ChannelLauncher{

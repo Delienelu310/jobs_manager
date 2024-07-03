@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.ilumusecase.jobs_manager.resources.AppUser;
+import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
 
 @Component
 public class AppUserJsonMapper {

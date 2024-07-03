@@ -1,13 +1,18 @@
-package com.ilumusecase.jobs_manager.resources;
+package com.ilumusecase.jobs_manager.resources.ilum;
 
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
+import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Document
 @Data
 @NoArgsConstructor
 public class JobResult {
@@ -22,6 +27,16 @@ public class JobResult {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
+
     @DBRef(lazy = true)
-    private JobEntity testJobCreator;
+    private JobEntity tester;
+    @DBRef(lazy = true)
+    private JobEntity target;
+
+    @DBRef(lazy = true)
+    private Project project;
+    @DBRef(lazy = true)
+    private JobNode jobNode;
+
+    
 }

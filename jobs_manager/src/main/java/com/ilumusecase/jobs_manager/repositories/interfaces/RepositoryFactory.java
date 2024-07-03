@@ -1,7 +1,7 @@
 package com.ilumusecase.jobs_manager.repositories.interfaces;
 
-import com.ilumusecase.jobs_manager.resources.JobNodePrivilege;
-import com.ilumusecase.jobs_manager.resources.ProjectPrivilege;
+import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
+import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 
 public interface RepositoryFactory {
 
@@ -15,4 +15,5 @@ public interface RepositoryFactory {
     public JobRepository getJobRepository();
     public IlumGroupRepository getIlumGroupRepository();
     public JobsFileRepositoryInterface getJobsFileRepositoryInterface();
+    public JobScriptRepository getJobScriptRepository();
 } 

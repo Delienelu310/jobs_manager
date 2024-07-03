@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Component;
 
-import com.ilumusecase.jobs_manager.resources.JobsFile;
+import com.ilumusecase.jobs_manager.resources.ilum.JobsFile;
 
 @Component
 public class JobsFileJsonMapper {

@@ -11,10 +11,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
-import com.ilumusecase.jobs_manager.resources.AppUser;
-import com.ilumusecase.jobs_manager.resources.JobNode;
-import com.ilumusecase.jobs_manager.resources.JobNodePrivilege;
-import com.ilumusecase.jobs_manager.resources.Project;
+import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
+import com.ilumusecase.jobs_manager.resources.abstraction.Project;
+import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
+import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeJobRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;

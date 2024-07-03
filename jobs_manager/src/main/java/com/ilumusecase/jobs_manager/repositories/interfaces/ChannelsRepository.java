@@ -2,9 +2,9 @@ package com.ilumusecase.jobs_manager.repositories.interfaces;
 
 import java.util.List;
 
-import com.ilumusecase.jobs_manager.resources.Channel;
-import com.ilumusecase.jobs_manager.resources.ChannelDetails;
-import com.ilumusecase.jobs_manager.resources.Project;
+import com.ilumusecase.jobs_manager.resources.abstraction.Channel;
+import com.ilumusecase.jobs_manager.resources.abstraction.ChannelDetails;
+import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 
 public interface ChannelsRepository {
 

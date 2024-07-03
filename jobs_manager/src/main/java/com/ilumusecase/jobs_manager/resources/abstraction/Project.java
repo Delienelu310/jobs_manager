@@ -1,4 +1,4 @@
-package com.ilumusecase.jobs_manager.resources;
+package com.ilumusecase.jobs_manager.resources.abstraction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +11,8 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.ilumusecase.jobs_manager.resources.authorities.PrivilegeList;
+import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -3,7 +3,7 @@ package com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import com.ilumusecase.jobs_manager.resources.ProjectPrivilege;
+import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.ElementType;

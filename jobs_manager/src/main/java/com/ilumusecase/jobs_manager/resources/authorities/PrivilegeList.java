@@ -1,4 +1,4 @@
-package com.ilumusecase.jobs_manager.resources;
+package com.ilumusecase.jobs_manager.resources.authorities;
 
 import java.util.LinkedList;
 import java.util.List;

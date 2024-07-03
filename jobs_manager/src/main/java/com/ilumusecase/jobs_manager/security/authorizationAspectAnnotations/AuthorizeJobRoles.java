@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.ilumusecase.jobs_manager.resources.JobNodePrivilege;
+import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
 
 //requires 2 arguments in target method: projectId and jobNodeId
 @Retention(RetentionPolicy.RUNTIME)

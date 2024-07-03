@@ -7,8 +7,8 @@ import org.springframework.stereotype.Repository;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.ProjectRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.MongoProject;
-import com.ilumusecase.jobs_manager.resources.Project;
-import com.ilumusecase.jobs_manager.resources.ProjectDetails;
+import com.ilumusecase.jobs_manager.resources.abstraction.Project;
+import com.ilumusecase.jobs_manager.resources.abstraction.ProjectDetails;
 
 @Repository
 public class ProjectMongoRepository implements ProjectRepository {

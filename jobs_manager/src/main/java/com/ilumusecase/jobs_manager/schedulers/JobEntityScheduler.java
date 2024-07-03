@@ -12,8 +12,8 @@ import org.quartz.TriggerBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ilumusecase.jobs_manager.resources.IlumGroup;
-import com.ilumusecase.jobs_manager.resources.JobEntity;
+import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
+import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
 
 @Service
 public class JobEntityScheduler {

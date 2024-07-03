@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
-import com.ilumusecase.jobs_manager.resources.JobsFile;
+import com.ilumusecase.jobs_manager.resources.ilum.JobsFile;
 
 public interface MongoJobsFile extends MongoRepository<JobsFile, String> {
 

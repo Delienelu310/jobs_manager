@@ -1,4 +1,4 @@
-package com.ilumusecase.jobs_manager.resources;
+package com.ilumusecase.jobs_manager.resources.abstraction;
 
 import java.util.ArrayList;
 import java.util.List;

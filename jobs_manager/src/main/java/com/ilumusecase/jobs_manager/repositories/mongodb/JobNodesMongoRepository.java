@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.JobNodesRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.MongoJobNode;
-import com.ilumusecase.jobs_manager.resources.JobNode;
-import com.ilumusecase.jobs_manager.resources.JobNodeDetails;
-import com.ilumusecase.jobs_manager.resources.Project;
+import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
+import com.ilumusecase.jobs_manager.resources.abstraction.JobNodeDetails;
+import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 
 @Repository
 public class JobNodesMongoRepository implements JobNodesRepository{

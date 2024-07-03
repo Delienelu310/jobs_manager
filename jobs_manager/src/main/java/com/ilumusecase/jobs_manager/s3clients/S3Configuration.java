@@ -21,7 +21,6 @@ public class S3Configuration {
         return MinioClient.builder()
             .endpoint(endpoint)
             .credentials(username, password)
-            
             .build();
     }
 }

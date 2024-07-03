@@ -19,8 +19,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.ilumusecase.jobs_manager.JobsManagerApplication;
-import com.ilumusecase.jobs_manager.resources.IlumGroup;
-import com.ilumusecase.jobs_manager.resources.JobEntity;
+import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
+import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
 import com.ilumusecase.jobs_manager.s3clients.S3ClientFactory;
 
 @Service

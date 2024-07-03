@@ -1,7 +1,5 @@
 package com.ilumusecase.jobs_manager.controllers;
 
-import java.util.List;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +21,13 @@ import com.ilumusecase.jobs_manager.files_validators.FilesValidatorFactory;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
 import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
-import com.ilumusecase.jobs_manager.resources.AppUser;
-import com.ilumusecase.jobs_manager.resources.IlumGroup;
-import com.ilumusecase.jobs_manager.resources.JobDetails;
-import com.ilumusecase.jobs_manager.resources.JobEntity;
-import com.ilumusecase.jobs_manager.resources.JobNode;
-import com.ilumusecase.jobs_manager.resources.JobsFile;
-import com.ilumusecase.jobs_manager.resources.Project;
+import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
+import com.ilumusecase.jobs_manager.resources.abstraction.Project;
+import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
+import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
+import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
+import com.ilumusecase.jobs_manager.resources.ilum.JobsFile;
+import com.ilumusecase.jobs_manager.resources.ilum.JobsFileDetails;
 import com.ilumusecase.jobs_manager.s3clients.S3ClientFactory;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
@@ -47,6 +45,108 @@ public class JobController {
     private S3ClientFactory s3ClientFactory;
     @Autowired
     private Manager manager;
+
+    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_files/{jobs_file_id}")
+    public MappingJacksonValue retrieveJobsFileById(
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
+        @PathVariable("jobs_file_id") String jobsFileId
+    ){
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId);
+
+
+        return jsonMappersFactory.getJobsFileJsonMapper().getFullJobsFile(
+            jobsFile
+        );
+    }
+
+    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_files")
+    public MappingJacksonValue retrieveJobsFilesByJobNodeId(
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId
+    ){
+
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+
+        // if(!project.getId().equals(jobNode.getProject().getId())) throw new RuntimeException();
+
+        return jsonMappersFactory.getJobsFileJsonMapper().getFullJobsFilesList(
+            repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFilesByJobNodeId(jobNodeId)
+        );
+    }
+
+    @PostMapping(value = "/projects/{project_id}/job_nodes/{job_node_id}/jobs_files", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public MappingJacksonValue uploadJobsFile(
+        Authentication authentication,
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
+        @RequestParam("files") MultipartFile file,
+        @RequestParam("extension") String extension,
+        @RequestParam("jobs_details") JobsFileDetails jobsFileDetails
+    ){
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        AppUser appUser = repositoryFactory.getUserDetailsManager().findByUsername(authentication.getName());
+
+        // if(!project.getId().equals(jobNode.getId())) throw new RuntimeException();
+
+
+        //set the fields of jobs_file objects
+        JobsFile jobsFile = new JobsFile();
+        jobsFile.setJobDetails(jobsFileDetails);
+        jobsFile.setExtension(extension);
+        jobsFile.setAllClasses(
+            filesValidatorFactory.getValidator(jobsFile.getExtension())
+                .orElseThrow(RuntimeException::new)
+                .retrieveFileClasses(file)
+        );
+        jobsFile.setPublisher(appUser);
+        jobsFile.setProject(project);
+        jobsFile.setJobNode(jobNode);
+        
+        //send file to s3
+        s3ClientFactory.getJobS3Client().uploadJob(jobsFile, file);
+
+        //save jobsfile to db
+        repositoryFactory.getJobsFileRepositoryInterface().updateJobsFileFull(jobsFile);
+
+
+        //add jobs file to job node
+        jobNode.getJobsFiles().add(jobsFile);
+        repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+
+        return jsonMappersFactory.getJobsFileJsonMapper().getFullJobsFile(jobsFile);
+
+    }
+
+    @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_files/{jobs_file_id}")
+    public void deleteJobsFile(
+        Authentication authentication,
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
+        @PathVariable("jobs_file_id") String jobsFileId
+    ){
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId);
+
+
+        if( ! repositoryFactory.getJobScriptRepository().retrieveJobScriptsByJobsFileId(jobsFileId).isEmpty()){
+            throw new RuntimeException("The job scripts are now using this jar");
+        }
+    
+        jobNode.getJobsFiles().removeIf(jb -> jb.equals(jobsFile));
+     
+        repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+        repositoryFactory.getJobRepository().deleteJob(jobsFileId);
+        s3ClientFactory.getJobS3Client().deleteJob(jobsFile);
+
+    }
+
+
+
 
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs/{job_id}")
@@ -77,77 +177,6 @@ public class JobController {
 
     Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
 
-    @PostMapping(value = "/projects/{project_id}/job_nodes/{job_node_id}/jobs", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public MappingJacksonValue uploadJob(
-        Authentication authentication,
-        @ProjectId @PathVariable("project_id") String projectId,
-        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @RequestParam("files") MultipartFile file,
-        @RequestParam("name") String name,
-        @RequestParam("description") String description,
-        @RequestParam("job_classes") String jobClasses
-    ){
-        
-        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
-        AppUser appUser = repositoryFactory.getUserDetailsManager().findByUsername(authentication.getName());
-
-        if(!project.getId().equals(jobNode.getId())) throw new RuntimeException();
-
-
-        List<String> jobClassesList = Stream.of(jobClasses.split(",")).toList();
-        
-        // check if file has required class 
-        String filename = file.getOriginalFilename();
-        if(filename == null || filename.lastIndexOf(".") == -1) throw new RuntimeException();
-        String extenstion = filename.substring(filename.lastIndexOf(".") + 1);
-        
-        if(!filesValidatorFactory
-            .getValidator(extenstion).orElseThrow(RuntimeException::new)
-            .validate(file, jobNode, jobClassesList)
-        ) throw new RuntimeException();
-
-        //save the job entiity
-        
-        JobDetails jobDetails = new JobDetails();
-        jobDetails.setName(name);
-        jobDetails.setDescription(description);
-
-        JobsFile jobsFile = new JobsFile();
-        jobsFile.setJobDetails(jobDetails);
-        jobsFile.setExtension(extenstion);
-        jobsFile.setAuthor(appUser);
-        jobsFile.setJobNode(jobNode);
-        jobsFile.setJobClassesPaths(jobClassesList);
-        jobsFile.setAllClasses(
-            filesValidatorFactory.getValidator(extenstion).orElseThrow(RuntimeException::new)
-            .retrieveFileClasses(file)
-        );
-
-        jobsFile = repositoryFactory.getJobsFileRepositoryInterface().updateJobsFileFull(jobsFile);
-
-        //add jobs file to job node
-        jobNode.getJobsFiles().add(jobsFile);
-        for(String className : jobsFile.getAllClasses()){
-            if(!jobNode.getUsedClassnames().containsKey(className)){
-                jobNode.getUsedClassnames().put(className, 1);
-            }else{
-                jobNode.getUsedClassnames().put(className, jobNode.getUsedClassnames().get(className) + 1);
-            }
-        }
-        for(String className : jobsFile.getJobClassesPaths()){
-            jobNode.getJobClasses().add(className);
-        }
-        repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
-
-        //send file to s3
-        s3ClientFactory.getJobS3Client().uploadJob(jobsFile, file);
-
-        repositoryFactory.getUserDetailsManager().saveAppUser(appUser);
-
-        return jsonMappersFactory.getJobsFileJsonMapper().getFullJobsFile(jobsFile);
-   
-    }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_queue/remove/{job_id}")
     public void removeJobFromQueue(
@@ -180,42 +209,5 @@ public class JobController {
 
     }
 
-    @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs/{job_id}")
-    public void deleteJob(
-        @ProjectId @PathVariable("project_id") String projectId,
-        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("job_id") String jobId
-    ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
-        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobId);
 
-        if(jobNode.getCurrentGroup() != null){
-            throw new RuntimeException();
-        }
-
-        jobNode.getJobsQueue().removeIf(jb -> jb.getJobsFile().equals(jobsFile));
-        jobNode.getJobsFiles().removeIf(jb -> jb.equals(jobsFile));
-        for(String className : jobsFile.getAllClasses()){
-            if(jobNode.getUsedClassnames().get(className).equals(1)){
-                jobNode.getUsedClassnames().remove(className);
-            }else{
-                jobNode.getUsedClassnames().put(className, jobNode.getUsedClassnames().get(className) + 1);
-            }
-        }
-        for(String className : jobsFile.getJobClassesPaths()){
-            jobNode.getJobClasses().remove(className);
-        }
-
-        repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
-
-        s3ClientFactory.getJobS3Client().deleteJob(jobsFile);
-
-        repositoryFactory.getJobRepository().deleteJob(jobId);
-
-        
-    }
-
-
-
-    
 }

@@ -1,7 +1,7 @@
 package com.ilumusecase.jobs_manager.repositories.interfaces;
 
 
-import com.ilumusecase.jobs_manager.resources.JobEntity;
+import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
 
 public interface JobRepository {
     

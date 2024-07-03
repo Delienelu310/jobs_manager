@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.ilumusecase.jobs_manager.resources.JobsFile;
+import com.ilumusecase.jobs_manager.resources.ilum.JobsFile;
 
 import io.minio.GetObjectArgs;
 import io.minio.GetObjectResponse;
@@ -33,7 +33,7 @@ public class JobS3Client {
     
             minioClient.putObject(PutObjectArgs.builder()
                 .bucket(bucket)
-                .object("jars/projects/" + jobsFile.getJobNode().getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/"  +
+                .object("jars/projects/" + jobsFile.getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/"  +
                     jobsFile.getId() + "." + jobsFile.getExtension())
                 .stream(inputStream, inputStream.available(), -1)
                 .build());
@@ -49,7 +49,7 @@ public class JobS3Client {
             GetObjectResponse getObjectResponse = minioClient.getObject(
                 GetObjectArgs.builder()
                     .bucket(bucket)
-                    .object("jars/projects/" + jobsFile.getJobNode().getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/" + 
+                    .object("jars/projects/" + jobsFile.getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/" + 
                        jobsFile.getId() + "." + jobsFile.getExtension())
                     .build()
             );
@@ -65,7 +65,7 @@ public class JobS3Client {
             minioClient.removeObject(
                 RemoveObjectArgs.builder()
                     .bucket(bucket)
-                    .object("jars/projects/" + jobsFile.getJobNode().getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/" + 
+                    .object("jars/projects/" + jobsFile.getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/" + 
                        jobsFile.getId() + "." + jobsFile.getExtension())
                     .build()
             );

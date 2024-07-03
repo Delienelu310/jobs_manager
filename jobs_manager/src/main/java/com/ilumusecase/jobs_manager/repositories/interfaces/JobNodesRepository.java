@@ -2,9 +2,9 @@ package com.ilumusecase.jobs_manager.repositories.interfaces;
 
 import java.util.List;
 
-import com.ilumusecase.jobs_manager.resources.JobNode;
-import com.ilumusecase.jobs_manager.resources.JobNodeDetails;
-import com.ilumusecase.jobs_manager.resources.Project;
+import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
+import com.ilumusecase.jobs_manager.resources.abstraction.JobNodeDetails;
+import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 
 public interface JobNodesRepository{
     

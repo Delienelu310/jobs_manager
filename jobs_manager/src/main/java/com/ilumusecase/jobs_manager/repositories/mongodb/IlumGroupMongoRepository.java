@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.IlumGroupRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.MongoIlumGroup;
-import com.ilumusecase.jobs_manager.resources.IlumGroup;
+import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
 
 @Repository
 public class IlumGroupMongoRepository implements IlumGroupRepository{

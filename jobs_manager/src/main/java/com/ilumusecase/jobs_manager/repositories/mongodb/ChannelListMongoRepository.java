@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.ChannelListRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.MongoChannelList;
-import com.ilumusecase.jobs_manager.resources.ChannelList;
+import com.ilumusecase.jobs_manager.resources.abstraction.ChannelList;
 
 @Repository
 public class ChannelListMongoRepository implements ChannelListRepository{

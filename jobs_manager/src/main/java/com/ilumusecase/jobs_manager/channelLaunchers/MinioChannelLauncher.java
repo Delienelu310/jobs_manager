@@ -2,7 +2,7 @@ package com.ilumusecase.jobs_manager.channelLaunchers;
 
 import org.springframework.stereotype.Component;
 
-import com.ilumusecase.jobs_manager.resources.Channel;
+import com.ilumusecase.jobs_manager.resources.abstraction.Channel;
 
 @Component("minio")
 public class MinioChannelLauncher implements ChannelLauncher{

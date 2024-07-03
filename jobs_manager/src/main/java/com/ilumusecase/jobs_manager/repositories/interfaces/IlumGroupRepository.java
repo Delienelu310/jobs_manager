@@ -1,6 +1,6 @@
 package com.ilumusecase.jobs_manager.repositories.interfaces;
 
-import com.ilumusecase.jobs_manager.resources.IlumGroup;
+import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
 
 public interface IlumGroupRepository {
     

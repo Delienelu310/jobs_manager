@@ -2,8 +2,8 @@ package com.ilumusecase.jobs_manager.repositories.interfaces;
 
 import java.util.List;
 
-import com.ilumusecase.jobs_manager.resources.Project;
-import com.ilumusecase.jobs_manager.resources.ProjectDetails;
+import com.ilumusecase.jobs_manager.resources.abstraction.Project;
+import com.ilumusecase.jobs_manager.resources.abstraction.ProjectDetails;
 
 public interface ProjectRepository {
 

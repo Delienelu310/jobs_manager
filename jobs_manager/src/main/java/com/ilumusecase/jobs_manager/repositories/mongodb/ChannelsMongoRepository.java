@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.ChannelsRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.MongoChannel;
-import com.ilumusecase.jobs_manager.resources.Channel;
-import com.ilumusecase.jobs_manager.resources.ChannelDetails;
-import com.ilumusecase.jobs_manager.resources.Project;
+import com.ilumusecase.jobs_manager.resources.abstraction.Channel;
+import com.ilumusecase.jobs_manager.resources.abstraction.ChannelDetails;
+import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 
 @Repository
 public class ChannelsMongoRepository implements ChannelsRepository{

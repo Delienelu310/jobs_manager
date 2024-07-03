@@ -1,6 +1,6 @@
 package com.ilumusecase.jobs_manager.repositories.interfaces;
 
-import com.ilumusecase.jobs_manager.resources.PrivilegeList;
+import com.ilumusecase.jobs_manager.resources.authorities.PrivilegeList;
 
 public interface PrivilegeListRepository<T> {
     public PrivilegeList<T> create();

@@ -2,7 +2,7 @@ package com.ilumusecase.jobs_manager.repositories.interfaces;
 
 import java.util.List;
 
-import com.ilumusecase.jobs_manager.resources.JobsFile;
+import com.ilumusecase.jobs_manager.resources.ilum.JobsFile;
 
 public interface JobsFileRepositoryInterface {
     

@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Component;
 
-import com.ilumusecase.jobs_manager.resources.JobEntity;
+import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
 
 @Component
 public class JobEntityMapper {

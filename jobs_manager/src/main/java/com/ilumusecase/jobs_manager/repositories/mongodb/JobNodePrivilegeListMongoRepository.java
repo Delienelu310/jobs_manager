@@ -5,8 +5,8 @@ import org.springframework.stereotype.Repository;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.PrivilegeListRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.MongoJobNodePrivilege;
-import com.ilumusecase.jobs_manager.resources.JobNodePrivilege;
-import com.ilumusecase.jobs_manager.resources.PrivilegeList;
+import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
+import com.ilumusecase.jobs_manager.resources.authorities.PrivilegeList;
 
 @Repository
 public class JobNodePrivilegeListMongoRepository implements PrivilegeListRepository<JobNodePrivilege>{
