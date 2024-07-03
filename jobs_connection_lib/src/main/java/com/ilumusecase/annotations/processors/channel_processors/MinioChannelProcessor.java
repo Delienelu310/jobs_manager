@@ -32,9 +32,9 @@ public class MinioChannelProcessor implements ChannelProcessor{
         // String bucketName = (String)config.get("minio_bucket");
         String bucketName = "ilum-files";
 
-        Dataset<Row> dataset = session.read().format("csv")
+        Dataset<Row> dataset = session.read()
             .option("header", "true")
-            .load("s3a://" + bucketName + "/jobs-manager/internal_" + channelData.id + ".csv");
+            .csv("s3a://" + bucketName + "/jobs-manager/internal_" + channelData.id + "/");
 
         if(!isHeaderValid(channelData.channelDetails.headers, dataset)){
             throw new RuntimeException("Invalid headers");
@@ -51,13 +51,12 @@ public class MinioChannelProcessor implements ChannelProcessor{
         
         // String bucketName = (String)config.get("minio_bucket");
         String bucketName = "ilum-files";
-        String filePath = "s3a://" + bucketName + "/jobs-manager/internal_" + channelDTO.id + ".csv";
+        String filePath = "s3a://" + bucketName + "/jobs-manager/internal_" + channelDTO.id;
 
-        dataset.write()
-            .format("csv")
+        dataset.coalesce(1).write()
             .option("header", "true")
             .mode(SaveMode.Overwrite)
-            .save(filePath);
+            .csv(filePath);
     }
 
     @Override
@@ -67,9 +66,9 @@ public class MinioChannelProcessor implements ChannelProcessor{
         // String bucketName = (String)config.get("minio_bucket");
         String bucketName = "ilum-files";
 
-        Dataset<Row> dataset = session.read().format("csv")
+        Dataset<Row> dataset = session.read()
             .option("header", "true")
-            .load("s3a://" + bucketName + "/jobs-manager/internal_" + channelData.id + ".csv");
+            .csv("s3a://" + bucketName + "/jobs-manager/internal_" + channelData.id + "/");
 
         if(!isHeaderValid(channelData.channelDetails.headers, dataset)){
             throw new RuntimeException("Invalid headers");

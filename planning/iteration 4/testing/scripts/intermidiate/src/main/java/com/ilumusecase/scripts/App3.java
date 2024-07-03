@@ -34,8 +34,21 @@ public final class App3 implements Job {
 
     public static void main(String[] args) {
         
+    }
 
+    static class Evaluator implements UDF1<String, String>{
+        @Override
+        public String call(String num) throws Exception {
+            int digit = Integer.parseInt(num);
 
+            if(digit >= 7){
+                return "high";
+            }else if(digit >= 5){
+                return "middle";
+            }else{
+                return "small";
+            }
+        }
     }
 
     @Override
@@ -57,37 +70,20 @@ public final class App3 implements Job {
         // configJava.put("token", "Basic YWRtaW46YWRtaW4=");
         // configJava.put("mod", "NORMAL");
 
-        JobProcessor jobProcessor = new JobProcessor(App1.class, sparkSession, configJava);
+        JobProcessor jobProcessor = new JobProcessor(App3.class, sparkSession, configJava);
         System.out.println("STARTING");
         jobProcessor.start();
         System.out.println("STARTED ");
 
-        UDF1<String, String> evaluator = new UDF1<String,String>() {
-
-            @Override
-            public String call(String num) throws Exception {
-                int digit = Integer.parseInt(num);
-
-                if(digit >= 7){
-                    return "high";
-                }else if(digit >= 5){
-                    return "middle";
-                }else{
-                    return "small";
-                }
-            }
-            
-        };
-
-        sparkSession.udf().register("evaluate", evaluator, DataTypes.StringType);
+        sparkSession.udf().register("evaluate", new App3.Evaluator(), DataTypes.StringType);
         
         try {
-            input.createTempView("MyDigits3");
+            App3.input.createTempView("MyDigits3");
         } catch (AnalysisException e) {
             e.printStackTrace();
         }
 
-        output = sparkSession.sql("SELECT number, evaluate(number) as somedata FROM MyDigits3");
+        App3.output = sparkSession.sql("SELECT number, evaluate(number) as somedata FROM MyDigits3");
 
         jobProcessor.finish();
 

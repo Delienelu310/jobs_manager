@@ -33,8 +33,23 @@ public final class App1 implements Job {
     public static Dataset<Row> output;
 
     public static void main(String[] args) {
-        
 
+    }
+
+    static class Evaluator implements UDF1<String, String>{
+
+        @Override
+        public String call(String num) throws Exception {
+            int digit = Integer.parseInt(num);
+
+            if(digit >= 6){
+                return "high";
+            }else if(digit >= 3){
+                return "middle";
+            }else{
+                return "small";
+            }
+        }   
 
     }
 
@@ -58,37 +73,23 @@ public final class App1 implements Job {
         // configJava.put("mod", "NORMAL");
 
         JobProcessor jobProcessor = new JobProcessor(App1.class, sparkSession, configJava);
+
         System.out.println("STARTING");
         jobProcessor.start();
         System.out.println("STARTED ");
 
-        UDF1<String, String> evaluator = new UDF1<String,String>() {
+        App1.input.show();
 
-            @Override
-            public String call(String num) throws Exception {
-                int digit = Integer.parseInt(num);
-
-                if(digit >= 6){
-                    return "high";
-                }else if(digit >= 3){
-                    return "middle";
-                }else{
-                    return "small";
-                }
-            }
-            
-        };
-
-        sparkSession.udf().register("evaluate", evaluator, DataTypes.StringType);
+        sparkSession.udf().register("evaluate", new App1.Evaluator(), DataTypes.StringType);
         
         try {
-            input.createTempView("MyDigits");
+            App1.input.createTempView("MyDigits");
         } catch (AnalysisException e) {
             e.printStackTrace();
         }
 
-        output = sparkSession.sql("SELECT number, evaluate(number) as somedata FROM MyDigits");
-
+        App1.output = sparkSession.sql("SELECT number, evaluate(number) as somedata FROM MyDigits");
+        // App1.output.show();
         jobProcessor.finish();
 
         return Some.apply("DONE");

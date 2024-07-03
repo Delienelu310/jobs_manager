@@ -34,6 +34,25 @@ public final class Tester implements Job{
 
     }
 
+    static class Evaluator implements UDF2<String, String, Boolean>{
+
+        @Override
+        public Boolean call(String num, String evaluation) throws Exception {
+        
+            int digit = Integer.parseInt(num);
+
+            if(digit >= 8){
+                return evaluation.equals("high");
+            }else if(digit >= 4){
+                return evaluation.equals("middle");
+            }else{
+                return evaluation.equals("small");
+            }
+        }
+        
+    }; 
+
+
     @Override
     public Option<String> run(SparkSession sparkSession, scala.collection.immutable.Map<String, Object> cfg) {
         
@@ -71,25 +90,8 @@ public final class Tester implements Job{
             e.printStackTrace();
         }
 
-        UDF2<String, String, Boolean> isCorrect = new UDF2<String,String,Boolean>() {
 
-            @Override
-            public Boolean call(String num, String evaluation) throws Exception {
-            
-                int digit = Integer.parseInt(num);
-
-                if(digit >= 8){
-                    return evaluation.equals("high");
-                }else if(digit >= 4){
-                    return evaluation.equals("middle");
-                }else{
-                    return evaluation.equals("small");
-                }
-            }
-            
-        }; 
-
-        sparkSession.udf().register("checkEvaluation", isCorrect, DataTypes.BooleanType);
+        sparkSession.udf().register("checkEvaluation", new Tester.Evaluator(), DataTypes.BooleanType);
 
         Dataset<Row> result = sparkSession.sql("SELECT (SELECT COUNT(*) FROM Tester_evaluation WHERE checkEvaluation(number, somedata)) / (SELECT COUNT(*) FROM Tester_evaluation) FROM (SELECT COUNT(*) FROM Tester_evaluation) ");
 

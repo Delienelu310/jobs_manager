@@ -36,6 +36,22 @@ public final class App2 implements Job {
         
     }
 
+    static class Evaluator implements UDF1<String, String>{
+        @Override
+        public String call(String num) throws Exception {
+            int digit = Integer.parseInt(num);
+
+            if(digit >= 10){
+                return "high";
+            }else if(digit >= 5){
+                return "middle";
+            }else{
+                return "small";
+            }
+        }
+            
+    }
+
     @Override
     public Option<String> run(SparkSession sparkSession, scala.collection.immutable.Map<String, Object> config) {
         // Logger.getLogger("org.apache").setLevel(Level.WARN);
@@ -55,37 +71,20 @@ public final class App2 implements Job {
         // configJava.put("token", "Basic YWRtaW46YWRtaW4=");
         // configJava.put("mod", "NORMAL");
 
-        JobProcessor jobProcessor = new JobProcessor(App1.class, sparkSession, configJava);
+        JobProcessor jobProcessor = new JobProcessor(App2.class, sparkSession, configJava);
         System.out.println("STARTING");
         jobProcessor.start();
         System.out.println("STARTED ");
 
-        UDF1<String, String> evaluator = new UDF1<String,String>() {
-
-            @Override
-            public String call(String num) throws Exception {
-                int digit = Integer.parseInt(num);
-
-                if(digit >= 10){
-                    return "high";
-                }else if(digit >= 5){
-                    return "middle";
-                }else{
-                    return "small";
-                }
-            }
-            
-        };
-
-        sparkSession.udf().register("evaluate", evaluator, DataTypes.StringType);
+        sparkSession.udf().register("evaluate", new App2.Evaluator(), DataTypes.StringType);
         
         try {
-            input.createTempView("MyDigits2");
+            App2.input.createTempView("MyDigits2");
         } catch (AnalysisException e) {
             e.printStackTrace();
         }
 
-        output = sparkSession.sql("SELECT number, evaluate(number) as somedata FROM MyDigits2");
+        App2.output = sparkSession.sql("SELECT number, evaluate(number) as somedata FROM MyDigits2");
 
         jobProcessor.finish();
 
