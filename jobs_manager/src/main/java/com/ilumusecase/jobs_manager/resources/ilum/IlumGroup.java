@@ -1,5 +1,6 @@
 package com.ilumusecase.jobs_manager.resources.ilum;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,8 +23,15 @@ public class IlumGroup {
     private String id;
     private String ilumId;
 
+    private IlumGroupConfiguraion ilumGroupConfiguraion;
+
     private int currentIndex = 0;
     private int currentTestingIndex = 0;
+    private String mod;
+
+    @DBRef(lazy = true)
+    private JobEntity currentJob;
+    private LocalDateTime currentStartTime;
 
     @DBRef(lazy = true)    
     private List<JobEntity> jobs = new ArrayList<>();

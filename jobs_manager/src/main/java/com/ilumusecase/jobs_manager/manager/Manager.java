@@ -2,7 +2,9 @@ package com.ilumusecase.jobs_manager.manager;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
 import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
+import com.ilumusecase.jobs_manager.resources.ilum.JobsFile;
 import com.ilumusecase.jobs_manager.s3clients.S3ClientFactory;
 
 @Service
@@ -60,15 +63,27 @@ public class Manager {
         extensionMap.put("jar", "jars");
         extensionMap.put("py", "files");
 
+        Set<String> jobsFilesUsed = new HashSet<>();
+
+
         for(JobEntity jobEntity : ilumGroup.getJobs()){
-            byte[] bytes = s3ClientFactory.getJobS3Client().downloadJob(jobEntity.getJobsFile()).orElseThrow(RuntimeException::new);
-            ByteArrayResource byteArrayResource = new ByteArrayResource(bytes) {
-                @Override
-                public String getFilename() {
-                    return jobEntity.getId() + "." + jobEntity.getJobsFile().getExtension();
-                }
-            };
-            bodyMap.add(extensionMap.get(jobEntity.getJobsFile().getExtension()), byteArrayResource);
+            for(JobsFile jobsFile : jobEntity.getJobScript().getJobsFiles()){
+                if(jobsFilesUsed.contains(jobsFile.getId())) continue;
+
+                jobsFilesUsed.add(jobsFile.getId());
+
+
+
+                byte[] bytes = s3ClientFactory.getJobS3Client().downloadJob(jobsFile).orElseThrow(RuntimeException::new);
+                ByteArrayResource byteArrayResource = new ByteArrayResource(bytes) {
+                    @Override
+                    public String getFilename() {
+                        return jobsFile.getId() + "." + jobsFile.getExtension();
+                    }
+                };
+                bodyMap.add(extensionMap.get(jobsFile.getExtension()), byteArrayResource);
+            }
+            
         }
         //add jobs_connection_lib 
         bodyMap.add("jars", new ByteArrayResource(loadJobConnectionLib()){
@@ -108,11 +123,11 @@ public class Manager {
     }
 
     public String submitJob(JobEntity jobEntity, Map<String, String> config){
-        String url = endpoint + versionPath + "group/" + jobEntity.getJobsFile().getJobNode().getCurrentGroup().getIlumId() + "/job/submit";
+        String url = endpoint + versionPath + "group/" + jobEntity.getIlumGroup().getIlumId() + "/job/submit";
 
         String jsonData = "{" + 
             "\"type\": \"interactive_job_execute\"," + 
-            "\"jobClass\":\"" + jobEntity.getClassPath() + "\"," +
+            "\"jobClass\":\"" + jobEntity.getJobScript().getClassFullName() + "\"," +
             "\"jobConfig\":" + mapToJson(config) +
         "}";
         String ilumId = webClient.post()

@@ -6,14 +6,12 @@ import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
-import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
 
 @Service
 public class JobEntityScheduler {
@@ -21,70 +19,21 @@ public class JobEntityScheduler {
     @Autowired
     private Scheduler scheduler;
 
-    public void scheduleJobEntityStop(JobEntity jobEntity) throws SchedulerException{
-        JobDetail jobDetail = JobBuilder.newJob(StopJobEntity.class)
-            .withIdentity(new JobKey(jobEntity.getId(), jobEntity.getGroupId()))
+
+    public void startIlumGroupLifecycle(IlumGroup ilumGroup) throws SchedulerException{
+        JobDetail jobDetail = JobBuilder.newJob(IlumGroupLifecycle.class)
+            .withIdentity(new JobKey(ilumGroup.getId()))
             .storeDurably()
             .build();
- 
 
-		Trigger trigger = TriggerBuilder.newTrigger()
+
+        Trigger trigger = TriggerBuilder.newTrigger()
             .forJob(jobDetail)
             .startAt(DateBuilder.futureDate(1, DateBuilder.IntervalUnit.MINUTE))
             .build();
 
         scheduler.scheduleJob(jobDetail, trigger);
-
     }
 
-    public void deleteJobEntityStop(JobEntity jobEntity) throws SchedulerException{
-        scheduler.deleteJob(new JobKey(jobEntity.getId(), jobEntity.getGroupId()));
-    }
-
-    public void startGroupStatusCheckScheduler(IlumGroup ilumGroup) throws SchedulerException{
-
-        JobDetail jobDetail = JobBuilder.newJob(CheckJobStatus.class)
-            .withIdentity(new JobKey(ilumGroup.getId(), ilumGroup.getJobNode().getId()))
-            .storeDurably()
-            .build();
-
-        SimpleScheduleBuilder simpleScheduleBuilder = SimpleScheduleBuilder.simpleSchedule()
-			.withIntervalInSeconds(10)
-			.repeatForever();
-
-		Trigger trigger = TriggerBuilder.newTrigger()
-            .forJob(jobDetail)
-            .withSchedule(simpleScheduleBuilder)
-            .build();
-
-        scheduler.scheduleJob(jobDetail, trigger);
-
-    }
-
-    public void startJobTestStatusCheckScheduler(IlumGroup ilumGroup) throws SchedulerException{
-        JobDetail jobDetail = JobBuilder.newJob(CheckTestJobStatus.class)
-            .withIdentity(new JobKey(Integer.toString(ilumGroup.getCurrentIndex()), ilumGroup.getId()))
-            .storeDurably()
-            .build();
-
-        SimpleScheduleBuilder simpleScheduleBuilder = SimpleScheduleBuilder.simpleSchedule()
-			.withIntervalInSeconds(10)
-			.repeatForever();
-
-		Trigger trigger = TriggerBuilder.newTrigger()
-            .forJob(jobDetail)
-            .withSchedule(simpleScheduleBuilder)
-            .build();
-
-        scheduler.scheduleJob(jobDetail, trigger);
-    }
-
-    public void deleteGroupStatusCheckScheduler(IlumGroup ilumGroup) throws SchedulerException{
-        scheduler.deleteJob(new JobKey(ilumGroup.getId(), ilumGroup.getJobNode().getId()));
-    }
-
-    public void deleteJobTestStatusCheckScheduler(IlumGroup ilumGroup) throws SchedulerException{
-        scheduler.deleteJob(new JobKey(Integer.toString(ilumGroup.getCurrentIndex()), ilumGroup.getId()));
-    }
 
 }
