@@ -2,7 +2,6 @@ package com.ilumusecase.jobs_manager.files_validators;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.List;
 import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -10,7 +9,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 
 @Component
 public class JarValidator implements FilesValidator{
@@ -28,19 +26,5 @@ public class JarValidator implements FilesValidator{
         }
     }
 
-    @Override
-    public boolean validate(MultipartFile multipartFile, JobNode jobNode, List<String> jobClasses) {
-  
-        boolean result = true;
-  
-        //1. check if classes in job nodes are in the jobClasses list
-        //2. check if classes in current file are in the active classes of jobnode 
-        Set<String> classes = retrieveFileClasses(multipartFile);
-        
-        result = result && !classes.stream().anyMatch(cl -> jobNode.getJobClasses().contains(cl));
-        result = result && !jobClasses.stream().anyMatch(cl -> jobNode.getUsedClassnames().containsKey(cl));
-    
-        return result;
-    }
-    
+
 }

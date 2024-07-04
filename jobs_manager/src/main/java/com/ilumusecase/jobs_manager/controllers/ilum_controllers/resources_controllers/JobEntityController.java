@@ -39,7 +39,7 @@ public class JobEntityController {
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         JobEntity jobEntity = repositoryFactory.getJobRepository().retrieveJobEntity(jobEntityId);
         if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
-        if(!jobNodeId.equals(jobEntity.getId())) throw new RuntimeException();
+        if(!jobNodeId.equals(jobEntity.getJobNode().getId())) throw new RuntimeException();
 
 
         return jsonMappersFactory.getJobEntityMapper().getFullJobEntity(jobEntity);
