@@ -68,6 +68,6 @@ public class JobNode {
     private List<JobEntity> jobsQueue = new LinkedList<>();
 
     @DBRef(lazy = true)
-    private IlumGroup currentGroup;
+    private List<IlumGroup> ilumGroups;
 
 }

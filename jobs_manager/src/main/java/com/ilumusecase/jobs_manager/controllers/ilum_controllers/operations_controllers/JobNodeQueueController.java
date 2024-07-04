@@ -78,9 +78,6 @@ public class JobNodeQueueController {
         if(!jobNodeId.equals(jobEntity.getJobNode().getId())) throw new RuntimeException();
 
 
-        if(jobNode.getCurrentGroup() != null) throw new RuntimeException("The queue cannot be modified during work");
-
-
         if(jobQueue.equals("job_queue")){
             if(jobNode.getJobEntities().contains(jobEntity)){
                 jobNode.getJobsQueue().remove(jobEntity);

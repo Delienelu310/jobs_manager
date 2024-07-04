@@ -2,6 +2,8 @@ package com.ilumusecase.jobs_manager.schedulers;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -43,30 +45,50 @@ public class IlumGroupLifecycle implements Job{
             repositoryFactory.getJobRepository().updateJobFull(ilumGroup.getCurrentJob());
         }
 
+
+
         //do something depending on the state
         if(ilumGroup.getCurrentJob().getState().equals("FINISHED")){
             if(ilumGroup.getMod().equals("TEST")){
                 if(ilumGroup.getCurrentTestingIndex() < ilumGroup.getTestingJobs().size()){
                     ilumGroup.setCurrentTestingIndex(ilumGroup.getCurrentTestingIndex() + 1);
                     ilumGroup.setCurrentJob(ilumGroup.getTestingJobs().get(ilumGroup.getCurrentIndex()));
+                    ilumGroup.setCurrentStartTime(LocalDateTime.now());
                     repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
 
-                    manager.submitJob(ilumGroup.getCurrentJob(), null);
-
+                    Map<String, String> config = new HashMap<>();
+                    config.put("projectId", ilumGroup.getProject().getId());
+                    config.put("jobNodeId", ilumGroup.getJobNode().getId());
+                    config.put("mod", ilumGroup.getMod());
+                    config.put("prefix", "http://jobs-manager:8080");
+                    config.put("token", "Basic YWRtaW46YWRtaW4=");
+                    manager.submitJob(ilumGroup.getCurrentJob(), config);
+                    
                     return;
                 }else{
                     if(ilumGroup.getCurrentIndex() < ilumGroup.getJobs().size()){
                         ilumGroup.setCurrentIndex(ilumGroup.getCurrentIndex() + 1);
                         ilumGroup.setCurrentJob(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()));
                         ilumGroup.setMod("NORMAL");
+                        ilumGroup.setCurrentStartTime(LocalDateTime.now());
                         repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
 
-                        manager.submitJob(ilumGroup.getCurrentJob(), null);
+                        Map<String, String> config = new HashMap<>();
+                        config.put("projectId", ilumGroup.getProject().getId());
+                        config.put("jobNodeId", ilumGroup.getJobNode().getId());
+                        config.put("mod", ilumGroup.getMod());
+                        config.put("prefix", "http://jobs-manager:8080");
+                        config.put("token", "Basic YWRtaW46YWRtaW4=");
+                        manager.submitJob(ilumGroup.getCurrentJob(), config);
                     }else{
                         //exit
                         try {
-                            scheduler.interrupt(new JobKey(ilumGroup.getId()));
+                            JobKey jobKey = new JobKey(ilumGroup.getId());
+                            scheduler.interrupt(jobKey);
+                            scheduler.deleteJob(jobKey);
                         } catch (UnableToInterruptJobException e) {
+                            throw new RuntimeException(e);
+                        } catch (SchedulerException e) {
                             throw new RuntimeException(e);
                         }
                     }
@@ -75,9 +97,16 @@ public class IlumGroupLifecycle implements Job{
                 ilumGroup.setMod("TEST");
                 ilumGroup.setCurrentTestingIndex(0);
                 ilumGroup.setCurrentJob(ilumGroup.getTestingJobs().get(0));
+                ilumGroup.setCurrentStartTime(LocalDateTime.now());
                 repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
             
-                manager.submitJob(ilumGroup.getCurrentJob(), null);                 
+                Map<String, String> config = new HashMap<>();
+                config.put("projectId", ilumGroup.getProject().getId());
+                config.put("jobNodeId", ilumGroup.getJobNode().getId());
+                config.put("mod", ilumGroup.getMod());
+                config.put("prefix", "http://jobs-manager:8080");
+                config.put("token", "Basic YWRtaW46YWRtaW4=");
+                manager.submitJob(ilumGroup.getCurrentJob(), config);                 
             
                 return;
             }      
@@ -86,9 +115,16 @@ public class IlumGroupLifecycle implements Job{
                 if(ilumGroup.getCurrentTestingIndex() < ilumGroup.getTestingJobs().size()){
                     ilumGroup.setCurrentTestingIndex(ilumGroup.getCurrentTestingIndex() + 1);
                     ilumGroup.setCurrentJob(ilumGroup.getTestingJobs().get(ilumGroup.getCurrentIndex()));
+                    ilumGroup.setCurrentStartTime(LocalDateTime.now());
                     repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
 
-                    manager.submitJob(ilumGroup.getCurrentJob(), null);
+                    Map<String, String> config = new HashMap<>();
+                    config.put("projectId", ilumGroup.getProject().getId());
+                    config.put("jobNodeId", ilumGroup.getJobNode().getId());
+                    config.put("mod", ilumGroup.getMod());
+                    config.put("prefix", "http://jobs-manager:8080");
+                    config.put("token", "Basic YWRtaW46YWRtaW4=");
+                    manager.submitJob(ilumGroup.getCurrentJob(), config);
 
                     return;
                 }else{
@@ -96,14 +132,26 @@ public class IlumGroupLifecycle implements Job{
                         ilumGroup.setCurrentIndex(ilumGroup.getCurrentIndex() + 1);
                         ilumGroup.setCurrentJob(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()));
                         ilumGroup.setMod("NORMAL");
+                        ilumGroup.setCurrentStartTime(LocalDateTime.now());
                         repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
 
-                        manager.submitJob(ilumGroup.getCurrentJob(), null);
+
+                        Map<String, String> config = new HashMap<>();
+                        config.put("projectId", ilumGroup.getProject().getId());
+                        config.put("jobNodeId", ilumGroup.getJobNode().getId());
+                        config.put("mod", ilumGroup.getMod());
+                        config.put("prefix", "http://jobs-manager:8080");
+                        config.put("token", "Basic YWRtaW46YWRtaW4=");
+                        manager.submitJob(ilumGroup.getCurrentJob(), config);
                     }else{
                         //exit
                         try {
-                            scheduler.interrupt(new JobKey(ilumGroup.getId()));
+                            JobKey jobKey = new JobKey(ilumGroup.getId());
+                            scheduler.interrupt(jobKey);
+                            scheduler.deleteJob(jobKey);
                         } catch (UnableToInterruptJobException e) {
+                            throw new RuntimeException(e);
+                        } catch (SchedulerException e) {
                             throw new RuntimeException(e);
                         }
                     }
@@ -113,9 +161,16 @@ public class IlumGroupLifecycle implements Job{
                     ilumGroup.setCurrentIndex(ilumGroup.getCurrentIndex() + 1);
                     ilumGroup.setCurrentJob(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()));
                     ilumGroup.setMod("NORMAL");
+                    ilumGroup.setCurrentStartTime(LocalDateTime.now());
                     repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
 
-                    manager.submitJob(ilumGroup.getCurrentJob(), null);
+                    Map<String, String> config = new HashMap<>();
+                    config.put("projectId", ilumGroup.getProject().getId());
+                    config.put("jobNodeId", ilumGroup.getJobNode().getId());
+                    config.put("mod", ilumGroup.getMod());
+                    config.put("prefix", "http://jobs-manager:8080");
+                    config.put("token", "Basic YWRtaW46YWRtaW4=");
+                    manager.submitJob(ilumGroup.getCurrentJob(), config);
                 }else{
                     //exit
                     try {
@@ -142,28 +197,50 @@ public class IlumGroupLifecycle implements Job{
                     ilumGroup.setMod("TEST");
                     ilumGroup.setCurrentTestingIndex(0);
                     ilumGroup.setCurrentJob(ilumGroup.getTestingJobs().get(0));
+                    ilumGroup.setCurrentStartTime(LocalDateTime.now());
                     repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
                 
-                    manager.submitJob(ilumGroup.getCurrentJob(), null);                 
+                    Map<String, String> config = new HashMap<>();
+                    config.put("projectId", ilumGroup.getProject().getId());
+                    config.put("jobNodeId", ilumGroup.getJobNode().getId());
+                    config.put("mod", ilumGroup.getMod());
+                    config.put("prefix", "http://jobs-manager:8080");
+                    config.put("token", "Basic YWRtaW46YWRtaW4=");
+                    manager.submitJob(ilumGroup.getCurrentJob(), config);
                 
                     return;
                 }else if(ilumGroup.getMod().equals("TEST")){
                     if(ilumGroup.getCurrentTestingIndex() < ilumGroup.getTestingJobs().size()){
                         ilumGroup.setCurrentTestingIndex(ilumGroup.getCurrentTestingIndex() + 1);
                         ilumGroup.setCurrentJob(ilumGroup.getTestingJobs().get(ilumGroup.getCurrentIndex()));
+                        ilumGroup.setCurrentStartTime(LocalDateTime.now());
                         repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
 
-                        manager.submitJob(ilumGroup.getCurrentJob(), null);
+                        Map<String, String> config = new HashMap<>();
+                        config.put("projectId", ilumGroup.getProject().getId());
+                        config.put("jobNodeId", ilumGroup.getJobNode().getId());
+                        config.put("mod", ilumGroup.getMod());
+                        config.put("prefix", "http://jobs-manager:8080");
+                        config.put("token", "Basic YWRtaW46YWRtaW4=");
+                        manager.submitJob(ilumGroup.getCurrentJob(), config);
 
                         return;
                     }else{
                         if(ilumGroup.getCurrentIndex() < ilumGroup.getJobs().size()){
                             ilumGroup.setCurrentIndex(ilumGroup.getCurrentIndex() + 1);
                             ilumGroup.setCurrentJob(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()));
+                            ilumGroup.setCurrentStartTime(LocalDateTime.now());
                             ilumGroup.setMod("NORMAL");
                             repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
 
-                            manager.submitJob(ilumGroup.getCurrentJob(), null);
+                            Map<String, String> config = new HashMap<>();
+                            config.put("projectId", ilumGroup.getProject().getId());
+                            config.put("jobNodeId", ilumGroup.getJobNode().getId());
+                            config.put("mod", ilumGroup.getMod());
+                            config.put("prefix", "http://jobs-manager:8080");
+                            config.put("token", "Basic YWRtaW46YWRtaW4=");
+                            manager.submitJob(ilumGroup.getCurrentJob(), config);
+                            
                         }else{
                             //exit
                             try {

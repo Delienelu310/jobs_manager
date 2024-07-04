@@ -21,6 +21,8 @@ public class JsonMappersFactory {
     private JobsFileJsonMapper jobsFileJsonMapper;
     @Autowired
     private JobScriptMapper jobScriptMapper;
+    @Autowired
+    private IlumGroupMapper ilumGroupMapper;
     
     public JobEntityMapper getJobEntityMapper() {
         return jobEntityMapper;
@@ -43,6 +45,9 @@ public class JsonMappersFactory {
     }
     public JobScriptMapper getJobScriptMapper(){
         return jobScriptMapper;
+    }
+    public IlumGroupMapper getIlumGroupMapper(){
+        return this.ilumGroupMapper;
     }
     
 }
