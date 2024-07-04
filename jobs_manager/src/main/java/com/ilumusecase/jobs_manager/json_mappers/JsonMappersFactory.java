@@ -19,6 +19,8 @@ public class JsonMappersFactory {
     private JobEntityMapper jobEntityMapper;
     @Autowired
     private JobsFileJsonMapper jobsFileJsonMapper;
+    @Autowired
+    private JobScriptMapper jobScriptMapper;
     
     public JobEntityMapper getJobEntityMapper() {
         return jobEntityMapper;
@@ -38,6 +40,9 @@ public class JsonMappersFactory {
     }
     public JobsFileJsonMapper getJobsFileJsonMapper(){
         return jobsFileJsonMapper;
+    }
+    public JobScriptMapper getJobScriptMapper(){
+        return jobScriptMapper;
     }
     
 }

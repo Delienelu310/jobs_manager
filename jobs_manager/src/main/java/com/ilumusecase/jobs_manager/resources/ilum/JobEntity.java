@@ -17,7 +17,10 @@ public class JobEntity {
     @Id
     private String id;
 
-    private String groupId;
+    // private String groupId;
+    @DBRef(lazy = true)
+    private IlumGroup ilumGroup;
+
     private String ilumId;
 
     @DBRef(lazy = true)
@@ -44,6 +47,6 @@ public class JobEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(getClass().getName() + "_" + id);
     }
 }

@@ -13,4 +13,7 @@ public interface MongoJobScripts extends MongoRepository<JobScript, String> {
     
     @Query("{ 'jobsFiles.id': ?0 }")
     public List<JobScript> retrieveByJobsFileId(String jobsFileId);
+
+    @Query("{ 'jobNode.id': ?0}")
+    public List<JobScript> retrieveByJobNodeId(String jobNodeId);
 }

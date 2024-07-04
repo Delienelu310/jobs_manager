@@ -41,5 +41,10 @@ public class JobScriptsMongoRepository implements JobScriptRepository{
     public List<JobScript> retrieveJobScriptsByJobsFileId(String jobsFileId) {
         return mongoJobScripts.retrieveByJobsFileId(jobsFileId);
     }
+
+    @Override
+    public List<JobScript> retrieveJobScriptsByJobNodeId(String jobNodeId) {
+        return mongoJobScripts.retrieveByJobNodeId(jobNodeId);
+    }
     
 }

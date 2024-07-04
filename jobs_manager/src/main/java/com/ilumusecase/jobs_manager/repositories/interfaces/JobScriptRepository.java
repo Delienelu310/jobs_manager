@@ -13,5 +13,6 @@ public interface JobScriptRepository {
     public void deleteJobScript(String id);
     
     public List<JobScript> retrieveJobScriptsByJobsFileId(String jobsFileId);
+    public List<JobScript> retrieveJobScriptsByJobNodeId(String jobNodeId);
 
 } 

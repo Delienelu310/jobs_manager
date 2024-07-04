@@ -1,6 +1,7 @@
 package com.ilumusecase.jobs_manager.resources.ilum;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.data.annotation.Id;
@@ -34,5 +35,24 @@ public class JobsFile {
     private AppUser publisher;
     
     private Set<String> allClasses = new HashSet<>();
+
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        JobsFile other = (JobsFile) obj;
+        return id == other.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getClass().getName() + "_" + id);
+    }
 
 }
