@@ -52,6 +52,13 @@ public class JobNode {
     @DBRef(lazy = true)
     private List<JobScript> jobScripts = new LinkedList<>();
 
+    @DBRef(lazy = true)
+    private List<JobEntity> jobEntities = new LinkedList<>();
+
+    @DBRef(lazy = true)
+    private List<JobEntity> jobResults = new LinkedList<>();
+
+
 
 
     @DBRef(lazy = true)

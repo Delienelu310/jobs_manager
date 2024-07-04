@@ -6,6 +6,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
+import com.ilumusecase.jobs_manager.resources.abstraction.Project;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,7 +20,6 @@ public class JobEntity {
     @Id
     private String id;
 
-    // private String groupId;
     @DBRef(lazy = true)
     private IlumGroup ilumGroup;
 
@@ -30,8 +32,17 @@ public class JobEntity {
 
     private String state;
 
-    private JobResult jobResult;
 
+
+    @DBRef(lazy = true)
+    private JobNode jobNode;
+
+    @DBRef(lazy = true)
+    private Project project;
+
+
+
+    
 
     @Override
     public boolean equals(Object obj) {
