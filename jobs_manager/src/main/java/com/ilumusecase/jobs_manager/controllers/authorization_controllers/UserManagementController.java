@@ -1,4 +1,4 @@
-package com.ilumusecase.jobs_manager.controllers;
+package com.ilumusecase.jobs_manager.controllers.authorization_controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
