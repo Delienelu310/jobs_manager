@@ -10,5 +10,6 @@ public interface JobsFileRepositoryInterface {
     public List<JobsFile> retrieveJobsFilesByAuthorUsername(String username);
     public List<JobsFile> retrieveJobsFilesByJobNodeId(String id);
     public JobsFile updateJobsFileFull(JobsFile jobsFile);
+    public void deleteJobsFileById(String id);
 
 }

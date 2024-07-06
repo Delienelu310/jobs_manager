@@ -46,9 +46,6 @@ public class JobEntity {
     private Project project;
 
 
-
-    
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -58,7 +55,7 @@ public class JobEntity {
             return false;
         }
         JobEntity other = (JobEntity) obj;
-        return id == other.getId();
+        return id.equals(other.getId());
     }
 
     @Override

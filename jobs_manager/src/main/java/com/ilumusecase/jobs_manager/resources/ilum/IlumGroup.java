@@ -3,6 +3,7 @@ package com.ilumusecase.jobs_manager.resources.ilum;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -53,5 +54,20 @@ public class IlumGroup {
     private JobNode jobNode;
 
     
-    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        IlumGroup other = (IlumGroup) obj;
+        return id.equals(other.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getClass().getName() + "_" + id);
+    }
 }

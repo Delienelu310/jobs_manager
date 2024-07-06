@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
@@ -38,7 +39,7 @@ public class JobScriptController {
     ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
 
-        if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
+        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
       
         return jsonMappersFactory.getJobScriptMapper().mapSimpleJobScriptsList(jobNode.getJobScripts());
     }
@@ -52,7 +53,7 @@ public class JobScriptController {
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         JobScript jobScript = repositoryFactory.getJobScriptRepository().retrieveJobScriptById(jobScriptId).orElseThrow(RuntimeException::new);
       
-        if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
+        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
         if(!jobScript.getJobNode().getId().equals(jobNodeId)) throw new RuntimeException();
 
         return jsonMappersFactory.getJobScriptMapper().mapSimpleJobScript(jobScript);
@@ -63,13 +64,13 @@ public class JobScriptController {
         Authentication authentication,
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        JobScript jobScript
+        @RequestBody JobScript jobScript
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         AppUser appUser = repositoryFactory.getUserDetailsManager().findByUsername(authentication.getName());
 
-        if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
+        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
 
         jobScript.setJobsFiles(new LinkedList<>());
         jobScript.setAuthor(appUser);
@@ -99,7 +100,7 @@ public class JobScriptController {
         JobScript jobScript = repositoryFactory.getJobScriptRepository().retrieveJobScriptById(jobScriptId).orElseThrow(RuntimeException::new);
         JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId);
 
-        if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
+        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
         if(!jobsFile.getJobNode().getId().equals(jobNodeId)) throw new RuntimeException();
         if(!jobScript.getJobNode().getId().equals(jobNodeId)) throw new RuntimeException();
 
@@ -127,7 +128,7 @@ public class JobScriptController {
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         JobScript jobScript = repositoryFactory.getJobScriptRepository().retrieveJobScriptById(jobScriptId).orElseThrow(RuntimeException::new);
       
-        if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
+        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
         if(!jobScript.getJobNode().getId().equals(jobNodeId)) throw new RuntimeException();
 
         jobNode.getJobScripts().remove(jobScript);

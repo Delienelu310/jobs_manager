@@ -49,7 +49,7 @@ public class JobsFile {
             return false;
         }
         JobsFile other = (JobsFile) obj;
-        return id == other.getId();
+        return id.equals(other.getId());
     }
 
     @Override

@@ -34,5 +34,10 @@ public class JobsFileMongo implements JobsFileRepositoryInterface {
     public JobsFile updateJobsFileFull(JobsFile jobsFile) {
         return mongoJobsFile.save(jobsFile);
     }
+
+    @Override
+    public void deleteJobsFileById(String id) {
+        mongoJobsFile.deleteById(id);
+    }
     
 }

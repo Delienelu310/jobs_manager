@@ -129,10 +129,10 @@ public class JobsFileController {
             throw new RuntimeException("The job scripts are now using this jar");
         }
     
-        jobNode.getJobsFiles().removeIf(jb -> jb.equals(jobsFile));
+        jobNode.getJobsFiles().remove(jobsFile);
      
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
-        repositoryFactory.getJobRepository().deleteJob(jobsFileId);
+        repositoryFactory.getJobsFileRepositoryInterface().deleteJobsFileById(jobsFileId);
         s3ClientFactory.getJobS3Client().deleteJob(jobsFile);
 
     }

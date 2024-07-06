@@ -1,6 +1,7 @@
 package com.ilumusecase.jobs_manager.resources.ilum;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -38,5 +39,21 @@ public class JobResult {
     @DBRef(lazy = true)
     private JobNode jobNode;
 
-    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        JobResult other = (JobResult) obj;
+        return id.equals(other.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getClass().getName() + "_" + id);
+    }
+
 }
