@@ -38,7 +38,7 @@ public class JobEntityController {
     ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         JobEntity jobEntity = repositoryFactory.getJobRepository().retrieveJobEntity(jobEntityId);
-        if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
+        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
         if(!jobNodeId.equals(jobEntity.getJobNode().getId())) throw new RuntimeException();
 
 
@@ -54,7 +54,7 @@ public class JobEntityController {
     ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
       
-        if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
+        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
 
 
         return jsonMappersFactory.getJobEntityMapper().getSimpleJobEntity(jobNode.getJobEntities());
@@ -75,7 +75,7 @@ public class JobEntityController {
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         JobScript jobScript = repositoryFactory.getJobScriptRepository().retrieveJobScriptById(jobScriptId).orElseThrow(RuntimeException::new);
       
-        if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
+        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
         if(!jobScript.getJobNode().getId().equals(jobNodeId)) throw new RuntimeException();
 
 
@@ -107,7 +107,7 @@ public class JobEntityController {
         JobScript jobScript = repositoryFactory.getJobScriptRepository().retrieveJobScriptById(jobScriptId).orElseThrow(RuntimeException::new);
         JobEntity jobEntity = repositoryFactory.getJobRepository().retrieveJobEntity(jobEntityId);
 
-        if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
+        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
         if(!jobScript.getJobNode().getId().equals(jobNodeId)) throw new RuntimeException();
         if(!jobScriptId.equals(jobEntity.getJobScript().getId())) throw new RuntimeException();
 

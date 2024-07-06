@@ -47,7 +47,7 @@ public class IlumGroupController {
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
-        if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
+        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
 
         if(jobNode.getJobsQueue().size() == 0){
             throw new RuntimeException("The queue is empty");
@@ -85,7 +85,7 @@ public class IlumGroupController {
     ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         IlumGroup ilumGroup = repositoryFactory.getIlumGroupRepository().retrieveByIlumId(ilumGroupId);
-        if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
+        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
         if(!jobNodeId.equals(ilumGroup.getJobNode().getId())) throw new RuntimeException();
 
         //initial ilum group config:

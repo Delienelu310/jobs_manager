@@ -33,6 +33,7 @@ public class JobNodeJsonMapper {
         .addFilter("job_script_jobs_files", SimpleBeanPropertyFilter.serializeAll())
         .addFilter("ilum_groups_jobs", SimpleBeanPropertyFilter.serializeAllExcept("ilumGroup"))
         .addFilter("job_entity_ilum_group", SimpleBeanPropertyFilter.serializeAll())
+        .addFilter("job_entity_job_script", SimpleBeanPropertyFilter.serializeAll())
     ;
 
     public MappingJacksonValue getFullJobNode(JobNode jobNode){

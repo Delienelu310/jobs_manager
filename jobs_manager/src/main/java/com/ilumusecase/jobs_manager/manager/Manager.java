@@ -32,9 +32,9 @@ public class Manager {
 
     Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
 
-    @Value("ilum.core.endpoint")
+    @Value("${ilum.core.endpoint}")
     private String endpoint;
-    @Value("ilum.core.version-path")
+    @Value("${ilum.core.version-path}")
     private String versionPath;
 
     @Autowired

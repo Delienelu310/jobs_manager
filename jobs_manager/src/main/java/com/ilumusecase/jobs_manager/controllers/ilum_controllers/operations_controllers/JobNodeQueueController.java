@@ -26,15 +26,19 @@ public class JobNodeQueueController {
     private boolean checkJarsCompatibility(JobNode jobNode, JobEntity jobEntity){
         
         
-        for(JobsFile jobsFile : jobEntity.getJobScript().getJobsFiles()){
+        outer: for(JobsFile jobsFile : jobEntity.getJobScript().getJobsFiles()){
             for(String fullClassName : jobsFile.getAllClasses()){
                 
                 for(JobEntity usedJobEntity : jobNode.getJobsQueue()){
                     if(!jobEntity.getJobScript().getExtension().equals(usedJobEntity.getJobScript().getExtension())){
                         continue;
                     }
+                    if(jobEntity.getJobScript().getJobsFiles().contains(jobsFile)){
+                        continue outer;
+                    }
 
                     for(JobsFile usedJobsFile : usedJobEntity.getJobScript().getJobsFiles()){
+                        
                         if(usedJobsFile.getAllClasses().contains(fullClassName)) return false;
                     }
 
@@ -43,12 +47,15 @@ public class JobNodeQueueController {
             }
         }
 
-        for(JobsFile jobsFile : jobEntity.getJobScript().getJobsFiles()){
+        outer: for(JobsFile jobsFile : jobEntity.getJobScript().getJobsFiles()){
             for(String fullClassName : jobsFile.getAllClasses()){
                 
                 for(JobEntity usedJobEntity : jobNode.getTestingJobs()){
                     if(!jobEntity.getJobScript().getExtension().equals(usedJobEntity.getJobScript().getExtension())){
                         continue;
+                    }
+                    if(jobEntity.getJobScript().getJobsFiles().contains(jobsFile)){
+                        continue outer;
                     }
 
                     for(JobsFile usedJobsFile : usedJobEntity.getJobScript().getJobsFiles()){
@@ -74,12 +81,12 @@ public class JobNodeQueueController {
     ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         JobEntity jobEntity = repositoryFactory.getJobRepository().retrieveJobEntity(jobEntityId);
-        if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
+        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
         if(!jobNodeId.equals(jobEntity.getJobNode().getId())) throw new RuntimeException();
 
 
         if(jobQueue.equals("job_queue")){
-            if(jobNode.getJobEntities().contains(jobEntity)){
+            if(jobNode.getJobsQueue().contains(jobEntity)){
                 jobNode.getJobsQueue().remove(jobEntity);
             }else{
                 if(!checkJarsCompatibility(jobNode, jobEntity)) throw new RuntimeException("The job entity is not compatible with current queue");

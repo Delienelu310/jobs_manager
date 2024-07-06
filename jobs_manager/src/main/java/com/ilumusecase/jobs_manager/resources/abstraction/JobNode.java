@@ -75,6 +75,6 @@ public class JobNode {
 
     @DBRef(lazy = true)
     @JsonFilter("job_node_ilum_groups")
-    private List<IlumGroup> ilumGroups;
+    private List<IlumGroup> ilumGroups = new LinkedList<>();
 
 }

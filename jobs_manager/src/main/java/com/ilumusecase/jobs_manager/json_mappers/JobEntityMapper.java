@@ -17,9 +17,9 @@ public class JobEntityMapper {
     private final FilterProvider simpleJobEntityFilter = new SimpleFilterProvider()
         .addFilter("ilum_resource_project_reference", SimpleBeanPropertyFilter.filterOutAllExcept("id", "projectDetails"))
         .addFilter("ilum_resource_job_node_reference", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
+        .addFilter("job_entity_job_script", SimpleBeanPropertyFilter.serializeAll())
         .addFilter("job_entity_ilum_group", SimpleBeanPropertyFilter.serializeAll())
         .addFilter("ilum_group_jobs", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobEntityDetails", "ilumId"))
-        .addFilter("job_entity_script", SimpleBeanPropertyFilter.serializeAll())
         .addFilter("job_script_jobs_files", SimpleBeanPropertyFilter.serializeAll())
     ;
     
