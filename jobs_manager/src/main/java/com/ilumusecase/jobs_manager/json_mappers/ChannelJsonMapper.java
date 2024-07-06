@@ -13,15 +13,16 @@ import com.ilumusecase.jobs_manager.resources.abstraction.Channel;
 @Component
 public class ChannelJsonMapper {
 
+    private final FilterProvider fullChannelFilter = new SimpleFilterProvider()
+        .addFilter("channel-plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
+        .addFilter("project-reference", SimpleBeanPropertyFilter.serializeAll())
+        .addFilter("plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
+        .addFilter("plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"));
+
     public MappingJacksonValue getFullChannel(Channel channel){
 
-        MappingJacksonValue wrapper = new MappingJacksonValue(channel);
-        FilterProvider filters = new SimpleFilterProvider()
-            .addFilter("channel-plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
-            .addFilter("project-reference", SimpleBeanPropertyFilter.serializeAll())
-            .addFilter("plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
-            .addFilter("plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"));
-        wrapper.setFilters(filters);
+        MappingJacksonValue wrapper = new MappingJacksonValue(channel); 
+        wrapper.setFilters(fullChannelFilter);
 
         return wrapper;
     }
@@ -29,12 +30,7 @@ public class ChannelJsonMapper {
     public MappingJacksonValue getFullChannelList(List<Channel> channel){
 
         MappingJacksonValue wrapper = new MappingJacksonValue(channel);
-        FilterProvider filters = new SimpleFilterProvider()
-            .addFilter("channel-plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
-            .addFilter("project-reference", SimpleBeanPropertyFilter.serializeAll())
-            .addFilter("plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
-            .addFilter("plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"));
-        wrapper.setFilters(filters);
+        wrapper.setFilters(fullChannelFilter);
 
         return wrapper;
     }

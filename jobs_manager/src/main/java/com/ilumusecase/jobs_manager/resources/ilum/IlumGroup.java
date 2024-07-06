@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 
@@ -30,20 +31,25 @@ public class IlumGroup {
     private String mod;
 
     @DBRef(lazy = true)
+    @JsonFilter("ilum_group_jobs")
     private JobEntity currentJob;
     private LocalDateTime currentStartTime;
 
     @DBRef(lazy = true)    
+    @JsonFilter("ilum_group_jobs")
     private List<JobEntity> jobs = new ArrayList<>();
 
     @DBRef(lazy = true)
+    @JsonFilter("ilum_group_jobs")
     private List<JobEntity> testingJobs = new ArrayList<>();
 
 
     @DBRef(lazy = true)
+    @JsonFilter("ilum_resource_project_reference")
     private Project project;
 
     @DBRef(lazy = true)
+    @JsonFilter("ilum_resource_job_node_reference")
     private JobNode jobNode;
 
     

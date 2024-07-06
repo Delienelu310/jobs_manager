@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 
@@ -21,11 +22,13 @@ public class JobEntity {
     private String id;
 
     @DBRef(lazy = true)
+    @JsonFilter("job_entity_ilum_group")
     private IlumGroup ilumGroup;
 
     private String ilumId;
 
     @DBRef(lazy = true)
+    @JsonFilter("job_entity_job_script")
     private JobScript jobScript;
     private String configuration;
     private JobEntityDetails jobEntityDetails;
@@ -35,9 +38,11 @@ public class JobEntity {
 
 
     @DBRef(lazy = true)
+    @JsonFilter("ilum_resource_job_node_reference")
     private JobNode jobNode;
 
     @DBRef(lazy = true)
+    @JsonFilter("ilum_resource_project_reference")
     private Project project;
 
 

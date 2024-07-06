@@ -74,7 +74,7 @@ public class IlumGroupController {
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
     
 
-        return jsonMappersFactory.getIlumGroupMapper().mapIlumGroupFull(ilumGroup);
+        return jsonMappersFactory.getIlumGroupMapper().mapSimpleIlumGroup(ilumGroup);
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/ilum_groups/{ilum_group_id}/start")

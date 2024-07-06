@@ -11,21 +11,21 @@ import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
 
 @Component
 public class AppUserJsonMapper {
+
+    private final FilterProvider fullUserFilter = new SimpleFilterProvider();
     
     public MappingJacksonValue getFulLAppUser(AppUser appUser){
         MappingJacksonValue result = new MappingJacksonValue(appUser);
-        FilterProvider filterProvider = new SimpleFilterProvider();
 
-        result.setFilters(filterProvider);
+        result.setFilters(fullUserFilter);
 
         return result;
     }
 
     public MappingJacksonValue getFullAppUserList(List<AppUser> users){
         MappingJacksonValue result = new MappingJacksonValue(users);
-        FilterProvider filterProvider = new SimpleFilterProvider();
 
-        result.setFilters(filterProvider);
+        result.setFilters(fullUserFilter);
 
         return result;
     }

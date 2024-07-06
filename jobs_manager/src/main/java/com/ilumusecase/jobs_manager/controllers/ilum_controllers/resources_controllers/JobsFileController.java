@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -47,7 +48,7 @@ public class JobsFileController {
         if( ! projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
         if( ! jobNodeId.equals(jobsFile.getJobNode().getId())) throw new RuntimeException(); 
 
-        return jsonMappersFactory.getJobsFileJsonMapper().getFullJobsFile(
+        return jsonMappersFactory.getJobsFileJsonMapper().getSimpleJobsFile(
             jobsFile
         );
     }
@@ -61,7 +62,7 @@ public class JobsFileController {
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         if( ! projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
 
-        return jsonMappersFactory.getJobsFileJsonMapper().getFullJobsFilesList(
+        return jsonMappersFactory.getJobsFileJsonMapper().getSimpleJobsFilesList(
             repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFilesByJobNodeId(jobNodeId)
         );
     }
@@ -73,7 +74,7 @@ public class JobsFileController {
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @RequestParam("files") MultipartFile file,
         @RequestParam("extension") String extension,
-        @RequestParam("jobs_details") JobsFileDetails jobsFileDetails
+        @RequestPart("jobs_details") JobsFileDetails jobsFileDetails
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
@@ -94,9 +95,7 @@ public class JobsFileController {
         jobsFile.setPublisher(appUser);
         jobsFile.setProject(project);
         jobsFile.setJobNode(jobNode);
-        
-        //send file to s3
-        s3ClientFactory.getJobS3Client().uploadJob(jobsFile, file);
+
 
         //save jobsfile to db
         repositoryFactory.getJobsFileRepositoryInterface().updateJobsFileFull(jobsFile);
@@ -106,7 +105,12 @@ public class JobsFileController {
         jobNode.getJobsFiles().add(jobsFile);
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
 
-        return jsonMappersFactory.getJobsFileJsonMapper().getFullJobsFile(jobsFile);
+
+        //send file to s3
+        s3ClientFactory.getJobS3Client().uploadJob(jobsFile, file);
+
+    
+        return jsonMappersFactory.getJobsFileJsonMapper().getSimpleJobsFile(jobsFile);
 
     }
 

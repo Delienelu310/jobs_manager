@@ -40,7 +40,7 @@ public class JobScriptController {
 
         if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
       
-        return jsonMappersFactory.getJobScriptMapper().mapJobScriptListFull(jobNode.getJobScripts());
+        return jsonMappersFactory.getJobScriptMapper().mapSimpleJobScriptsList(jobNode.getJobScripts());
     }
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_scripts/{job_script_id}")
@@ -55,7 +55,7 @@ public class JobScriptController {
         if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
         if(!jobScript.getJobNode().getId().equals(jobNodeId)) throw new RuntimeException();
 
-        return jsonMappersFactory.getJobScriptMapper().mapJobScriptFull(jobScript);
+        return jsonMappersFactory.getJobScriptMapper().mapSimpleJobScript(jobScript);
     }
     
     @PostMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_scripts")
@@ -81,7 +81,7 @@ public class JobScriptController {
         jobNode.getJobScripts().add(jobScript);
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
 
-        return jsonMappersFactory.getJobScriptMapper().mapJobScriptFull(
+        return jsonMappersFactory.getJobScriptMapper().mapSimpleJobScript(
             jobScript
         );
         
@@ -113,7 +113,7 @@ public class JobScriptController {
         }
 
 
-        return jsonMappersFactory.getJobScriptMapper().mapJobScriptFull(
+        return jsonMappersFactory.getJobScriptMapper().mapSimpleJobScript(
             repositoryFactory.getJobScriptRepository().updateFullJobScript(jobScript)
         );
     }

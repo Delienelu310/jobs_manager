@@ -47,27 +47,34 @@ public class JobNode {
 
 
     @DBRef(lazy = true)
+    @JsonFilter("job_node_jobs_files")
     private List<JobsFile> jobsFiles = new LinkedList<>();
     
     @DBRef(lazy = true)
+    @JsonFilter("job_node_job_scripts")
     private List<JobScript> jobScripts = new LinkedList<>();
 
     @DBRef(lazy = true)
+    @JsonFilter("job_node_job_entities")
     private List<JobEntity> jobEntities = new LinkedList<>();
 
     @DBRef(lazy = true)
+    @JsonFilter("job_node_job_results")
     private List<JobEntity> jobResults = new LinkedList<>();
 
 
 
 
     @DBRef(lazy = true)
+    @JsonFilter("job_node_jobs_queue")
     private List<JobEntity> testingJobs = new LinkedList<>();
 
     @DBRef(lazy = true)
+    @JsonFilter("job_node_jobs_queue")
     private List<JobEntity> jobsQueue = new LinkedList<>();
 
     @DBRef(lazy = true)
+    @JsonFilter("job_node_ilum_groups")
     private List<IlumGroup> ilumGroups;
 
 }

@@ -42,7 +42,7 @@ public class JobEntityController {
         if(!jobNodeId.equals(jobEntity.getJobNode().getId())) throw new RuntimeException();
 
 
-        return jsonMappersFactory.getJobEntityMapper().getFullJobEntity(jobEntity);
+        return jsonMappersFactory.getJobEntityMapper().getSimpleJobEntity(jobEntity);
 
     }
 
@@ -57,7 +57,7 @@ public class JobEntityController {
         if(!projectId.equals(jobNode.getId())) throw new RuntimeException();
 
 
-        return jsonMappersFactory.getJobEntityMapper().getFullJobEntityList(jobNode.getJobEntities());
+        return jsonMappersFactory.getJobEntityMapper().getSimpleJobEntity(jobNode.getJobEntities());
 
     }
 
@@ -92,7 +92,7 @@ public class JobEntityController {
         jobNode.getJobEntities().add(jobEntity);
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
 
-        return jsonMappersFactory.getJobEntityMapper().getFullJobEntity(jobEntity);
+        return jsonMappersFactory.getJobEntityMapper().getSimpleJobEntity(jobEntity);
     }
 
 
