@@ -2,9 +2,11 @@ package com.ilumusecase.jobs_manager.controllers.ilum_controllers.operations_con
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,6 +39,24 @@ public class IlumGroupController {
 
     @Autowired
     private JobEntityScheduler jobEntityScheduler;
+
+
+
+    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/ilum_group/{ilum_group_id}")
+    public MappingJacksonValue retrieveIlumGroupById(
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
+        @PathVariable("ilum_group_id") String ilumGroupId
+    ){
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        IlumGroup ilumGroup = repositoryFactory.getIlumGroupRepository().retrieveById(ilumGroupId);
+
+        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
+        if(!ilumGroup.getJobNode().getId().equals(jobNodeId)) throw new RuntimeException();
+
+        return jsonMappersFactory.getIlumGroupMapper().mapSimpleIlumGroup(ilumGroup);
+    }
+
 
 
     @PostMapping("/projects/{project_id}/job_nodes/{job_node_id}/ilum_group")
@@ -84,7 +104,7 @@ public class IlumGroupController {
         @PathVariable("ilum_group_id") String ilumGroupId
     ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
-        IlumGroup ilumGroup = repositoryFactory.getIlumGroupRepository().retrieveByIlumId(ilumGroupId);
+        IlumGroup ilumGroup = repositoryFactory.getIlumGroupRepository().retrieveById(ilumGroupId);
         if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
         if(!jobNodeId.equals(ilumGroup.getJobNode().getId())) throw new RuntimeException();
 
@@ -94,10 +114,18 @@ public class IlumGroupController {
         ilumGroup.setCurrentStartTime(LocalDateTime.now());
         ilumGroup.setCurrentJob(ilumGroup.getJobs().get(0));
         ilumGroup.setMod("NORMAL");
+        repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
 
 
+        Map<String, String> config = new HashMap<>();
+        config.put("projectId", ilumGroup.getProject().getId());
+        config.put("jobNodeId", ilumGroup.getJobNode().getId());
+        config.put("mod", ilumGroup.getMod());
+        config.put("prefix", "http://jobs-manager:8080");
+        config.put("token", "Basic YWRtaW46YWRtaW4=");
 
-        manager.submitJob(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()), new HashMap<>());
+
+        manager.submitJob(ilumGroup, ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()), config);
         try{
             jobEntityScheduler.startIlumGroupLifecycle(ilumGroup);
         }catch(Exception e){

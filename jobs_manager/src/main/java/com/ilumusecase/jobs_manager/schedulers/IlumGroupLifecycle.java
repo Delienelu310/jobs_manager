@@ -143,7 +143,7 @@ public class IlumGroupLifecycle implements Job{
         config.put("mod", ilumGroup.getMod());
         config.put("prefix", "http://jobs-manager:8080");
         config.put("token", "Basic YWRtaW46YWRtaW4=");
-        manager.submitJob(ilumGroup.getCurrentJob(), config);
+        manager.submitJob(ilumGroup, ilumGroup.getCurrentJob(), config);
 
         
     }

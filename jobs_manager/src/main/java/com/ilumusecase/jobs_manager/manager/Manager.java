@@ -109,27 +109,31 @@ public class Manager {
 
     private String mapToJson(Map<String, String> map){
         StringBuilder result = new StringBuilder();
-        result.append("{ ");
+        result.append("{");
         for(String key : map.keySet()){
-            result.append("\"" + key);
+            result.append("\"");
             result.append(key);
-            result.append("\": \"");
+            result.append("\":\"");
             result.append(map.get(key));
-            result.append("\", ");
+            result.append("\",");
         }
         result.delete(result.length() - 1, result.length());
         result.append("}");
         return result.toString();
     }
 
-    public String submitJob(JobEntity jobEntity, Map<String, String> config){
-        String url = endpoint + versionPath + "group/" + jobEntity.getIlumGroup().getIlumId() + "/job/submit";
+
+    public String submitJob(IlumGroup ilumGroup, JobEntity jobEntity, Map<String, String> config){
+        String url = endpoint + versionPath + "group/" + ilumGroup.getIlumId() + "/job/submit";
 
         String jsonData = "{" + 
             "\"type\": \"interactive_job_execute\"," + 
             "\"jobClass\":\"" + jobEntity.getJobScript().getClassFullName() + "\"," +
             "\"jobConfig\":" + mapToJson(config) +
         "}";
+        logger.info(jsonData);
+
+
         String ilumId = webClient.post()
             .uri(url)
             .contentType(MediaType.APPLICATION_JSON)

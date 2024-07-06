@@ -17,7 +17,7 @@ public class IlumGroupMapper {
         .addFilter("ilum_resource_project_reference", SimpleBeanPropertyFilter.filterOutAllExcept("id", "projectDetails"))
         .addFilter("ilum_resource_job_node_reference", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
         .addFilter("ilum_group_jobs", SimpleBeanPropertyFilter.serializeAllExcept("ilumGroup"))
-        .addFilter("job_entity_script", SimpleBeanPropertyFilter.serializeAll())
+        .addFilter("job_entity_job_script", SimpleBeanPropertyFilter.serializeAll())
         .addFilter("job_script_jobs_files", SimpleBeanPropertyFilter.serializeAll())
     ;
 

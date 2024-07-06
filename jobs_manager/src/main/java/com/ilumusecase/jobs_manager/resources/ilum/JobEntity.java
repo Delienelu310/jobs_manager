@@ -21,9 +21,9 @@ public class JobEntity {
     @Id
     private String id;
 
-    @DBRef(lazy = true)
-    @JsonFilter("job_entity_ilum_group")
-    private IlumGroup ilumGroup;
+    // @DBRef(lazy = true)
+    // @JsonFilter("job_entity_ilum_group")
+    // private IlumGroup ilumGroup;
 
     private String ilumId;
 
