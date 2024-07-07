@@ -1,11 +1,11 @@
 package com.ilumusecase.jobs_manager.schedulers;
 
-import org.quartz.DateBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +23,17 @@ public class JobEntityScheduler {
     public void startIlumGroupLifecycle(IlumGroup ilumGroup) throws SchedulerException{
         JobDetail jobDetail = JobBuilder.newJob(IlumGroupLifecycle.class)
             .withIdentity(new JobKey(ilumGroup.getId()))
+            .usingJobData("ilumGroupId", ilumGroup.getId())
             .storeDurably()
             .build();
 
 
         Trigger trigger = TriggerBuilder.newTrigger()
             .forJob(jobDetail)
-            .startAt(DateBuilder.futureDate(1, DateBuilder.IntervalUnit.MINUTE))
+            .startNow()
+            .withSchedule(SimpleScheduleBuilder.simpleSchedule()
+                .withIntervalInSeconds(40)
+                .repeatForever())
             .build();
 
         scheduler.scheduleJob(jobDetail, trigger);

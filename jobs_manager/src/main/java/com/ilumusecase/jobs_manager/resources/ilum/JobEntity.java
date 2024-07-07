@@ -33,10 +33,6 @@ public class JobEntity {
     private String configuration;
     private JobEntityDetails jobEntityDetails;
 
-    private String state;
-
-
-
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_job_node_reference")
     private JobNode jobNode;

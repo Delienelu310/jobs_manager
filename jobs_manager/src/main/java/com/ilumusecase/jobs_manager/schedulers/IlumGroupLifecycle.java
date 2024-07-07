@@ -16,6 +16,7 @@ import org.quartz.UnableToInterruptJobException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
@@ -41,39 +42,28 @@ public class IlumGroupLifecycle implements Job{
 
 
         //get current job state:
-        String state = manager.getJobInfo(ilumGroup.getCurrentJob()).get("state").asText();
+        JsonNode jobInfo = manager.getJobInfo(ilumGroup, ilumGroup.getCurrentJob());
+        boolean isError = !jobInfo.get("error").isNull();
+        boolean isFinished = !isError && !jobInfo.get("result").isNull();
+        
+        
         //if job state is not finished/error, then you should skip tick or stop the job, if it was to long
         if(
-            !ilumGroup.getCurrentJob().getState().equals("FINISHED") &&
-            !ilumGroup.getCurrentJob().getState().equals("ERROR")
-            
+            !isFinished &&
+            !isError
         ){
             long timePassed = Duration.between(LocalDateTime.now(), ilumGroup.getCurrentStartTime()).getSeconds();
             if(timePassed >= ilumGroup.getIlumGroupConfiguraion().getMaxJobDuration()){
                 manager.stopJob(ilumGroup.getCurrentJob());
-                state = manager.getJobInfo(ilumGroup.getCurrentJob()).get("state").asText();
+
+                jobInfo = manager.getJobInfo(ilumGroup, ilumGroup.getCurrentJob());
+                isError = !jobInfo.get("error").isNull();
+                isFinished = !isError && !jobInfo.get("result").isNull();
             }else{
                 return;
             }
         }
-        //refresh the state in the db, if required
-        if(!ilumGroup.getCurrentJob().getState().equals(state)){
-            repositoryFactory.getJobRepository().updateJobFull(ilumGroup.getCurrentJob());
-        }
-
-
-        //do something depending on the state
-        //now mod is expecte to be "FINISHED" or "ERROR"
-        if(
-            !ilumGroup.getCurrentJob().getState().equals("FINISHED") &&
-            !ilumGroup.getCurrentJob().getState().equals("ERROR")
-        ){
-            return;
-        }
-
-
-
-
+        
         if(
             ilumGroup.getMod().equals("TEST") &&
             ilumGroup.getCurrentTestingIndex() < ilumGroup.getTestingJobs().size()
@@ -85,7 +75,7 @@ public class IlumGroupLifecycle implements Job{
 
         }else if(
             ilumGroup.getMod().equals("NORMAL") && 
-            ilumGroup.getCurrentJob().getState().equals("ERROR") &&
+            isError &&
             ilumGroup.getCurrentIndex() < ilumGroup.getJobs().size()
             ||
             ilumGroup.getMod().equals("TEST") &&
@@ -101,7 +91,7 @@ public class IlumGroupLifecycle implements Job{
 
         }else if(
             ilumGroup.getMod().equals("NORMAL") && 
-            ilumGroup.getCurrentJob().getState().equals("ERROR") &&
+            isError &&
             ilumGroup.getCurrentIndex() >= ilumGroup.getJobs().size()
             ||
             ilumGroup.getCurrentTestingIndex() >= ilumGroup.getTestingJobs().size() &&
@@ -120,7 +110,7 @@ public class IlumGroupLifecycle implements Job{
             return;
 
         }else if(
-            ilumGroup.getCurrentJob().getState().equals("FINISHED") &&
+            isFinished &&
                 ilumGroup.getMod().equals("NORMAL")
         ){
             ilumGroup.setMod("TEST");
@@ -131,7 +121,7 @@ public class IlumGroupLifecycle implements Job{
         }else{
             throw new RuntimeException("Unexpected behaviod: " +
                 ilumGroup.getMod() + ", " +
-                ilumGroup.getCurrentJob().getState()
+                (isError ? "Error" : (isFinished ? "Finished" : "Strange state"))
             );
         }
 
@@ -143,7 +133,11 @@ public class IlumGroupLifecycle implements Job{
         config.put("mod", ilumGroup.getMod());
         config.put("prefix", "http://jobs-manager:8080");
         config.put("token", "Basic YWRtaW46YWRtaW4=");
-        manager.submitJob(ilumGroup, ilumGroup.getCurrentJob(), config);
+        
+        String ilumId = manager.submitJob(ilumGroup, ilumGroup.getCurrentJob(), config);
+        ilumGroup.getCurrentJob().setIlumId(ilumId);
+        repositoryFactory.getJobRepository().updateJobFull(ilumGroup.getCurrentJob());
+
 
         
     }

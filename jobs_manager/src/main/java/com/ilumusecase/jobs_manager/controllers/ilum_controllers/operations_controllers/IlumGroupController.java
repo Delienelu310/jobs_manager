@@ -125,7 +125,9 @@ public class IlumGroupController {
         config.put("token", "Basic YWRtaW46YWRtaW4=");
 
 
-        manager.submitJob(ilumGroup, ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()), config);
+        String ilumId = manager.submitJob(ilumGroup, ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()), config);
+        ilumGroup.getCurrentJob().setIlumId(ilumId);
+        repositoryFactory.getJobRepository().updateJobFull(ilumGroup.getCurrentJob());
         try{
             jobEntityScheduler.startIlumGroupLifecycle(ilumGroup);
         }catch(Exception e){

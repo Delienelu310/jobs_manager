@@ -65,7 +65,6 @@ public class Manager {
 
         Set<String> jobsFilesUsed = new HashSet<>();
 
-
         for(JobEntity jobEntity : ilumGroup.getJobs()){
             for(JobsFile jobsFile : jobEntity.getJobScript().getJobsFiles()){
                 if(jobsFilesUsed.contains(jobsFile.getId())) continue;
@@ -85,6 +84,28 @@ public class Manager {
             }
             
         }
+
+        for(JobEntity jobEntity : ilumGroup.getTestingJobs()){
+            for(JobsFile jobsFile : jobEntity.getJobScript().getJobsFiles()){
+                if(jobsFilesUsed.contains(jobsFile.getId())) continue;
+
+                jobsFilesUsed.add(jobsFile.getId());
+
+
+
+                byte[] bytes = s3ClientFactory.getJobS3Client().downloadJob(jobsFile).orElseThrow(RuntimeException::new);
+                ByteArrayResource byteArrayResource = new ByteArrayResource(bytes) {
+                    @Override
+                    public String getFilename() {
+                        return jobsFile.getId() + "." + jobsFile.getExtension();
+                    }
+                };
+                bodyMap.add(extensionMap.get(jobsFile.getExtension()), byteArrayResource);
+            }
+            
+        }
+
+
         //add jobs_connection_lib 
         bodyMap.add("jars", new ByteArrayResource(loadJobConnectionLib()){
             @Override
@@ -144,13 +165,15 @@ public class Manager {
         return ilumId;
     }
 
-    public JsonNode getJobInfo(JobEntity jobEntity){
-        String url = endpoint + versionPath + "job/" + jobEntity.getIlumId();
+    public JsonNode getJobInfo(IlumGroup ilumGroup, JobEntity jobEntity){
+        String url = endpoint + versionPath + "group/" + ilumGroup.getIlumId() + "/job/result?search=" + jobEntity.getIlumId();
+
+        logger.info(url);
 
         JsonNode jsonNode = webClient.get()
             .uri(url)
             .retrieve()
-            .bodyToMono(JsonNode.class).block();
+            .bodyToMono(JsonNode.class).block().path("content").get(0);
         return jsonNode;
         
     }
