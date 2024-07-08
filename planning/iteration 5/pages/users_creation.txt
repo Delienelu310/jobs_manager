@@ -1,0 +1,14 @@
+
+form
+    username
+    status (moderator / user)
+    password
+
+users list
+    search bar
+    filter
+    pager
+    user
+        details
+        status
+        projects

@@ -1,0 +1,40 @@
+
+
+project_graph
+    display (canvas)
+        jobnode
+            name, status
+            inputs - points 
+            outputs - points
+        channels - bold line between points
+        contextmenu
+    panel
+        cursor
+        connect 
+        add job jobnode
+        delete
+    channel-creation-window
+
+users-list
+    search bar
+    filter
+        privilleges
+        jobNodes
+    pager
+    user
+        username
+        privilleges
+        status (api user/moderator)
+    
+
+jobs-files list
+    search bar
+    filter
+    pager
+    jobs-file
+        details
+        check status
+        delete
+        update
+
+

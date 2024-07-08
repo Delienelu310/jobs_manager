@@ -1,0 +1,19 @@
+
+button: add project
+    input name
+    input description
+
+search bar
+filter
+    admin
+pager
+    pageSize
+    offset
+request button
+
+[
+    project element
+        name, description, admin
+        enter button
+
+]
