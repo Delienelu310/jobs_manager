@@ -1,0 +1,123 @@
+
+
+1. Projects in general
+- Creating projects by providing name and description
+- Viewing list of projects 
+    all projects
+    available to current user
+    created by the certain user
+    filtered on search query
+    chosen json mapping style
+    paging
+- updating its name and descriptiont
+- deleting projects with everything that is inside, if nothing is running right now
+- projects force delete - stops evertything and deletes
+
+2. Projects more detailed:
+- viewing a graph of job nodes, that are connected
+    jobnodes are vertices
+    channels are edges
+    inputs/output - are points of connection
+    the vertices placement can be changed with a drag&drop 
+    the state of jobnodes and channels (running / not running) is displayed
+
+- instruments panel / context menu (for privileged users)
+    adding job nodes
+    adding inputs and outputs to jobnodes, if the jobnode is not running
+    adding inputs and outputs to project
+    deleting jobnodes with all related resources, if nothing is running within it
+    deleting jobnodes forcefully
+    connecting inputs and outputs (both of jobnodes and project), if the jobnode is not running
+        by mouse, then the window appears, where the channel details should be set, including channel type
+    disconnecting inputs and outputs, if the jobnodes are not running right now and channel
+    deleting channel, if not working 
+    deleting channel forcefully
+
+    launching channels, jobnodes
+    stopping channels, jobnodes
+
+- users and privileges management:
+    viewing of a list of users
+        filtered by search query
+        filtered by privileges assigned
+            general project privileges
+            specific jobnode privilege
+    addition of users to project
+    addition of users to separate jobnodes
+    modifying of the user`s privilege list 
+        inside of the project
+        inside of the jobnode
+    removing users
+        from project
+        from separate jobnode
+- ilum resources:
+    1. jobsFiles:
+        view list of all jobsfiles that are currently associated with this project
+            search query
+            filter by jobnode ids
+            filter by publisher
+            filter by extension
+        delete jar file, if it is possible 
+        check state of jobsfiles - are they present on s3 bucket?
+        update jarfile - uplaod new version and replace previous
+
+
+3. JobNodes more detailed:
+    view job node details
+    updating job node details
+    users and privilege management - in similar way 
+
+    ilum resources:
+        jobs files:
+            upload jobs ifle
+            delete jobs file, if not used by job entity in queue
+            view jobs files assigned to this jobnode
+                search query
+                filter by jobnode ids
+                filter by publisher
+                filter by extension
+            view job scripts, that make use of this jobsfile
+            update jobs file details
+            update jobs file
+            check jobs file state
+            find jobs files by given classname
+
+        job scripts    
+            create 
+            delete, if not used by job entity in queue
+            attach/deattach jobsfiels to it
+            update details
+            view job scripts 
+                search query
+                filter by jobnode ids
+                filter by publisher
+                filter by extension
+            view jobsfiles used 
+    queues:
+        add jobentity, by providing job script and config
+        remove jobentity by clicking on it
+        check if certain classname is compatible
+        check if jobsfile is compatible 
+        check if jobscript is compatible
+        clear queue
+        find jobs files, that make use of 
+
+    launching: 
+        checking if the jobnode is ready to be launched
+        create ilum group
+        launch all realted channels
+        launch ilum group
+    
+    observing results:
+        viewing as a list, with filtering
+        viewing separate ilumgroup tests in good visual representation
+        clearing results
+
+    add, delete, update inputs and outputs 
+
+4. Channels more detailed:
+    update channel details
+    listen to channel
+    crud operations
+
+
