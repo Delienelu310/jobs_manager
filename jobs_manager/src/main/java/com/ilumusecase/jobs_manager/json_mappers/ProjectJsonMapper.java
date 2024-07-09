@@ -1,19 +1,19 @@
 package com.ilumusecase.jobs_manager.json_mappers;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 
-@Component
-public class ProjectJsonMapper {
+@Component(value = "Project")
+public class ProjectJsonMapper implements ResourceJsonMapper{
 
     private final FilterProvider fullProjectFilter = new SimpleFilterProvider()
+        .addFilter("project", SimpleBeanPropertyFilter.serializeAll())
         .addFilter("project-reference", SimpleBeanPropertyFilter.filterOutAllExcept("id", "projectDetails"))
         .addFilter("plug-channel", SimpleBeanPropertyFilter.serializeAll())
         .addFilter("node-plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
@@ -23,20 +23,20 @@ public class ProjectJsonMapper {
         )
     );
 
-    public MappingJacksonValue getFullProject(Project project){
+    private final FilterProvider simpleProjectFilter = new SimpleFilterProvider()
+        .addFilter("project", SimpleBeanPropertyFilter.filterOutAllExcept("id", "projectDetails", "privileges"));
+    
 
-        MappingJacksonValue wrapper = new MappingJacksonValue(project);
-        wrapper.setFilters(fullProjectFilter);
 
-        return wrapper;
+    private final Map<String, FilterProvider> filters = new HashMap<>();
+    {
+        filters.put("simple", simpleProjectFilter);
+        filters.put("full", fullProjectFilter);
     }
 
-    public MappingJacksonValue getFullProjectList(List<Project> project){
-
-        MappingJacksonValue wrapper = new MappingJacksonValue(project);
-        wrapper.setFilters(fullProjectFilter);
-
-        return wrapper;
+    @Override
+    public FilterProvider getFilterProvider(String type) {
+        return filters.get(type);
     }
 
 }

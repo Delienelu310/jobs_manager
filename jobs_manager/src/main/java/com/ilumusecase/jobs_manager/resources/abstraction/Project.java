@@ -20,6 +20,7 @@ import lombok.NoArgsConstructor;
 @Document
 @Data
 @NoArgsConstructor
+@JsonFilter("project")
 public class Project {
     
     @Id

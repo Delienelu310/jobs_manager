@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 public class JsonMappersFactory {
 
     @Autowired
-    private ProjectJsonMapper projectJsonMapper;
-    @Autowired
     private ChannelJsonMapper channelJsonMapper;
     @Autowired
     private JobNodeJsonMapper jobNodeJsonMapper;
@@ -29,9 +27,6 @@ public class JsonMappersFactory {
     }
     public JobNodeJsonMapper getJobNodeJsonMapper() {
         return jobNodeJsonMapper;
-    }
-    public ProjectJsonMapper getProjectJsonMapper() {
-        return projectJsonMapper;
     }
     public ChannelJsonMapper getChannelJsonMapper() {
         return channelJsonMapper;
