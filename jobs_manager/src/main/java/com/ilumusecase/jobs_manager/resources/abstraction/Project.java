@@ -27,6 +27,7 @@ public class Project {
     private String id;
 
     private ProjectDetails projectDetails;
+    private String admin;
 
     @DBRef(lazy=true)
     @JsonFilter("plug-channel")

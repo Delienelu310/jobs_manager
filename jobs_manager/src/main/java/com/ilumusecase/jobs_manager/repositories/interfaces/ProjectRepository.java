@@ -8,6 +8,14 @@ import com.ilumusecase.jobs_manager.resources.abstraction.ProjectDetails;
 public interface ProjectRepository {
 
 
+    public List<Project> retrieveProjectsFiltered(
+        int pageSize,
+        int pageNumber,
+        String query,
+        String username,
+        String admin
+    );
+
     public List<Project> retrieveAllProjects();
     public Project retrieveProjectById(String id);
 

@@ -3,6 +3,8 @@ package com.ilumusecase.jobs_manager.repositories.mongodb;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.ProjectRepository;
@@ -52,6 +54,18 @@ public class ProjectMongoRepository implements ProjectRepository {
     @Override
     public Project updateProjectFull(Project project) {
         return mongoProject.save(project);
+    }
+
+    @Override
+    public List<Project> retrieveProjectsFiltered(int pageSize, int pageNumber, String query, String username, String admin) {
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        if(admin == null){
+            return mongoProject.retrieveProjectsFiltered(query, username, pageable);
+        }else{
+            return mongoProject.retrieveProjectsFilteredAdvanced(query, username, admin, pageable);
+        }
     }
     
 }

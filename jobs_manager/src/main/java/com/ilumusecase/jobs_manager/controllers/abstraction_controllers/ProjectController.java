@@ -1,6 +1,7 @@
 package com.ilumusecase.jobs_manager.controllers.abstraction_controllers;
 
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -9,8 +10,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.Channel;
@@ -26,6 +29,8 @@ import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.Auth
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.IgnoreAuthAspect;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
+import jakarta.validation.constraints.Min;
+
 @RestController
 public class ProjectController {
 
@@ -35,8 +40,28 @@ public class ProjectController {
     @Autowired
     private ChannelController channelController;
     
+
+    Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
+
+
     @GetMapping("/projects")
-    @IgnoreAuthAspect
+    @JsonMapperRequest(type="simple", resource = "Project")
+    public Object getProjects(
+        @RequestParam(name = "query", defaultValue = "", required = false) String query,
+        @RequestParam(name = "admin", required = false) String admin,
+        @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
+        @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber,
+        Authentication authentication
+    ){
+        logger.info(query + " " + pageSize + " " + pageNumber + " " + authentication.getName());
+
+        query = query.trim();
+
+        return repositoryFactory.getProjectRepository().retrieveProjectsFiltered(pageSize, pageNumber, query, authentication.getName(), admin);
+       
+    }
+
+    @GetMapping("/projects/all")
     @JsonMapperRequest(type="simple", resource = "Project")
     public Object getAllProjects(Authentication authentication){
 
@@ -89,6 +114,7 @@ public class ProjectController {
         privilegeList.getList().add(ProjectPrivilege.ADMIN);
         repositoryFactory.getProjectPrivilegeList().update(privilegeList);
 
+        project.setAdmin(authentication.getName());
         project.getPrivileges().put(authentication.getName(), privilegeList);
         project = repositoryFactory.getProjectRepository().updateProjectFull(project);
 
