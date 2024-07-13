@@ -24,7 +24,7 @@ public class ProjectJsonMapper implements ResourceJsonMapper{
     );
 
     private final FilterProvider simpleProjectFilter = new SimpleFilterProvider()
-        .addFilter("project", SimpleBeanPropertyFilter.filterOutAllExcept("id", "projectDetails", "privileges"));
+        .addFilter("project", SimpleBeanPropertyFilter.filterOutAllExcept("id", "projectDetails", "admin"));
     
 
 
