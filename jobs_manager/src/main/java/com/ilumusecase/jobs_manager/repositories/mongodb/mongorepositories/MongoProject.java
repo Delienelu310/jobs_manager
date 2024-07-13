@@ -17,4 +17,11 @@ public interface MongoProject extends MongoRepository<Project, String>{
     @Query("{'projectDetails.name': { $regex: '^?0', $options: 'i' }, 'privileges.?1': { $exists: true }}")
     public List<Project> retrieveProjectsFiltered(String query, String username, Pageable pageable);
     
+
+    @Query(value = "{'projectDetails.name': { $regex: '^?0', $options: 'i' },  'privileges.?1': { $exists: true },  'admin': { $eq: '?2' } }", count=true)
+    public long countProjectsFilteredAdvanced(String query, String username, String admin );
+
+    @Query(value = "{'projectDetails.name': { $regex: '^?0', $options: 'i' }, 'privileges.?1': { $exists: true }}", count = true)
+    public long countProjectsFiltered(String query, String username);
+    
 }

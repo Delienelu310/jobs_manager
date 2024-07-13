@@ -1,15 +1,20 @@
 
 import { ProjectSimple } from "../../../api/abstraction/ProjectClient";
 
-const ProjectElement = (projectSimple : ProjectSimple) => {
+
+export interface ProjectElementProps{
+    data: ProjectSimple
+}
+
+const ProjectElement = ( {data} : ProjectElementProps) => {
     return (
         <div>     
-            <h4>{projectSimple.projectDetails.name}</h4>
-            <span>{projectSimple.id}</span>
+            <h4>{data.projectDetails.name}</h4>
+            <span>{data.id}</span>
             <hr/>
-            {projectSimple.projectDetails.description}
+            {data.projectDetails.description}
             <hr/>
-            <b>Admin: ${projectSimple.admin}</b>
+            <b>Admin: {data.admin}</b>
         </div>
     );
 };

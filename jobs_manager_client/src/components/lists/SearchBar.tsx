@@ -8,7 +8,7 @@ export interface SearchBarParameters{
 const SearchBar = ({queue, setQueue} : SearchBarParameters) => {
     return (
         <div>
-            <input value={queue} onChange={e => setQueue(queue)}/>
+            <input value={queue} onChange={e => setQueue(e.target.value)}/>
         </div>
     );
 };

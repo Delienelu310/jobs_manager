@@ -6,7 +6,6 @@ import { FieldValue } from "./Filter";
 import React, { useEffect, useState } from "react";
 
 
-
 export interface Field{
     label : string,
     fieldType : FieldType,
@@ -16,14 +15,16 @@ export interface Field{
 
 export interface SourceCountArg{
     filter : {
-        parameters : Map<string, FieldValue>
+        parameters : Map<string, FieldValue>,
+        values : Map<string , string[]>
     },
     search : string
 }
 
 export interface SourceArg{
     filter : {
-        parameters : Map<string, FieldValue>
+        parameters : Map<string, FieldValue>,
+        values : Map<string, string[]>
     },
     search : string,
     pager : {
@@ -76,20 +77,32 @@ const List = <Data,>({
     
 
     //fitler:
-    const fields : Map<string, FieldValue> = new Map<string, FieldValue>([]);
+    const [fields, setFields] = useState<Map<string, FieldValue>>(new Map<string, FieldValue>([]));
+    
+    const [values, setValues] = useState<Map<string, string[]>>(new Map<string, string[]>([]));
 
+    useEffect(() => {
+        
+        const fields = new Map<string, FieldValue>([]);
+        for(let field  of parameters){
+            
 
-    for(let field  of parameters){
-        let [val, setter] = useState<string[]>([]);
+            let fieldExtended : FieldValue = {
+                additionalData: field.additionalData,
+                fieldType: field.fieldType,
+                setter: (val) => {
+                    const newMap = new Map(values);
+                    newMap.set(field.label, val);
+                    setValues(newMap);
+                }
+            };
+            fields.set(field.label, fieldExtended);
 
-        let fieldExtended : FieldValue = {
-            additionalData: field.additionalData,
-            fieldType: field.fieldType,
-            setter: setter,
-            value: val
-        };
-        fields.set(field.label, fieldExtended);
-    }
+            
+        }
+        setFields(fields);
+    }, []);
+    
     
     
     
@@ -101,7 +114,8 @@ const List = <Data,>({
         sourceCount({
             search : queue,
             filter : {
-                parameters : fields
+                parameters : fields,
+                values : values
             }
         }).then(elementsCount => {
             setElementsCount(elementsCount);
@@ -115,7 +129,8 @@ const List = <Data,>({
         sourceData({
             search : queue,
             filter : {
-                parameters : fields
+                parameters : fields,
+                values: values
             },
             pager : {
                 pageChosen : pageChosen,
@@ -142,7 +157,7 @@ const List = <Data,>({
         <div>
             <SearchBar queue={queue} setQueue={setQueue}/>
             <button className="btn btn-success" onClick={() => { count(); search(); }}>Apply</button>
-            <Filter parameters={new Map<string, FieldValue>([])}/>
+            <Filter parameters={fields} values={values}/>
 
             <div>
                 {data.map(d => (

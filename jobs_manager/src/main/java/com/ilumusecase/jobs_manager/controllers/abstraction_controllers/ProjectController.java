@@ -61,6 +61,17 @@ public class ProjectController {
        
     }
 
+    @GetMapping("/projects/count")
+    public long getProjectsCount(
+        @RequestParam(name = "query", defaultValue = "", required = false) String query,
+        @RequestParam(name = "admin", required = false) String admin,
+        Authentication authentication
+    ){
+        query = query.trim();
+
+        return repositoryFactory.getProjectRepository().countProjectsFiltered(query, authentication.getName(), admin);
+    }
+
     @GetMapping("/projects/all")
     @JsonMapperRequest(type="simple", resource = "Project")
     public Object getAllProjects(Authentication authentication){

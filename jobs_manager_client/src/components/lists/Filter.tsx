@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 
 export enum FieldType{
@@ -6,8 +6,8 @@ export enum FieldType{
 }
 
 export interface FieldValue{
-    value : string[],
-    setter: React.Dispatch<React.SetStateAction<string[]>>,       
+    // setter: React.Dispatch<React.SetStateAction<string[]>>,    
+    setter : (val : string[]) => void   
     fieldType: FieldType,                                      
     additionalData: string[]                                        
 }
@@ -15,9 +15,10 @@ export interface FieldValue{
 
 export interface FilterProperties{
     parameters : Map<string, FieldValue>
+    values : Map<string, string[]>
 }
 
-const Filter = ({parameters} : FilterProperties) => {
+const Filter = ({parameters, values} : FilterProperties) => {
 
     const [multipleInput, setMultipleInput] = useState<string>("");
     const [multipleInputList, setMultipleInputList] = useState<string[]>([]);
@@ -25,12 +26,13 @@ const Filter = ({parameters} : FilterProperties) => {
 
     return (
         <div>
+            <h5>Filter</h5>
             {Array.from(parameters.entries()).map( ([label, fieldValue]) => (
                 <div>
                     {fieldValue.fieldType == FieldType.SingleInput ?
                         <div>
                             <label>{label}</label>
-                            <input value={fieldValue.value[0] ? fieldValue.value[0] : ""} onChange={(e) => fieldValue.setter([e.target.value])}/>
+                            <input value={values.get(label)} onChange={(e) => fieldValue.setter([e.target.value])}/>
                         </div>
                         :
                         fieldValue.fieldType == FieldType.MultipleInput ?
@@ -55,7 +57,7 @@ const Filter = ({parameters} : FilterProperties) => {
                         <div>
                             <label>{label}</label>
                             <select 
-                                value={fieldValue.value[0] ? fieldValue.value[0] : ""}
+                                value={values.get(label)}
                                 onChange={(e) => fieldValue.setter([e.target.value])}
                             >
                                 {fieldValue.additionalData.map(str => <option value={str}>

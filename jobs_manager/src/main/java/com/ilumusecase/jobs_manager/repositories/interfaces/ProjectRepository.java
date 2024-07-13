@@ -15,6 +15,7 @@ public interface ProjectRepository {
         String username,
         String admin
     );
+    public long countProjectsFiltered(String query, String username, String admin);
 
     public List<Project> retrieveAllProjects();
     public Project retrieveProjectById(String id);

@@ -61,10 +61,19 @@ public class ProjectMongoRepository implements ProjectRepository {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-        if(admin == null){
+        if(admin == null || admin.equals("")){
             return mongoProject.retrieveProjectsFiltered(query, username, pageable);
         }else{
             return mongoProject.retrieveProjectsFilteredAdvanced(query, username, admin, pageable);
+        }
+    }
+
+    @Override
+    public long countProjectsFiltered(String query, String username, String admin){
+        if(admin == null || admin.equals("")){
+            return mongoProject.countProjectsFiltered(query, username);
+        }else{
+            return mongoProject.countProjectsFilteredAdvanced(query, username, admin);
         }
     }
     
