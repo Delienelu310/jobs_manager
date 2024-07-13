@@ -1,4 +1,4 @@
-import { AxiosResponse } from "axios";
+import { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import  apiClient from "../api/ApiClient";
 import React from "react";
 
@@ -10,7 +10,10 @@ export interface ClientData{
 
 export function login(
     {username, password} : ClientData, 
-    {setToken} : {setToken : React.Dispatch<React.SetStateAction<string | null>>}
+    {setToken, setRequestInjector} : {
+        setToken : React.Dispatch<React.SetStateAction<string | null>>,
+        setRequestInjector : React.Dispatch<React.SetStateAction<number | null>>
+    }
 ) : Promise<AxiosResponse<string>>{
 
     const base64Token : string = btoa(`${username}:${password}`);
@@ -20,8 +23,13 @@ export function login(
           'Authorization': `Basic ${base64Token}`,
         }
     }).then(response   => {
+        const token = `Bearer ${response.data}`;
+        setToken(token);
 
-        setToken(`Bearer ${response.data}`);
+        setRequestInjector(apiClient.interceptors.request.use((config) => {
+            config.headers.Authorization=token
+            return config;
+        }));
 
         return response;
     });
