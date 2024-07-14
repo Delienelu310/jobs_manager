@@ -12,6 +12,7 @@ import com.ilumusecase.jobs_manager.repositories.interfaces.JobRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.JobScriptRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.JobsFileRepositoryInterface;
 import com.ilumusecase.jobs_manager.repositories.interfaces.PrivilegeListRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.ProjectGraphRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ProjectRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.MongoAppUser;
@@ -43,6 +44,9 @@ public class MongoRepository implements RepositoryFactory{
     private JobsFileMongo jobsFileMongo;
     @Autowired
     private JobScriptsMongoRepository jobScriptsMongoRepository;
+    @Autowired
+    private ProjectGraphMongoRepository projectGraphMongoRepository;
+
 
     @Override
     public JobNodesRepository getJobNodesRepository() {
@@ -97,6 +101,11 @@ public class MongoRepository implements RepositoryFactory{
     @Override
     public JobScriptRepository getJobScriptRepository() {
         return jobScriptsMongoRepository;
+    }
+
+    @Override
+    public ProjectGraphRepository getProjectGraphRepository() {
+        return projectGraphMongoRepository;
     }
 
   

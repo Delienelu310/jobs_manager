@@ -26,13 +26,13 @@ export default function AuthProvider({children} : {children : ReactNode})  {
     const [token, setToken] = useState<string | null>(null);
     const [requestInjector, setRequestInjector] = useState<number | null>(null);
 
-    // useEffect(() => {
-    //     setRequestInjector(apiClient.interceptors.request.use((config) => {
-    //         config.headers.Authorization="Basic YWRtaW46YWRtaW4="
-    //         return config;
-    //     }));
-    //     setToken("Basic YWRtaW46YWRtaW4=");
-    // }, []);
+    useEffect(() => {
+        setRequestInjector(apiClient.interceptors.request.use((config) => {
+            config.headers.Authorization="Basic YWRtaW46YWRtaW4="
+            return config;
+        }));
+        setToken("Basic YWRtaW46YWRtaW4=");
+    }, []);
     
 
     function logout() : void{

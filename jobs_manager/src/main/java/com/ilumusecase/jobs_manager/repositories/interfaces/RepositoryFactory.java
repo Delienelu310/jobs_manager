@@ -16,4 +16,5 @@ public interface RepositoryFactory {
     public IlumGroupRepository getIlumGroupRepository();
     public JobsFileRepositoryInterface getJobsFileRepositoryInterface();
     public JobScriptRepository getJobScriptRepository();
+    public ProjectGraphRepository getProjectGraphRepository();
 } 
