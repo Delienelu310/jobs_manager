@@ -1,12 +1,26 @@
 import apiClient from "../ApiClient";
 
 
+export interface Channel{
+    id: string, 
+    channelDetails: {
+        name : string,
+        type : string,
+        headers : string[]
+    }
+}
+
 export interface JobNodeVertice{
     x : number,
     y : number,
     id : string,
     jobNode : {
-        id : string
+        id : string,
+        jobNodeDetails: {
+            name : string
+        },
+        input : Channel[]
+        ouput : Channel[]
     }
 }
 

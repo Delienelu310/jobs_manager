@@ -15,10 +15,15 @@ public class JobNodeVerticeJsonMapper implements ResourceJsonMapper{
     private final FilterProvider simplefFilterProvider = new SimpleFilterProvider()
         .addFilter("vertice_job_node", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
     ;
+    private final FilterProvider graphFilterProvider = new SimpleFilterProvider()
+        .addFilter("vertice_job_node", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails", "input", "output"))
+        .addFilter("node-plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
+    ;
 
     private final Map<String, FilterProvider> filters = new HashMap<>();
     {
         filters.put("simple", simplefFilterProvider);
+        filters.put("graph", graphFilterProvider);
     }
 
 

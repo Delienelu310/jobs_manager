@@ -80,7 +80,7 @@ public class ProjectGraphController {
 
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/graph")
-    @JsonMapperRequest(type="simple", resource = "JobNodeVertice")
+    @JsonMapperRequest(type="graph", resource = "JobNodeVertice")
     public Object updateJobNodeVertice(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
