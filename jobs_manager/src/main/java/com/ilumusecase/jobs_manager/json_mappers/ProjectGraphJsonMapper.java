@@ -14,9 +14,9 @@ public class ProjectGraphJsonMapper implements ResourceJsonMapper{
 
   
     private final FilterProvider graphFilterProvider = new SimpleFilterProvider()
-        .addFilter("project_graph_project", SimpleBeanPropertyFilter.filterOutAllExcept("id", "projectDetails"))
+        .addFilter("project_graph_project", SimpleBeanPropertyFilter.filterOutAllExcept("id"))
         .addFilter("project_graph_vertices", SimpleBeanPropertyFilter.serializeAll())
-        .addFilter("vertice_job_node", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"));
+        .addFilter("vertice_job_node", SimpleBeanPropertyFilter.filterOutAllExcept("id"));
 
     private final Map<String, FilterProvider> filters = new HashMap<>();
     {

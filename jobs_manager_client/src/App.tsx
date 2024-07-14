@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import AuthProvider from './authentication/AuthContext';
 import WelcomePage from './pages/WelcomePage';
 import ProjectListPage from './pages/ProjectsListPage';
+import ProjectPage from './pages/ProjectPage';
 
 
 function App() {
@@ -19,6 +20,8 @@ function App() {
             <Route path={"/"} Component={WelcomePage}/>
 
             <Route path={"/projects"} Component={ProjectListPage}/>
+
+            <Route path={"/projects/:projectId"} Component={ProjectPage}/>
           </Routes>
         </BrowserRouter>
       </AuthProvider>
