@@ -19,5 +19,10 @@ public class ProjectGraphMongoRepository implements ProjectGraphRepository{
     public Optional<ProjectGraph> retrieveProjectGraphByProjectId(String projectId) {
         return mongoProjectrGraph.findByProject_Id(projectId);
     }
+
+    @Override
+    public ProjectGraph updateProjectGraph(ProjectGraph projectGraph) {
+        return mongoProjectrGraph.save(projectGraph);
+    }
     
 }
