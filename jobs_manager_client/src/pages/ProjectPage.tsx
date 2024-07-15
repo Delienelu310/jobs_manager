@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import ProjectGraphComponent from "../components/projectGraph/ProjectGraph";
 import { ProjectGraph, retrieveProjectGraph } from "../api/ui/projectGraphApi";
 import { useParams } from "react-router-dom";
-import { ProjectFullData, retrieveProject } from "../api/ui/projectApi";
+import { ProjectFullData, retrieveProject } from "../api/abstraction/projectApi";
 
 const ProjectPage = () => {
 
