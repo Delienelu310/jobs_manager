@@ -5,6 +5,7 @@ import { NullGraphElement } from "./NullGraphElement";
 import { ChannelFullData } from "../../../api/abstraction/projectApi";
 import { PlugElement } from "./PlugElement";
 import { PlugBarElement } from "./PlugBarElement";
+import { TextNode } from "./TetxNode";
 
 
 export interface StaticChannelConfig{
@@ -42,7 +43,8 @@ export class ChannelElement implements GraphElement{
         return `ChannelElement_${this.channelData.id}`;
     }
 
-    public getCoords() : [number, number]{
+
+    private getPoints() : [[number, number], [number, number]]{
         const inputPlug : PlugElement = this.gof.findById(this.inputId) as PlugElement;
         const outputPlug : PlugElement = this.gof.findById(this.outputId) as PlugElement;
 
@@ -57,6 +59,14 @@ export class ChannelElement implements GraphElement{
         leftPoint[1] += leftConfig.plugHeight / 2;
 
         rightPoint[1] += rightConfig.plugHeight / 2;
+
+        return [leftPoint, rightPoint];
+    }
+
+
+
+    public getCoords() : [number, number]{
+       let [leftPoint, rightPoint] = this.getPoints();
 
 
         let middlePoint = [(leftPoint[0] + rightPoint[0]) / 2, (leftPoint[1] + rightPoint[1]) / 2];
@@ -76,8 +86,41 @@ export class ChannelElement implements GraphElement{
     }
 
 
-    public draw(): void {
-        throw new Error("Method not implemented.");
+    public draw(ctx : CanvasRenderingContext2D): void {
+
+        let [leftPoint, rightPoint] = this.getPoints();
+        let [boxX, boxY] = this.getCoords();
+        let [dx, dy] = this.gof.getOffsets();
+
+        boxX += dx;
+        boxY += dy;
+
+        ctx.strokeStyle = "black";
+        ctx.lineWidth =  10;
+
+        ctx.beginPath();
+        ctx.moveTo(leftPoint[0], leftPoint[1]);
+        ctx.lineTo(rightPoint[0], rightPoint[1]);
+        ctx.stroke();
+        ctx.closePath();
+
+        ctx.fillStyle = "white";
+        ctx.fillRect(boxX, boxY, this.config.width, this.config.height);
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 5;
+        ctx.strokeRect(boxX, boxY, this.config.width, this.config.height);
+
+        let textNode : TextNode = new TextNode({
+            x : boxX, 
+            y : boxY + this.config.height / 2, 
+            color : "black", 
+            font : "16px Arial", 
+            maxWidth : this.config.width
+        }, this.channelData.channelDetails.name);
+
+        textNode.draw(ctx);
+
+
     }
 
 

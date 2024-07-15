@@ -62,8 +62,10 @@ export class GOF{
     }
 
 
-    public draw() : void {
-
+    public draw(ctx : CanvasRenderingContext2D) : void {
+        for(let elem of this.children){
+            elem.draw(ctx);
+        }
     }
 
 

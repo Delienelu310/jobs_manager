@@ -106,8 +106,25 @@ export class PlugBarElement implements GraphElement{
             y >= barY && y <= barY + height;
     }
 
-    public draw(): void {
-        throw new Error("Method not implemented.");
+    public draw(ctx : CanvasRenderingContext2D): void {
+
+        let [x, y] = this.getCoords();
+        let [dx, dy] = this.gof.getOffsets();
+        x += dx;
+        y += dy;
+
+        const height = Math.max(
+            this.config.minHeight,
+            this.getChildren().length * (this.config.distanceBetween + this.config.plugHeight) + this.config.distanceBetween
+        );
+
+        ctx.strokeStyle = 'black'; 
+        ctx.lineWidth = 5;
+        ctx.strokeRect(x, y, this.config.width, height);
+
+        for(let elem of this.children){
+            elem.draw(ctx);
+        }
     }
 
     public getChildren(): GraphElement[] {

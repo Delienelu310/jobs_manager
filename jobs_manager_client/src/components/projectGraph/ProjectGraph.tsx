@@ -48,63 +48,6 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig} : P
         ];
     }
 
-    function drawProjectInputsOutputs(
-        ctx : CanvasRenderingContext2D
-    ){
-
-        // let width = staticConfig.projectPlugs.width;
-        // let height = Object.keys(projectFullData.inputChannels).length * (staticConfig.projectPlugs.distanceBetween + staticConfig.projectPlugs.plugSize) + 
-        //     staticConfig.projectPlugs.distanceBetween
-    
-        // let [inputX, inputY] = getActualPosition([staticConfig.projectPlugs.x, staticConfig.projectPlugs.y]);
-
-
-        // ctx.strokeStyle = 'black'; 
-        // ctx.lineWidth = 5;
-        // ctx.strokeRect(inputX, inputY, width, height);
-
-
-        // let counter = 0;
-        // for(let label of Object.keys(projectFullData.inputChannels)){
-        //     counter++;
-        //     let [inputChannelX, inputChannelY] = getActualPosition([
-        //         staticConfig.projectPlugs.inputs.x + staticConfig.projectPlugs.width / 2,
-        //         staticConfig.projectPlugs.inputs.y + staticConfig.projectPlugs.distanceBetween * (counter) + staticConfig.projectPlugs.plugSize * (counter + 1) / 2
-        //     ])
-        //     ctx.beginPath();
-        //     ctx.arc(inputChannelX, inputChannelY, staticConfig.projectPlugs.plugSize / 2, 0, 2 * Math.PI, false);
-        //     console.log(inputChannelX, inputChannelY);
-        //     ctx.fill();
-        //     ctx.closePath();
-        
-        // }
-
-
-        // let [outputX, outputY] = getActualPosition([staticConfig.projectPlugs.outputs.x, staticConfig.projectPlugs.outputs.y]);
-
-
-        // ctx.strokeStyle = 'black'; 
-        // ctx.lineWidth = 5;
-        // ctx.strokeRect(outputX, outputY, width, height);
-
-
-        // counter = 0;
-        // for(let label of Object.keys(projectFullData.outputChannels)){
-        //     counter++;
-        //     let [inputChannelX, inputChannelY] = getActualPosition([
-        //         staticConfig.projectPlugs.outputs.x + staticConfig.projectPlugs.width / 2,
-        //         staticConfig.projectPlugs.outputs.y + staticConfig.projectPlugs.distanceBetween * (counter) + staticConfig.projectPlugs.plugSize * (counter + 1) / 2
-        //     ])
-        //     ctx.beginPath();
-        //     ctx.arc(inputChannelX, inputChannelY, staticConfig.projectPlugs.plugSize / 2, 0, 2 * Math.PI, false);
-        //     console.log(inputChannelX, inputChannelY);
-        //     ctx.fill();
-        //     ctx.closePath();
-        
-        // }
-
-    }
-
     function drawCanvas(
         ctx : CanvasRenderingContext2D
     ){
@@ -152,7 +95,6 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig} : P
         if(!ctx) return;
         
         drawCanvas(ctx);
-        drawProjectInputsOutputs(ctx);
         drawJobNodes(ctx);
         drawJobChannels(ctx);
 

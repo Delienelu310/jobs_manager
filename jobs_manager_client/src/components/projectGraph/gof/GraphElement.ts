@@ -4,7 +4,7 @@ import { GOF } from "./GOF";
 export interface GraphElement{
 
     doesContainPoint(x : number, y : number) : boolean;
-    draw() : void;
+    draw(ctx : CanvasRenderingContext2D) : void;
 
     getChildren() : GraphElement[];
     getParent() : GraphElement;

@@ -3,6 +3,7 @@ import { GraphElement } from "./GraphElement";
 import { JobNodeElement } from "./JobNodeElement";
 
 import { PlugBarElement } from "./PlugBarElement";
+import { TextNode } from "./TetxNode";
 
 
 export class PlugElement implements GraphElement{
@@ -43,8 +44,26 @@ export class PlugElement implements GraphElement{
             y >= plugY && y <= plugY + this.parent.getConfig().plugHeight;
     }
 
-    public draw(): void {
-        throw new Error("Method not implemented.");
+    public draw(ctx : CanvasRenderingContext2D): void {
+
+        let [x, y] = this.getCoords();
+        let [dx, dy] = this.gof.getOffsets();
+        x += dx; 
+        y += dy;
+
+        ctx.fillStyle = 'black'; 
+        ctx.fillRect(x, y, this.parent.getConfig().plugWidth, this.parent.getConfig().plugHeight);
+
+
+        let textNode : TextNode = new TextNode({
+            x : x, 
+            y : y + this.parent.getConfig().plugHeight / 2, 
+            color : "white", 
+            font : "16px Arial", 
+            maxWidth : this.parent.getConfig().plugWidth
+        }, this.label);
+
+        textNode.draw(ctx);
     }
 
     public getChildren(): GraphElement[] {

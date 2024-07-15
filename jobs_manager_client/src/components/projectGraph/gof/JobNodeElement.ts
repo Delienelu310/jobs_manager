@@ -7,6 +7,7 @@ import { JobNodeVertice } from "../../../api/ui/projectGraphApi";
 import { PlugBarElement, StaticPlugBarConfig } from "./PlugBarElement";
 
 import { GOF } from "./GOF";
+import { TextNode } from "./TetxNode";
 
 
 export interface StaticJobNodeElementConfig{
@@ -70,8 +71,32 @@ export class JobNodeElement implements GraphElement{
          
     }
 
-    public draw() : void{
-        return;
+    public draw(ctx : CanvasRenderingContext2D) : void{
+
+        let [x, y] = [this.vertice.x, this.vertice.y];
+        let [dx, dy] = this.gof.getOffsets();
+        x += dx;
+        y += dy;
+
+
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 5;
+        ctx.strokeRect(x, y, this.config.width, this.config.height);
+        
+        let nameTextNode : TextNode = new TextNode({
+            x : x + this.config.width * 0.2, 
+            y : y + this.config.height * 0.4, 
+            color : "black", 
+            font : "16px Arial", 
+            maxWidth : this.config.width * 0.6
+        }, this.data.jobNodeDetails.name);
+        nameTextNode.draw(ctx);
+  
+
+        for(let child of this.children){
+            child.draw(ctx);
+        }
+
     }
     public getChildren() : GraphElement[]{
         return this.children;

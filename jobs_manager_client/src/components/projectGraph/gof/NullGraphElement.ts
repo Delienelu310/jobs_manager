@@ -16,7 +16,7 @@ export class NullGraphElement implements GraphElement{
     doesContainPoint(x: number, y: number): boolean {
         return false;
     }
-    draw(): void {
+    draw(ctx : CanvasRenderingContext2D): void {
         return;
     }
     getChildren(): GraphElement[] {
