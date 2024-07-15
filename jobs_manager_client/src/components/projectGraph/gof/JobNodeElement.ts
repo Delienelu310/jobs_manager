@@ -43,6 +43,10 @@ export class JobNodeElement implements GraphElement{
 
     }
 
+    public getConfig() : StaticJobNodeElementConfig{
+        return this.config;
+    }
+
     public getGof(): GOF {
         return this.gof;
     }

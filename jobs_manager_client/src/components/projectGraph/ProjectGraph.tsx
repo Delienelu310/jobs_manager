@@ -4,23 +4,14 @@ import { ProjectFullData } from "../../api/abstraction/projectApi";
 
 import { StaticJobNodeElementConfig } from "./gof/JobNodeElement";
 import { StaticPlugBarConfig } from "./gof/PlugBarElement";
-
+import { StaticCanvasConfig } from "./gof/GOF";
 
 interface StaticGraphCanvasConfig{
     
-
-    canvas : {
-        width : number,
-        height : number,
-        padding : {
-            x : number,
-            y : number
-        }
-    },
-
+    canvas : StaticCanvasConfig;
     jobNodes : StaticJobNodeElementConfig;
-
     projectPlugs : StaticPlugBarConfig
+
 }
 
 interface DynamicGraphCanvasConfig{

@@ -1,14 +1,36 @@
+import { ProjectFullData } from "../../../api/abstraction/projectApi";
 import { GraphElement } from "./GraphElement";
 import { NullGraphElement } from "./NullGraphElement";
+
+
+export interface StaticCanvasConfig{
+    width : number,
+    height : number,
+    padding : {
+        x : number,
+        y : number
+    }
+}
 
 export class GOF{
 
 
     private children : GraphElement[] = [];
+    private projectData : ProjectFullData;
+    private config : StaticCanvasConfig;
 
+    
 
-    public getSizes() : [number, number]{
-        return [0,0];
+    public constructor(config : StaticCanvasConfig, projectData : ProjectFullData){
+        this.config = config;
+        this.projectData = projectData;
+    }
+
+    public getProjectData() : ProjectFullData{
+        return this.projectData;
+    }
+    public getCanvasConfig() : StaticCanvasConfig{
+        return this.config;
     }
 
     public getOffsets() : [number, number]{

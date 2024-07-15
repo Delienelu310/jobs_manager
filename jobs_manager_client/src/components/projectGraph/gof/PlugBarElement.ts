@@ -3,14 +3,15 @@ import { GraphElement } from "./GraphElement";
 
 import { JobNodeElement } from "./JobNodeElement";
 import { NullGraphElement } from "./NullGraphElement";
+import { PlugElement } from "./PlugElement";
 
 
 
 export interface StaticPlugBarConfig{
     x : number,
     y : number
-
     width : number,
+    minHeight : number,
     distanceBetween : number,
     plugHeight : number,
     plugWidth : number
@@ -21,6 +22,7 @@ export class PlugBarElement implements GraphElement{
     private gof : GOF;
 
     private parent : JobNodeElement | NullGraphElement;
+    private children : PlugElement[];
     private config : StaticPlugBarConfig;
     private rightOrientation : boolean;
 
@@ -35,38 +37,92 @@ export class PlugBarElement implements GraphElement{
         this.config = config;
         this.rightOrientation = rightOrienation;
 
-        if(
-            parent.isNull()
-        ){
-            
-        }else{
+        this.children = [];
 
+        const labels : string[] = Object.keys(
+            this.getParent().isNull() ? 
+                (this.rightOrientation ? 
+                    this.getGof().getProjectData().inputChannels
+                    :
+                    this.getGof().getProjectData().outputChannels
+                )
+                :
+                (this.rightOrientation ? 
+                    (this.getParent() as JobNodeElement).getData().input
+                    :
+                    (this.getParent() as JobNodeElement).getData().input
+                )
+        );
+
+        for(let key of labels){
+            const plugElement = new PlugElement(gof, this, key);
+        
+            this.children.push(plugElement);
+            
         }
     }
-    getGof(): GOF {
+
+
+    public getGof(): GOF {
         return this.gof;
     }
 
+    public getOrientation() : boolean{
+        return this.rightOrientation;
+    }
 
-    doesContainPoint(x: number, y: number): boolean {
+    public getConfig() : StaticPlugBarConfig{
+        return this.config;
+    }
+
+    public getCoords(){
+        let [barX, barY] = [0,0];
+        if(this.getParent().isNull()){
+            [barX, barY] = [this.rightOrientation ? this.config.x : this.getGof().getCanvasConfig().width - this.config.x, this.config.y];
+            
+        }else{
+            [barX, barY] = [(this.getParent() as JobNodeElement).getVertice().x + 
+                (this.rightOrientation 
+                    ? this.config.x 
+                    : (this.getParent() as JobNodeElement).getConfig().width - this.config.x), 
+                this.config.y
+            ];
+            
+        }
+
+        return [barX, barY];
+    }
+
+
+    public doesContainPoint(x: number, y: number): boolean {
+        const height = Math.max(
+            this.config.minHeight,
+            this.getChildren().length * (this.config.distanceBetween + this.config.plugHeight) + this.config.distanceBetween
+        );
+
+        let [barX, barY] = this.getCoords();
+
+        return x >= barX && x <= this.config.width &&
+            y >= barY && y <= barY + height;
+    }
+
+    public draw(): void {
         throw new Error("Method not implemented.");
     }
-    draw(): void {
-        throw new Error("Method not implemented.");
+
+    public getChildren(): GraphElement[] {
+        return this.children;
     }
-    getChildren(): GraphElement[] {
-        throw new Error("Method not implemented.");
-    }
-    getParent(): GraphElement {
+
+    public getParent(): GraphElement {
         return this.parent;
     }
-    setParent(parent: JobNodeElement): void {
-        this.parent = parent;
-    }
-    isNull(): boolean {
+  
+    public isNull(): boolean {
         return false;
     }
-    getGofId(): string {
+
+    public getGofId(): string {
         if(this.parent.isNull()){
             return `PlugBarElement_project_${this.rightOrientation ? "output" : "input"}`;
         }else{
