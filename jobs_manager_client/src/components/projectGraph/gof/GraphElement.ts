@@ -19,4 +19,7 @@ export interface GraphElement{
 
     getEventHandler() : GraphElementEventHandler;
 
+
+    getMenuComponent() : JSX.Element;
+
 }

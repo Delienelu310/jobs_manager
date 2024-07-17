@@ -1,6 +1,7 @@
 import React from "react";
 import { GraphElementEventHandler } from "./GraphElementEventHandler";
 import { PlugElement } from "../PlugElement";
+import { PanelMods } from "./PanelMods";
 
 
 export class PlugElementEventHandler implements GraphElementEventHandler{
@@ -9,9 +10,12 @@ export class PlugElementEventHandler implements GraphElementEventHandler{
     public constructor(element : PlugElement){
         this.element = element;
     }
+    public handleMouseMove: (event: React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => void = (event,mod) => {
+        this.element.getParent().getEventHandler().handleMouseMove(event, mod);
+    };
 
 
-    public handleClick: (event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => void = () => {
+    public handleClick: (event: React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => void = (event, mod) => {
 
     };
 

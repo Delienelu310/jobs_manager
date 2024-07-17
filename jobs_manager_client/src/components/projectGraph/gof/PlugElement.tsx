@@ -24,6 +24,9 @@ export class PlugElement implements GraphElement{
         
         this.eventHandler = new PlugElementEventHandler(this);
     }
+    public getMenuComponent(): JSX.Element {
+        throw new Error("Method not implemented.");
+    }
     public getEventHandler(): GraphElementEventHandler {
         return this.eventHandler;
     }

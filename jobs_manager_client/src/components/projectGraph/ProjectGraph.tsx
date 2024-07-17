@@ -21,16 +21,22 @@ interface StaticGraphCanvasConfig{
 
 interface ProjectGraphComponent{
     projectGraph : ProjectGraph,
+    setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>
     projectFullData : ProjectFullData,
     staticConfig : StaticGraphCanvasConfig,
 }
 
-const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig} : ProjectGraphComponent) => {
+const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, setProjectGraph} : ProjectGraphComponent) => {
 
     const [dynamicConfig, setDynamicConfig] = useState<DynamicCanvasConfig>({
         offset : {
             x : 0,
             y : 0
+        },
+        dragData: {
+            start : null,
+            elem : new NullGraphElement(),
+            isDragging: false
         }
     });
 
@@ -39,19 +45,26 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig} : P
     const [gof, setGof] = useState<GOF>(new GOF(
         staticConfig.canvas,
         projectFullData,
+        projectGraph,
         dynamicConfig,
-        setDynamicConfig
+        setDynamicConfig,
+        setProjectGraph
     ));
+
+    const [mod, SetMod] = useState<PanelMods>(PanelMods.CURSOR);
 
     const [jobNodeName, setJobNodeName] = useState<string>("");
 
 
     function prepareGof(){
 
-        let newGof : GOF = new GOF( staticConfig.canvas,
+        let newGof : GOF = new GOF( 
+            staticConfig.canvas,
             projectFullData,
+            projectGraph,
             dynamicConfig,
-            setDynamicConfig
+            setDynamicConfig,
+            setProjectGraph
         );
 
         //1. prepare job nodes
@@ -67,7 +80,10 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig} : P
                 newGof, 
                 jobNode, 
                 vertice,
-                staticConfig.jobNodes);
+                staticConfig.jobNodes,
+                setProjectGraph,
+                setDynamicConfig
+        );
 
                 newGof.addElement(jobNodeElement);
         }
@@ -143,7 +159,7 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig} : P
 
         prepareGof();
 
-    }, [projectGraph, projectFullData]);
+    }, [projectGraph, projectFullData, dynamicConfig]);
 
 
     useEffect(() => {
@@ -157,25 +173,42 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig} : P
         gof.draw(ctx);
     }, [gof]);
 
+    function convertEvent(e : 
+        React.MouseEvent<HTMLCanvasElement, MouseEvent> |
+        React.DragEvent<HTMLCanvasElement>
+    ) : void{
+        const canvas = e.currentTarget;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        e.clientX = x;
+        e.clientY = y;
+    }
+
     return (
         <div>
             {projectGraph && projectFullData && gof && <>
-                <canvas ref={canvasRef} 
+                <canvas ref={canvasRef}
                     width={staticConfig.canvas.width} 
                     height={staticConfig.canvas.height}
                     onClick={(e) => {
-                        const canvas = e.currentTarget;
-                        const rect = canvas.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const y = e.clientY - rect.top;
-
-                        e.clientX = x;
-                        e.clientY = y;
-
-                        console.log(x + " "  + y);
-                        console.log(e.clientX + " " + e.clientY);
-                        gof.handleClick(e)
+                        convertEvent(e);
+                        gof.handleClick(e, mod);
                     }}    
+                onMouseDown={e => {
+                    convertEvent(e);
+                    gof.handleMouseDown(e, mod);
+                }}
+                onMouseMove={(e) => {
+                    convertEvent(e)
+                    gof.handleMouseMove(e, mod);
+                }}
+                onMouseUp={e => {
+                    convertEvent(e)
+                    gof.handleMouseUp(e, mod);
+                }}
+
                 />
                 <div>
                     <h5>Mod : {PanelMods[gof.getMod()]}</h5>

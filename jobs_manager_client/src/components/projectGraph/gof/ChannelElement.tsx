@@ -35,8 +35,12 @@ export class ChannelElement implements GraphElement{
         this.eventHandler = new ChannelElementEventHandler(this);
 
     }
+    public getMenuComponent() : JSX.Element{
+        return (
+            <div></div>   
+        )
+    }
 
-    
     public getEventHandler(): GraphElementEventHandler {
         return this.eventHandler;
     }
@@ -175,16 +179,16 @@ export class ChannelElement implements GraphElement{
 
         for(let leftPoint of leftPoints){
             ctx.beginPath();
-            ctx.moveTo(leftPoint[0], leftPoint[1]);
-            ctx.lineTo(boxX, boxY + this.config.height / 2);
+            ctx.moveTo(leftPoint[0] + dx, leftPoint[1] + dy);
+            ctx.lineTo(boxX , boxY + this.config.height / 2 );
             ctx.stroke();
             ctx.closePath();
         }
 
         for(let rightPoint of rightPoints){
             ctx.beginPath();
-            ctx.moveTo(boxX + this.config.width, boxY + this.config.height / 2);
-            ctx.lineTo(rightPoint[0], rightPoint[1]);
+            ctx.moveTo(boxX + this.config.width , boxY + this.config.height / 2 );
+            ctx.lineTo(rightPoint[0] + dx, rightPoint[1] + dy);
             ctx.stroke();
             ctx.closePath();
         }

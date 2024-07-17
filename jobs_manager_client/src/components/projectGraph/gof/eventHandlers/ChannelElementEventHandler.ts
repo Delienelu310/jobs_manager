@@ -1,6 +1,7 @@
 import React from "react";
 import { GraphElementEventHandler } from "./GraphElementEventHandler";
 import { ChannelElement } from "../ChannelElement";
+import { PanelMods } from "./PanelMods";
 
 
 
@@ -11,9 +12,12 @@ export class ChannelElementEventHandler implements GraphElementEventHandler{
     constructor(element : ChannelElement){
         this.element = element;
     }
+    public handleMouseMove: (event: React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => void = (event, mod)=> {
+        
+    }
 
 
-    handleClick: (event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => void = (event) => {
+    public handleClick: (event: React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => void = (event, mod) => {
         
     };
 

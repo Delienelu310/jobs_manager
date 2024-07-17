@@ -1,6 +1,8 @@
 import { ProjectFullData } from "../../../api/abstraction/projectApi";
+import { ProjectGraph } from "../../../api/ui/projectGraphApi";
 import { PanelMods } from "./eventHandlers/PanelMods";
 import { GraphElement } from "./GraphElement";
+import { JobNodeElement } from "./JobNodeElement";
 import { NullGraphElement } from "./NullGraphElement";
 import { StaticPlugBarConfig } from "./PlugBarElement";
 
@@ -19,19 +21,30 @@ export interface DynamicCanvasConfig{
     offset : {
         x : number,
         y : number
+    },
+    dragData : {
+        start : {
+            x : number,
+            y : number
+        } | null,
+        elem : GraphElement,
+        isDragging : boolean
     }
 }
+
+export type DraggableGraphElement = JobNodeElement;
 
 export class GOF{
 
 
     private children : GraphElement[] = [];
     private projectData : ProjectFullData;
+    private projectGraph : ProjectGraph;
     private config : StaticCanvasConfig;
 
     private dynamic : DynamicCanvasConfig;
-    private dynamicConfigSetter : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>;
-
+    private setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>;
+    private setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>;
     private mod : PanelMods = PanelMods.CURSOR;
 
     
@@ -39,13 +52,21 @@ export class GOF{
     public constructor(
         config : StaticCanvasConfig, 
         projectData : ProjectFullData, 
+        projectGraph : ProjectGraph,
         dynamic : DynamicCanvasConfig,
-        dynamicConfigSetter : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>
+        setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>,
+        setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>
     ){
         this.config = config;
         this.projectData = projectData;
+        this.projectGraph = projectGraph;
         this.dynamic = dynamic;
-        this.dynamicConfigSetter = dynamicConfigSetter;
+        this.setDynamic = setDynamic;
+        this.setProjectGraph = setProjectGraph;
+    }
+
+    public getProjectGraph() : ProjectGraph{
+        return this.projectGraph;
     }
 
     public getMod() : PanelMods{
@@ -70,7 +91,9 @@ export class GOF{
         ]
     }
 
-
+    public getDynamic() : DynamicCanvasConfig{
+        return this.dynamic;
+    }
 
     public findById(id : string) : GraphElement {
         return this.findByIdRecursively(id, this.children);
@@ -91,22 +114,6 @@ export class GOF{
         return new NullGraphElement();
     }
 
-    private dragTarget : GraphElement = new NullGraphElement();
-
-    public handleDragStart(){
-
-    }
-
-    public handleDragEnd(){
-
-    }
-
-    public handleDrag(){
-        if(this.dragTarget.isNull()){
-            
-        }
-    }
-
     private clickHandlers : Map<PanelMods, (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>) => void> = 
         new Map<PanelMods, (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>) => void> ([
             [PanelMods.CURSOR, (event) => {
@@ -117,8 +124,70 @@ export class GOF{
 
             }]
         ]);
+    
+    public handleMouseDown = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => {
+        let target = this.findClickTarget(event.clientX, event.clientY);
+        
+        this.setDynamic({
+            ...this.dynamic,
+            dragData: {
+                isDragging : true,
+                start : {
+                    x : event.clientX,
+                    y : event.clientY
+                },
+                elem : target
+            }
+        })
 
-    public handleClick : React.MouseEventHandler<HTMLCanvasElement> = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+        console.log(event.clientX + " " + event.clientY);
+    }
+
+    public handleMouseMove  = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => {
+
+    
+
+        if(!this.dynamic.dragData.isDragging) return;
+        console.log("a");
+        if(!this.dynamic.dragData.start) return;
+        console.log("b");
+        console.log(this.dynamic.dragData.elem);
+
+        if(this.dynamic.dragData.elem.isNull()){
+            this.setDynamic({
+                ...this.dynamic,
+                dragData : {
+                    ...this.dynamic.dragData,
+                    start :{
+                        x : event.clientX,
+                        y : event.clientY
+                    }
+
+                },
+                offset: {
+                    x : this.dynamic.offset.x + event.clientX - this.dynamic.dragData.start.x,
+                    y:  this.dynamic.offset.y + event.clientY - this.dynamic.dragData.start.y
+                }   
+            });
+        }else{
+            console.log("dragging jobnode");
+            this.dynamic.dragData.elem.getEventHandler().handleMouseMove(event, mod);
+        }
+        
+
+    }
+
+    public handleMouseUp = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => {
+        this.setDynamic({
+            ...this.dynamic,
+            dragData: {
+                ...this.dynamic.dragData,
+                isDragging : false
+            }
+        })
+    }
+
+    public handleClick = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => {
 
         let elem = this.findClickTarget(event.clientX, event.clientY);
 
@@ -127,8 +196,10 @@ export class GOF{
             let method = this.clickHandlers.get(this.mod);
             if(!method) return;
             method(event);
+        }else{
+            elem.getEventHandler().handleClick(event, mod);
         }
-        elem.getEventHandler().handleClick(event);
+        
 
     }
 

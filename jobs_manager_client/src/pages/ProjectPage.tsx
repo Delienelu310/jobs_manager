@@ -21,9 +21,10 @@ const ProjectPage = () => {
 
     return (
         <div>
-            {projectGraph && projectFullData &&
+            {projectGraph && projectFullData && 
                 <ProjectGraphComponent 
                     projectGraph={projectGraph} 
+                    setProjectGraph={setProjectGraph}
                     projectFullData={projectFullData}
                     staticConfig={{
                         canvas : {

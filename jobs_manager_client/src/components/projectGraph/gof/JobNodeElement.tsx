@@ -3,13 +3,14 @@ import { NullGraphElement } from "./NullGraphElement";
 
 
 import { JobNodeFullData } from "../../../api/abstraction/projectApi";
-import { JobNodeVertice } from "../../../api/ui/projectGraphApi";
+import { JobNodeVertice, ProjectGraph } from "../../../api/ui/projectGraphApi";
 import { PlugBarElement, StaticPlugBarConfig } from "./PlugBarElement";
 
-import { GOF } from "./GOF";
+import { DynamicCanvasConfig, GOF } from "./GOF";
 import { TextNode } from "./TetxNode";
 import { JobNodeElementEventHandler } from "./eventHandlers/JobNodeElementEventHandler";
 import { GraphElementEventHandler } from "./eventHandlers/GraphElementEventHandler";
+import React from "react";
 
 
 export interface StaticJobNodeElementConfig{
@@ -33,7 +34,11 @@ export class JobNodeElement implements GraphElement{
     private vertice : JobNodeVertice;
     private config : StaticJobNodeElementConfig;
 
-    public constructor(gof : GOF, data : JobNodeFullData, vertice : JobNodeVertice, config : StaticJobNodeElementConfig){
+    public constructor(gof : GOF, data : JobNodeFullData, vertice : JobNodeVertice, config : StaticJobNodeElementConfig,
+        setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>,
+        setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>
+
+    ){
 
         this.gof = gof;
 
@@ -47,9 +52,21 @@ export class JobNodeElement implements GraphElement{
 
         this.children = [inputBar, outputBar];
 
-        this.eventHandler = new JobNodeElementEventHandler(this);
+        this.eventHandler = new JobNodeElementEventHandler(this, setProjectGraph, setDynamic);
 
     }
+
+
+    public getMenuComponent(): JSX.Element {
+        return (
+            <div>
+
+            </div>
+        );
+    }
+
+
+
     public getEventHandler(): GraphElementEventHandler {
         return this.eventHandler;
     }

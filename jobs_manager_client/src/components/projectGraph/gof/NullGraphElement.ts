@@ -4,6 +4,9 @@ import { GraphElement } from "./GraphElement";
 
 
 export class NullGraphElement implements GraphElement{
+    public getMenuComponent(): JSX.Element {
+        throw new Error("Method not implemented.");
+    }
 
 
     public getEventHandler(): GraphElementEventHandler {
