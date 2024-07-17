@@ -41,6 +41,9 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
     });
 
 
+    const [menu, setMenu] = useState<JSX.Element>(<div>Choose Element...</div>);
+
+
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [gof, setGof] = useState<GOF>(new GOF(
         staticConfig.canvas,
@@ -48,10 +51,11 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
         projectGraph,
         dynamicConfig,
         setDynamicConfig,
-        setProjectGraph
+        setProjectGraph,
+        setMenu
     ));
 
-    const [mod, SetMod] = useState<PanelMods>(PanelMods.CURSOR);
+    const [mod, setMod] = useState<PanelMods>(PanelMods.CURSOR);
 
     const [jobNodeName, setJobNodeName] = useState<string>("");
 
@@ -64,7 +68,8 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
             projectGraph,
             dynamicConfig,
             setDynamicConfig,
-            setProjectGraph
+            setProjectGraph,
+            setMenu
         );
 
         //1. prepare job nodes
@@ -212,14 +217,17 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
                 />
                 <div>
                     <h5>Mod : {PanelMods[gof.getMod()]}</h5>
-                    <button>Cursor</button>
-                    <button>Connect</button>
-                    <button>Delete</button>
+                    <button onClick={e => setMod(PanelMods.CURSOR)}>Cursor</button>
+                    <button onClick={e => setMod(PanelMods.CONNECT)}>Connect</button>
+                    <button onClick={e => setMod(PanelMods.DELETE)}>Delete</button>
                     <button>Add JobNode</button>
                     <div>
                         <input value={jobNodeName} onChange={e => setJobNodeName(e.target.value)}/>
                     </div>
                 </div>
+
+                <hr/>
+                {menu}
             </>}
         </div>
     )

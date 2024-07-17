@@ -67,7 +67,7 @@ export class PlugBarElement implements GraphElement{
         this.eventHandler = new PlugBarElementEventHandler(this);
     }
     public getMenuComponent(): JSX.Element {
-        throw new Error("Method not implemented.");
+        return <div>This is plug bar menu</div>
     }
     public getEventHandler(): GraphElementEventHandler {
         return this.eventHandler;

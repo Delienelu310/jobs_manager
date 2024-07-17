@@ -60,7 +60,7 @@ export class JobNodeElement implements GraphElement{
     public getMenuComponent(): JSX.Element {
         return (
             <div>
-
+                This is jobnode menu component
             </div>
         );
     }

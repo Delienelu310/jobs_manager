@@ -45,6 +45,7 @@ export class GOF{
     private dynamic : DynamicCanvasConfig;
     private setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>;
     private setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>;
+    private setMenu : React.Dispatch<React.SetStateAction<JSX.Element>>;
     private mod : PanelMods = PanelMods.CURSOR;
 
     
@@ -55,7 +56,8 @@ export class GOF{
         projectGraph : ProjectGraph,
         dynamic : DynamicCanvasConfig,
         setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>,
-        setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>
+        setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>,
+        setMenu : React.Dispatch<React.SetStateAction<JSX.Element>>
     ){
         this.config = config;
         this.projectData = projectData;
@@ -63,6 +65,7 @@ export class GOF{
         this.dynamic = dynamic;
         this.setDynamic = setDynamic;
         this.setProjectGraph = setProjectGraph;
+        this.setMenu = setMenu;
     }
 
     public getProjectGraph() : ProjectGraph{
@@ -114,16 +117,6 @@ export class GOF{
         return new NullGraphElement();
     }
 
-    private clickHandlers : Map<PanelMods, (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>) => void> = 
-        new Map<PanelMods, (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>) => void> ([
-            [PanelMods.CURSOR, (event) => {
-                console.log("something");
-            }],
-            [PanelMods.DELETE, (event) => {}],
-            [PanelMods.CONNECT, (event) => {
-
-            }]
-        ]);
     
     public handleMouseDown = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => {
         let target = this.findClickTarget(event.clientX, event.clientY);
@@ -186,21 +179,31 @@ export class GOF{
             }
         })
     }
+    
+    
+    private clickHandlers : Map<PanelMods, (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>) => void> = 
+        new Map<PanelMods, (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>) => void> ([
+            [PanelMods.CURSOR, (event) => {
+
+                let elem = this.findClickTarget(event.clientX, event.clientY);
+                if(elem.isNull()) return;
+                
+                this.setMenu(elem.getMenuComponent());
+
+            }],
+            [PanelMods.DELETE, (event) => {}],
+            [PanelMods.CONNECT, (event) => {
+
+            }]
+        ]);
+    
 
     public handleClick = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => {
 
-        let elem = this.findClickTarget(event.clientX, event.clientY);
+        let handler = this.clickHandlers.get(mod);
+        if(!handler) return;
 
-
-        if(elem.isNull()){
-            let method = this.clickHandlers.get(this.mod);
-            if(!method) return;
-            method(event);
-        }else{
-            elem.getEventHandler().handleClick(event, mod);
-        }
-        
-
+        handler(event);
     }
 
 

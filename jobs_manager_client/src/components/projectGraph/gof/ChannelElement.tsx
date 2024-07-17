@@ -37,7 +37,7 @@ export class ChannelElement implements GraphElement{
     }
     public getMenuComponent() : JSX.Element{
         return (
-            <div></div>   
+            <div>This is channel menu</div>   
         )
     }
 
