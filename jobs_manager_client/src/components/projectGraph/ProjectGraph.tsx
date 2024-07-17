@@ -76,8 +76,9 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig} : P
 
         //2.
         let inputPlugBarElement : PlugBarElement =  new PlugBarElement(newGof, new NullGraphElement(), staticConfig.projectPlugs, false);
+        console.log("inputPlugBarElement" + inputPlugBarElement.getOrientation());
         let outputPlugBarElement : PlugBarElement = new PlugBarElement(newGof, new NullGraphElement(), staticConfig.projectPlugs, true);
-
+        console.log("outputPlugBarElement" + outputPlugBarElement.getOrientation());
         newGof.addElement(inputPlugBarElement);
         newGof.addElement(outputPlugBarElement);
 
@@ -125,6 +126,7 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig} : P
             }
         }
 
+        channelElements.forEach(elem => newGof.addElement(elem));
 
         setGof(newGof);
     }
@@ -142,7 +144,7 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig} : P
 
 
     useEffect(() => {
-                
+
         prepareGof();
 
     }, [projectGraph, projectFullData]);

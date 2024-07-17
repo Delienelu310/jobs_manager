@@ -10,8 +10,7 @@ export interface StaticCanvasConfig{
     padding : {
         x : number,
         y : number
-    },
-    plugBar : StaticPlugBarConfig
+    }
 }
 
 
@@ -78,6 +77,8 @@ export class GOF{
             if(elem.isNull()) continue;
             
             if(elem.getGofId() == id) return elem;
+
+            console.log(elem.getGofId());
 
             let child = this.findByIdRecursively(id, elem.getChildren());
             if(child.getGofId() == id) return child;

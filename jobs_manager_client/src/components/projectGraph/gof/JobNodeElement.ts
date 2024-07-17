@@ -20,7 +20,7 @@ export interface StaticJobNodeElementConfig{
 export class JobNodeElement implements GraphElement{
 
     private gof : GOF;
-    private children : GraphElement[];
+    private children : PlugBarElement[];
     private parent: NullGraphElement = new NullGraphElement;
 
 
@@ -81,7 +81,10 @@ export class JobNodeElement implements GraphElement{
 
         ctx.strokeStyle = "black";
         ctx.lineWidth = 5;
-        ctx.strokeRect(x, y, this.config.width, this.config.height);
+        ctx.strokeRect(x, y, 
+            this.config.width,
+            Math.max(this.config.height, this.children[0].getHeight(), this.children[1].getHeight())
+        );
         
         let nameTextNode : TextNode = new TextNode({
             x : x + this.config.width * 0.2, 

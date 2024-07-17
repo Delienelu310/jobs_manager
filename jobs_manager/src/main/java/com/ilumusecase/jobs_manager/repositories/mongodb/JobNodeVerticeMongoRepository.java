@@ -24,5 +24,10 @@ public class JobNodeVerticeMongoRepository implements JobNodeVerticeRepository{
     public Optional<JobNodeVertice> retrieveById(String id) {
         return mongoJobNodeVertice.findById(id);
     }
+
+    @Override
+    public Optional<JobNodeVertice> retrieveByJobNodeId(String jobNodeId) {
+        return mongoJobNodeVertice.findByJobNode_Id(jobNodeId);
+    }
     
 }

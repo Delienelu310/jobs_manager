@@ -55,6 +55,10 @@ export class ChannelElement implements GraphElement{
 
         let inputs : Set<PlugElement> = new Set<PlugElement>();
         let outputs : Set<PlugElement> = new Set<PlugElement>();
+
+        console.log(this.inputIds);
+        console.log(this.gof.findById("project_input_somelabel"));
+        
         this.inputIds.forEach(id => inputs.add(this.gof.findById(id) as PlugElement));
         this.outputIds.forEach(id => outputs.add(this.gof.findById(id) as PlugElement));
 
@@ -62,6 +66,7 @@ export class ChannelElement implements GraphElement{
         let rightPoints : [number, number][] = [];
 
         inputs.forEach(inputPlug => {
+            console.log(inputPlug);
             let leftPoint : [number, number] = inputPlug.getCoords();
             let leftConfig = (inputPlug.getParent() as PlugBarElement).getConfig();
             
@@ -129,6 +134,7 @@ export class ChannelElement implements GraphElement{
 
     public draw(ctx : CanvasRenderingContext2D): void {
 
+        if(Array.from(this.inputIds).length == 0 || Array.from(this.outputIds).length == 0) return;
         let [leftPoints, rightPoints] = this.getPoints();
         let [boxX, boxY] = this.getCoords();
         let [dx, dy] = this.gof.getOffsets();

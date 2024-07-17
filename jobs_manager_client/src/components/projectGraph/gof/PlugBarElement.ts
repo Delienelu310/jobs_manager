@@ -42,13 +42,13 @@ export class PlugBarElement implements GraphElement{
         const labels : string[] = Object.keys(
             this.getParent().isNull() ? 
                 (this.rightOrientation ? 
-                    this.getGof().getProjectData().inputChannels
-                    :
                     this.getGof().getProjectData().outputChannels
+                    :
+                    this.getGof().getProjectData().inputChannels
                 )
                 :
                 (this.rightOrientation ? 
-                    (this.getParent() as JobNodeElement).getData().input
+                    (this.getParent() as JobNodeElement).getData().output
                     :
                     (this.getParent() as JobNodeElement).getData().input
                 )
@@ -78,14 +78,16 @@ export class PlugBarElement implements GraphElement{
     public getCoords(){
         let [barX, barY] = [0,0];
         if(this.getParent().isNull()){
-            [barX, barY] = [this.rightOrientation ? this.config.x : this.getGof().getCanvasConfig().width - this.config.x, this.config.y];
+            [barX, barY] = [this.rightOrientation ? this.getGof().getCanvasConfig().width - this.config.x - this.config.width : this.config.x , this.config.y];
             
         }else{
             [barX, barY] = [(this.getParent() as JobNodeElement).getVertice().x + 
-                (this.rightOrientation 
-                    ? this.config.x 
-                    : (this.getParent() as JobNodeElement).getConfig().width - this.config.x), 
-                this.config.y
+                (this.rightOrientation ? 
+                    (this.getParent() as JobNodeElement).getConfig().width - this.config.x - this.config.width
+                    : 
+                    this.config.x),
+                    (this.getParent() as JobNodeElement).getVertice().y + this.config.y
+                    
             ];
             
         }
@@ -93,12 +95,16 @@ export class PlugBarElement implements GraphElement{
         return [barX, barY];
     }
 
-
-    public doesContainPoint(x: number, y: number): boolean {
-        const height = Math.max(
+    public getHeight() : number{
+        return Math.max(
             this.config.minHeight,
             this.getChildren().length * (this.config.distanceBetween + this.config.plugHeight) + this.config.distanceBetween
         );
+    }
+
+
+    public doesContainPoint(x: number, y: number): boolean {
+        const height = this.getHeight();
 
         let [barX, barY] = this.getCoords();
 
@@ -113,12 +119,11 @@ export class PlugBarElement implements GraphElement{
         x += dx;
         y += dy;
 
-        const height = Math.max(
-            this.config.minHeight,
-            this.getChildren().length * (this.config.distanceBetween + this.config.plugHeight) + this.config.distanceBetween
-        );
+        if(!this.parent.isNull()) console.log((this.rightOrientation ? "output" : "input" ) + " " + this.getCoords() + " " + [dx,dy]);
 
-        ctx.strokeStyle = 'black'; 
+        const height = this.getHeight()
+
+        ctx.strokeStyle = 'brown'; 
         ctx.lineWidth = 5;
         ctx.strokeRect(x, y, this.config.width, height);
 

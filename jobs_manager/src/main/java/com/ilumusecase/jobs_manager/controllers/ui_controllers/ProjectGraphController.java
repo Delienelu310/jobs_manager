@@ -86,9 +86,12 @@ public class ProjectGraphController {
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @RequestBody JobNodeVertice jobNodeVertice
     ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
-        if(!jobNode.equals(jobNodeVertice.getJobNode())) throw new RuntimeException();
 
-        return repositoryFactory.getJobNodeVerticeRepository().updateJobNodeVertice(jobNodeVertice);
+        JobNodeVertice jobNodeVerticeActual = repositoryFactory.getJobNodeVerticeRepository().retrieveByJobNodeId(jobNodeId).orElseThrow();
+
+        jobNodeVerticeActual.setX(jobNodeVertice.getX());
+        jobNodeVerticeActual.setY(jobNodeVertice.getY());
+
+        return repositoryFactory.getJobNodeVerticeRepository().updateJobNodeVertice(jobNodeVerticeActual);
     }
 }
