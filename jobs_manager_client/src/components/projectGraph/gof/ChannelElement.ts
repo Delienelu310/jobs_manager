@@ -6,6 +6,8 @@ import { ChannelFullData } from "../../../api/abstraction/projectApi";
 import { PlugElement } from "./PlugElement";
 import { PlugBarElement } from "./PlugBarElement";
 import { TextNode } from "./TetxNode";
+import { GraphElementEventHandler } from "./eventHandlers/GraphElementEventHandler";
+import { ChannelElementEventHandler } from "./eventHandlers/ChannelElementEventHandler";
 
 
 export interface StaticChannelConfig{
@@ -14,8 +16,11 @@ export interface StaticChannelConfig{
 }
 
 export class ChannelElement implements GraphElement{
-
+    
+    
     private gof : GOF;
+    private eventHandler : ChannelElementEventHandler;
+
     private channelData : ChannelFullData;
     private config : StaticChannelConfig;
 
@@ -27,6 +32,13 @@ export class ChannelElement implements GraphElement{
         this.channelData = channelData;
         this.config = config;
 
+        this.eventHandler = new ChannelElementEventHandler(this);
+
+    }
+
+    
+    public getEventHandler(): GraphElementEventHandler {
+        return this.eventHandler;
     }
 
     public getInputIds() : Set<string>{
@@ -56,8 +68,6 @@ export class ChannelElement implements GraphElement{
         let inputs : Set<PlugElement> = new Set<PlugElement>();
         let outputs : Set<PlugElement> = new Set<PlugElement>();
 
-        console.log(this.inputIds);
-        console.log(this.gof.findById("project_input_somelabel"));
         
         this.inputIds.forEach(id => inputs.add(this.gof.findById(id) as PlugElement));
         this.outputIds.forEach(id => outputs.add(this.gof.findById(id) as PlugElement));
@@ -66,7 +76,6 @@ export class ChannelElement implements GraphElement{
         let rightPoints : [number, number][] = [];
 
         inputs.forEach(inputPlug => {
-            console.log(inputPlug);
             let leftPoint : [number, number] = inputPlug.getCoords();
             let leftConfig = (inputPlug.getParent() as PlugBarElement).getConfig();
             

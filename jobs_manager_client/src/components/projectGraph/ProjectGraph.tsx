@@ -4,10 +4,11 @@ import { ChannelFullData, ProjectFullData } from "../../api/abstraction/projectA
 
 import { JobNodeElement, StaticJobNodeElementConfig } from "./gof/JobNodeElement";
 import { StaticPlugBarConfig, PlugBarElement } from "./gof/PlugBarElement";
-import { GOF, StaticCanvasConfig } from "./gof/GOF";
+import { DynamicCanvasConfig, GOF, StaticCanvasConfig } from "./gof/GOF";
 import { NullGraphElement } from "./gof/NullGraphElement";
 import { PlugElement } from "./gof/PlugElement";
 import { ChannelElement, StaticChannelConfig } from "./gof/ChannelElement";
+import { PanelMods } from "./gof/eventHandlers/PanelMods";
 
 interface StaticGraphCanvasConfig{
     
@@ -26,18 +27,20 @@ interface ProjectGraphComponent{
 
 const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig} : ProjectGraphComponent) => {
 
+    const [dynamicConfig, setDynamicConfig] = useState<DynamicCanvasConfig>({
+        offset : {
+            x : 0,
+            y : 0
+        }
+    });
 
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [gof, setGof] = useState<GOF>(new GOF(
         staticConfig.canvas,
         projectFullData,
-        {  
-            offset: {
-                x: 0,
-                y: 0
-            }
-        }
+        dynamicConfig,
+        setDynamicConfig
     ));
 
     const [jobNodeName, setJobNodeName] = useState<string>("");
@@ -47,12 +50,8 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig} : P
 
         let newGof : GOF = new GOF( staticConfig.canvas,
             projectFullData,
-            {  
-                offset: {
-                    x: 0,
-                    y: 0
-                }
-            }
+            dynamicConfig,
+            setDynamicConfig
         );
 
         //1. prepare job nodes
@@ -76,9 +75,7 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig} : P
 
         //2.
         let inputPlugBarElement : PlugBarElement =  new PlugBarElement(newGof, new NullGraphElement(), staticConfig.projectPlugs, false);
-        console.log("inputPlugBarElement" + inputPlugBarElement.getOrientation());
         let outputPlugBarElement : PlugBarElement = new PlugBarElement(newGof, new NullGraphElement(), staticConfig.projectPlugs, true);
-        console.log("outputPlugBarElement" + outputPlugBarElement.getOrientation());
         newGof.addElement(inputPlugBarElement);
         newGof.addElement(outputPlugBarElement);
 
@@ -142,7 +139,6 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig} : P
         ctx.strokeRect(0, 0, staticConfig.canvas.width, staticConfig.canvas.height);
     }
 
-
     useEffect(() => {
 
         prepareGof();
@@ -164,8 +160,25 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig} : P
     return (
         <div>
             {projectGraph && projectFullData && gof && <>
-                <canvas ref={canvasRef} width={staticConfig.canvas.width} height={staticConfig.canvas.height}/>
+                <canvas ref={canvasRef} 
+                    width={staticConfig.canvas.width} 
+                    height={staticConfig.canvas.height}
+                    onClick={(e) => {
+                        const canvas = e.currentTarget;
+                        const rect = canvas.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+
+                        e.clientX = x;
+                        e.clientY = y;
+
+                        console.log(x + " "  + y);
+                        console.log(e.clientX + " " + e.clientY);
+                        gof.handleClick(e)
+                    }}    
+                />
                 <div>
+                    <h5>Mod : {PanelMods[gof.getMod()]}</h5>
                     <button>Cursor</button>
                     <button>Connect</button>
                     <button>Delete</button>

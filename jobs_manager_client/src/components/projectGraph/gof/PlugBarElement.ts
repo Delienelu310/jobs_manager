@@ -1,3 +1,5 @@
+import { GraphElementEventHandler } from "./eventHandlers/GraphElementEventHandler";
+import { PlugBarElementEventHandler } from "./eventHandlers/PlugBarElementEventHandler";
 import { GOF } from "./GOF";
 import { GraphElement } from "./GraphElement";
 
@@ -20,6 +22,7 @@ export interface StaticPlugBarConfig{
 export class PlugBarElement implements GraphElement{
 
     private gof : GOF;
+    private eventHandler : PlugBarElementEventHandler;
 
     private parent : JobNodeElement | NullGraphElement;
     private children : PlugElement[];
@@ -60,6 +63,11 @@ export class PlugBarElement implements GraphElement{
             this.children.push(plugElement);
             
         }
+
+        this.eventHandler = new PlugBarElementEventHandler(this);
+    }
+    public getEventHandler(): GraphElementEventHandler {
+        return this.eventHandler;
     }
 
 
@@ -108,7 +116,7 @@ export class PlugBarElement implements GraphElement{
 
         let [barX, barY] = this.getCoords();
 
-        return x >= barX && x <= this.config.width &&
+        return x >= barX && x <= barX + this.config.width &&
             y >= barY && y <= barY + height;
     }
 

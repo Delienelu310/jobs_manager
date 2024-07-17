@@ -1,3 +1,4 @@
+import { GraphElementEventHandler } from "./eventHandlers/GraphElementEventHandler";
 import { GOF } from "./GOF";
 
 
@@ -14,5 +15,8 @@ export interface GraphElement{
     getGofId() : string;
 
     getGof() : GOF;
+
+
+    getEventHandler() : GraphElementEventHandler;
 
 }

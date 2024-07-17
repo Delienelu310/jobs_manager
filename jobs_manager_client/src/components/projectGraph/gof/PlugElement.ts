@@ -1,3 +1,5 @@
+import { GraphElementEventHandler } from "./eventHandlers/GraphElementEventHandler";
+import { PlugElementEventHandler } from "./eventHandlers/PlugElementEventHandler";
 import { GOF } from "./GOF";
 import { GraphElement } from "./GraphElement";
 import { JobNodeElement } from "./JobNodeElement";
@@ -9,13 +11,21 @@ import { TextNode } from "./TetxNode";
 export class PlugElement implements GraphElement{
 
     private gof : GOF;
+    private eventHandler : PlugElementEventHandler;
+
+
     private parent : PlugBarElement;
     private label : string;
 
     constructor(gof : GOF, parent : PlugBarElement, label : string){
         this.gof = gof;
         this.parent = parent;
-        this.label = label;        
+        this.label = label;     
+        
+        this.eventHandler = new PlugElementEventHandler(this);
+    }
+    public getEventHandler(): GraphElementEventHandler {
+        return this.eventHandler;
     }
     
     public getGof(): GOF {

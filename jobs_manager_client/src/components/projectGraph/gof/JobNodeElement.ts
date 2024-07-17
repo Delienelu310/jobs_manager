@@ -8,6 +8,8 @@ import { PlugBarElement, StaticPlugBarConfig } from "./PlugBarElement";
 
 import { GOF } from "./GOF";
 import { TextNode } from "./TetxNode";
+import { JobNodeElementEventHandler } from "./eventHandlers/JobNodeElementEventHandler";
+import { GraphElementEventHandler } from "./eventHandlers/GraphElementEventHandler";
 
 
 export interface StaticJobNodeElementConfig{
@@ -20,6 +22,9 @@ export interface StaticJobNodeElementConfig{
 export class JobNodeElement implements GraphElement{
 
     private gof : GOF;
+    private eventHandler : JobNodeElementEventHandler;
+
+
     private children : PlugBarElement[];
     private parent: NullGraphElement = new NullGraphElement;
 
@@ -42,6 +47,11 @@ export class JobNodeElement implements GraphElement{
 
         this.children = [inputBar, outputBar];
 
+        this.eventHandler = new JobNodeElementEventHandler(this);
+
+    }
+    public getEventHandler(): GraphElementEventHandler {
+        return this.eventHandler;
     }
 
     public getConfig() : StaticJobNodeElementConfig{

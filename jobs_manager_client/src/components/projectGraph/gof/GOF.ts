@@ -1,4 +1,5 @@
 import { ProjectFullData } from "../../../api/abstraction/projectApi";
+import { PanelMods } from "./eventHandlers/PanelMods";
 import { GraphElement } from "./GraphElement";
 import { NullGraphElement } from "./NullGraphElement";
 import { StaticPlugBarConfig } from "./PlugBarElement";
@@ -21,33 +22,37 @@ export interface DynamicCanvasConfig{
     }
 }
 
-export enum GOFClickMod{
-    CURSOR, CONNECT, DELETE
-}
-
 export class GOF{
 
 
     private children : GraphElement[] = [];
     private projectData : ProjectFullData;
     private config : StaticCanvasConfig;
-    private dynamic : DynamicCanvasConfig;
 
-    private mod : GOFClickMod = GOFClickMod.CURSOR;
+    private dynamic : DynamicCanvasConfig;
+    private dynamicConfigSetter : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>;
+
+    private mod : PanelMods = PanelMods.CURSOR;
 
     
 
-    public constructor(config : StaticCanvasConfig, projectData : ProjectFullData, dynamic : DynamicCanvasConfig){
+    public constructor(
+        config : StaticCanvasConfig, 
+        projectData : ProjectFullData, 
+        dynamic : DynamicCanvasConfig,
+        dynamicConfigSetter : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>
+    ){
         this.config = config;
         this.projectData = projectData;
         this.dynamic = dynamic;
+        this.dynamicConfigSetter = dynamicConfigSetter;
     }
 
-    public getMod() : GOFClickMod{
+    public getMod() : PanelMods{
         return this.mod;
     }
 
-    public setMod(mod : GOFClickMod) : void{
+    public setMod(mod : PanelMods) : void{
         this.mod = mod;
     }
 
@@ -78,7 +83,6 @@ export class GOF{
             
             if(elem.getGofId() == id) return elem;
 
-            console.log(elem.getGofId());
 
             let child = this.findByIdRecursively(id, elem.getChildren());
             if(child.getGofId() == id) return child;
@@ -99,11 +103,32 @@ export class GOF{
 
     public handleDrag(){
         if(this.dragTarget.isNull()){
-
+            
         }
     }
 
-    public handleClick(){
+    private clickHandlers : Map<PanelMods, (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>) => void> = 
+        new Map<PanelMods, (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>) => void> ([
+            [PanelMods.CURSOR, (event) => {
+                console.log("something");
+            }],
+            [PanelMods.DELETE, (event) => {}],
+            [PanelMods.CONNECT, (event) => {
+
+            }]
+        ]);
+
+    public handleClick : React.MouseEventHandler<HTMLCanvasElement> = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+
+        let elem = this.findClickTarget(event.clientX, event.clientY);
+
+
+        if(elem.isNull()){
+            let method = this.clickHandlers.get(this.mod);
+            if(!method) return;
+            method(event);
+        }
+        elem.getEventHandler().handleClick(event);
 
     }
 

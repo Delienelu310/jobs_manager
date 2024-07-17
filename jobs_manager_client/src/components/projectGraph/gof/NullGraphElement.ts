@@ -1,28 +1,34 @@
+import { GraphElementEventHandler } from "./eventHandlers/GraphElementEventHandler";
 import { GOF } from "./GOF";
 import { GraphElement } from "./GraphElement";
 
 
 export class NullGraphElement implements GraphElement{
 
-    getGof(): GOF {
+
+    public getEventHandler(): GraphElementEventHandler {
+        throw new Error("Null element cant handle any events");
+    }
+
+    public getGof(): GOF {
         throw new Error("Null graph element cant have GOF");
     }
-    getGofId(): string {
+    public getGofId(): string {
         return "null_element";
     }
-    isNull(): boolean {
+    public isNull(): boolean {
         return true;
     }
-    doesContainPoint(x: number, y: number): boolean {
+    public doesContainPoint(x: number, y: number): boolean {
         return false;
     }
-    draw(ctx : CanvasRenderingContext2D): void {
+    public draw(ctx : CanvasRenderingContext2D): void {
         return;
     }
-    getChildren(): GraphElement[] {
+    public getChildren(): GraphElement[] {
         return [];
     }
-    getParent(): GraphElement {
+    public getParent(): GraphElement {
         throw new Error("Null element cannot have parent");
     }
 
