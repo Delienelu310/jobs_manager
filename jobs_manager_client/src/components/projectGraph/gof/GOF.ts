@@ -1,6 +1,7 @@
 import { ProjectFullData } from "../../../api/abstraction/projectApi";
 import { GraphElement } from "./GraphElement";
 import { NullGraphElement } from "./NullGraphElement";
+import { StaticPlugBarConfig } from "./PlugBarElement";
 
 
 export interface StaticCanvasConfig{
@@ -9,7 +10,20 @@ export interface StaticCanvasConfig{
     padding : {
         x : number,
         y : number
+    },
+    plugBar : StaticPlugBarConfig
+}
+
+
+export interface DynamicCanvasConfig{
+    offset : {
+        x : number,
+        y : number
     }
+}
+
+export enum GOFClickMod{
+    CURSOR, CONNECT, DELETE
 }
 
 export class GOF{
@@ -18,12 +32,24 @@ export class GOF{
     private children : GraphElement[] = [];
     private projectData : ProjectFullData;
     private config : StaticCanvasConfig;
+    private dynamic : DynamicCanvasConfig;
+
+    private mod : GOFClickMod = GOFClickMod.CURSOR;
 
     
 
-    public constructor(config : StaticCanvasConfig, projectData : ProjectFullData){
+    public constructor(config : StaticCanvasConfig, projectData : ProjectFullData, dynamic : DynamicCanvasConfig){
         this.config = config;
         this.projectData = projectData;
+        this.dynamic = dynamic;
+    }
+
+    public getMod() : GOFClickMod{
+        return this.mod;
+    }
+
+    public setMod(mod : GOFClickMod) : void{
+        this.mod = mod;
     }
 
     public getProjectData() : ProjectFullData{
@@ -34,8 +60,13 @@ export class GOF{
     }
 
     public getOffsets() : [number, number]{
-        return [0,0];
+        return [
+            this.dynamic.offset.x,
+            this.dynamic.offset.y 
+        ]
     }
+
+
 
     public findById(id : string) : GraphElement {
         return this.findByIdRecursively(id, this.children);
@@ -54,6 +85,48 @@ export class GOF{
         
         return new NullGraphElement();
     }
+
+    private dragTarget : GraphElement = new NullGraphElement();
+
+    public handleDragStart(){
+
+    }
+
+    public handleDragEnd(){
+
+    }
+
+    public handleDrag(){
+        if(this.dragTarget.isNull()){
+
+        }
+    }
+
+    public handleClick(){
+
+    }
+
+
+    private findClickTarget(x : number, y : number) : GraphElement{
+        return this.findClickTargetRecursive(x, y, this.children)
+    }
+
+    private findClickTargetRecursive(x : number, y : number, children : GraphElement[]) : GraphElement{
+    
+        let result : GraphElement = new NullGraphElement();
+        for(let elem of children){
+            if(elem.doesContainPoint(x,y)){
+                result = elem;
+                break;
+            }
+        }
+        if(result.isNull()) return result;
+
+        let deeperResult = this.findClickTargetRecursive(x, y, result.getChildren());
+        if(deeperResult.isNull()) return result;
+        else return deeperResult;
+    }
+
 
 
     public addElement(element : GraphElement) : void{

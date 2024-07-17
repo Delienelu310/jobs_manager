@@ -19,17 +19,24 @@ export class ChannelElement implements GraphElement{
     private channelData : ChannelFullData;
     private config : StaticChannelConfig;
 
-    private inputId : string;
-    private outputId : string;
+    private inputIds : Set<string> = new Set([]);
+    private outputIds : Set<string> = new Set([]);
 
-    constructor(gof : GOF, channelData : ChannelFullData, config : StaticChannelConfig, inputId : string, outputId : string){
+    constructor(gof : GOF, channelData : ChannelFullData, config : StaticChannelConfig){
         this.gof = gof;
         this.channelData = channelData;
         this.config = config;
 
-        this.inputId = inputId;
-        this.outputId = outputId;
     }
+
+    public getInputIds() : Set<string>{
+        return this.inputIds;
+    }
+
+    public getOutputIds() : Set<string>{
+        return this.outputIds;        
+    }
+
 
     public getData() : ChannelFullData{
         return this.channelData;
@@ -44,32 +51,66 @@ export class ChannelElement implements GraphElement{
     }
 
 
-    private getPoints() : [[number, number], [number, number]]{
-        const inputPlug : PlugElement = this.gof.findById(this.inputId) as PlugElement;
-        const outputPlug : PlugElement = this.gof.findById(this.outputId) as PlugElement;
+    private getPoints() : [[number, number][], [number, number][]]{
 
-        let leftPoint : [number, number] = inputPlug.getCoords();
-        let leftConfig = (inputPlug.getParent() as PlugBarElement).getConfig();
-        let rightPoint : [number, number] = outputPlug.getCoords();
-        let rightConfig = (inputPlug.getParent() as PlugBarElement).getConfig();
+        let inputs : Set<PlugElement> = new Set<PlugElement>();
+        let outputs : Set<PlugElement> = new Set<PlugElement>();
+        this.inputIds.forEach(id => inputs.add(this.gof.findById(id) as PlugElement));
+        this.outputIds.forEach(id => outputs.add(this.gof.findById(id) as PlugElement));
 
-        
+        let leftPoints : [number, number][] = [];
+        let rightPoints : [number, number][] = [];
 
-        leftPoint[0] += leftConfig.plugWidth;
-        leftPoint[1] += leftConfig.plugHeight / 2;
+        inputs.forEach(inputPlug => {
+            let leftPoint : [number, number] = inputPlug.getCoords();
+            let leftConfig = (inputPlug.getParent() as PlugBarElement).getConfig();
+            
+            leftPoint[0] += leftConfig.plugWidth;
+            leftPoint[1] += leftConfig.plugHeight / 2;
 
-        rightPoint[1] += rightConfig.plugHeight / 2;
+            leftPoints.push(leftPoint);
+        });
 
-        return [leftPoint, rightPoint];
+        outputs.forEach(outputPlug => {
+            let rightPoint : [number, number] = outputPlug.getCoords();
+            let rightConfig = (outputPlug.getParent() as PlugBarElement).getConfig();
+
+
+            rightPoint[1] += rightConfig.plugHeight / 2;
+
+            rightPoints.push(rightPoint);
+        });
+
+        return [leftPoints, rightPoints];
     }
 
 
 
     public getCoords() : [number, number]{
-       let [leftPoint, rightPoint] = this.getPoints();
+       let [leftPoints, rightPoints] = this.getPoints();
 
+       if(leftPoints.length == 0 || rightPoints.length == 0) return [0,0];
 
-        let middlePoint = [(leftPoint[0] + rightPoint[0]) / 2, (leftPoint[1] + rightPoint[1]) / 2];
+    
+       let middleLeftPoint : [number, number] = [0, 0];
+       for(let leftPoint of leftPoints){
+            middleLeftPoint[0] += leftPoint[0];
+            middleLeftPoint[1] += leftPoint[1];
+       }
+       middleLeftPoint[0] /= leftPoints.length;
+       middleLeftPoint[1] /= leftPoints.length;
+
+       let middleRightPoint : [number, number] = [0, 0];
+       for(let rightPoint of rightPoints){
+            middleRightPoint[0] += rightPoint[0];
+            middleRightPoint[1] += rightPoint[1];
+       }
+       middleRightPoint[0] /= rightPoints.length;
+       middleRightPoint[1] /= rightPoints.length;
+
+       
+
+        let middlePoint = [(middleLeftPoint[0] + middleRightPoint[0]) / 2, (middleLeftPoint[1] + middleRightPoint[1]) / 2];
 
         return [middlePoint[0] - this.config.width / 2, middlePoint[1] - this.config.height / 2];
 
@@ -88,21 +129,14 @@ export class ChannelElement implements GraphElement{
 
     public draw(ctx : CanvasRenderingContext2D): void {
 
-        let [leftPoint, rightPoint] = this.getPoints();
+        let [leftPoints, rightPoints] = this.getPoints();
         let [boxX, boxY] = this.getCoords();
         let [dx, dy] = this.gof.getOffsets();
 
         boxX += dx;
         boxY += dy;
 
-        ctx.strokeStyle = "black";
-        ctx.lineWidth =  10;
-
-        ctx.beginPath();
-        ctx.moveTo(leftPoint[0], leftPoint[1]);
-        ctx.lineTo(rightPoint[0], rightPoint[1]);
-        ctx.stroke();
-        ctx.closePath();
+        // draw the channel box
 
         ctx.fillStyle = "white";
         ctx.fillRect(boxX, boxY, this.config.width, this.config.height);
@@ -120,6 +154,25 @@ export class ChannelElement implements GraphElement{
 
         textNode.draw(ctx);
 
+        //draw the lines to the box
+        ctx.strokeStyle = "black";
+        ctx.lineWidth =  10;
+
+        for(let leftPoint of leftPoints){
+            ctx.beginPath();
+            ctx.moveTo(leftPoint[0], leftPoint[1]);
+            ctx.lineTo(boxX, boxY + this.config.height / 2);
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        for(let rightPoint of rightPoints){
+            ctx.beginPath();
+            ctx.moveTo(boxX + this.config.width, boxY + this.config.height / 2);
+            ctx.lineTo(rightPoint[0], rightPoint[1]);
+            ctx.stroke();
+            ctx.closePath();
+        }
 
     }
 
