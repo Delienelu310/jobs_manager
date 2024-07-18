@@ -11,18 +11,23 @@ const ProjectPage = () => {
     const [projectGraph, setProjectGraph] = useState<ProjectGraph>();
     const [projectFullData, setProjectFullData] = useState<ProjectFullData>();
 
-    useEffect(() => {
-        console.log(projectId);
+
+    function refresh(){
         if(!projectId) return;
 
         retrieveProjectGraph(projectId).then(graph => setProjectGraph(graph)).catch(e => console.log(e));
         retrieveProject(projectId).then(projectFullData => { console.log(projectFullData);setProjectFullData(projectFullData)}).catch(e => console.log(e));
+    }
+
+    useEffect(() => {
+        refresh();
     }, []);
 
     return (
         <div>
             {projectGraph && projectFullData && 
                 <ProjectGraphComponent 
+                    refresh={refresh}
                     projectGraph={projectGraph} 
                     setProjectGraph={setProjectGraph}
                     projectFullData={projectFullData}

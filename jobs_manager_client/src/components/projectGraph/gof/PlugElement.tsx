@@ -1,3 +1,6 @@
+import { AxiosResponse } from "axios";
+import { removeJobNodePlug } from "../../../api/abstraction/jobNodeApi";
+import { removeProjectPlug } from "../../../api/abstraction/projectApi";
 import { GraphElementEventHandler } from "./eventHandlers/GraphElementEventHandler";
 import { PlugElementEventHandler } from "./eventHandlers/PlugElementEventHandler";
 import { GOF } from "./GOF";
@@ -24,6 +27,16 @@ export class PlugElement implements GraphElement{
         
         this.eventHandler = new PlugElementEventHandler(this);
     }
+
+    public deleteElement(): Promise<AxiosResponse<void>> | null  {
+        if(this.parent.getParent().isNull()){
+            return removeProjectPlug(this.getGof().getProjectData().id, this.parent.getOrientation(), this.label);
+        }else{
+            return removeJobNodePlug(this.getGof().getProjectData().id, (this.parent.getParent() as JobNodeElement).getData().id, this.parent.getOrientation(), this.label);
+        }
+        
+    }
+
     public getMenuComponent(): JSX.Element {
         return <div>this is plug component</div>
     }

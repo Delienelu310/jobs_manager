@@ -1,3 +1,4 @@
+import { AxiosResponse } from "axios";
 import { GraphElementEventHandler } from "./eventHandlers/GraphElementEventHandler";
 import { GOF } from "./GOF";
 
@@ -21,5 +22,7 @@ export interface GraphElement{
 
 
     getMenuComponent() : JSX.Element;
+
+    deleteElement() : Promise<AxiosResponse<void>> | null;
 
 }

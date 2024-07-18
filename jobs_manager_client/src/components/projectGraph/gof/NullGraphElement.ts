@@ -1,9 +1,13 @@
+import { AxiosResponse } from "axios";
 import { GraphElementEventHandler } from "./eventHandlers/GraphElementEventHandler";
 import { GOF } from "./GOF";
 import { GraphElement } from "./GraphElement";
 
 
 export class NullGraphElement implements GraphElement{
+    public deleteElement(): Promise<AxiosResponse<void>> | null  {
+        return null;
+    }
     public getMenuComponent(): JSX.Element {
         throw new Error("Null graph element cannot return menu.");
     }

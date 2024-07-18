@@ -20,13 +20,15 @@ interface StaticGraphCanvasConfig{
 }
 
 interface ProjectGraphComponent{
+    refresh : () => void,
     projectGraph : ProjectGraph,
     setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>
     projectFullData : ProjectFullData,
     staticConfig : StaticGraphCanvasConfig,
+
 }
 
-const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, setProjectGraph} : ProjectGraphComponent) => {
+const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, setProjectGraph, refresh} : ProjectGraphComponent) => {
 
     const [dynamicConfig, setDynamicConfig] = useState<DynamicCanvasConfig>({
         offset : {
@@ -45,6 +47,9 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
 
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    
+
+    const [mod, setMod] = useState<PanelMods>(PanelMods.CURSOR);
     const [gof, setGof] = useState<GOF>(new GOF(
         staticConfig.canvas,
         projectFullData,
@@ -52,11 +57,10 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
         dynamicConfig,
         setDynamicConfig,
         setProjectGraph,
-        setMenu
+        setMenu,
+        mod,
+        refresh
     ));
-
-    const [mod, setMod] = useState<PanelMods>(PanelMods.CURSOR);
-
     const [jobNodeName, setJobNodeName] = useState<string>("");
 
 
@@ -69,7 +73,9 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
             dynamicConfig,
             setDynamicConfig,
             setProjectGraph,
-            setMenu
+            setMenu,
+            mod,
+            refresh
         );
 
         //1. prepare job nodes
@@ -164,7 +170,7 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
 
         prepareGof();
 
-    }, [projectGraph, projectFullData, dynamicConfig]);
+    }, [projectGraph, projectFullData, dynamicConfig, mod]);
 
 
     useEffect(() => {
@@ -217,6 +223,7 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
                 />
                 <div>
                     <h5>Mod : {PanelMods[gof.getMod()]}</h5>
+                    <h5>Also Mod : {PanelMods[mod]}</h5>
                     <button onClick={e => setMod(PanelMods.CURSOR)}>Cursor</button>
                     <button onClick={e => setMod(PanelMods.CONNECT)}>Connect</button>
                     <button onClick={e => setMod(PanelMods.DELETE)}>Delete</button>

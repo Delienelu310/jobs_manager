@@ -8,6 +8,8 @@ import { PlugBarElement } from "./PlugBarElement";
 import { TextNode } from "./TetxNode";
 import { GraphElementEventHandler } from "./eventHandlers/GraphElementEventHandler";
 import { ChannelElementEventHandler } from "./eventHandlers/ChannelElementEventHandler";
+import { deleteChannel } from "../../../api/abstraction/channelApi";
+import { AxiosResponse } from "axios";
 
 
 export interface StaticChannelConfig{
@@ -34,6 +36,9 @@ export class ChannelElement implements GraphElement{
 
         this.eventHandler = new ChannelElementEventHandler(this);
 
+    }
+    public deleteElement(): Promise<AxiosResponse<void>> | null {
+        return deleteChannel(this.getGof().getProjectData().id, this.channelData.id);
     }
     public getMenuComponent() : JSX.Element{
         return (

@@ -1,3 +1,4 @@
+import { AxiosResponse } from "axios";
 import apiClient from "../ApiClient";
 
 export interface JobNodeFullData{
@@ -44,4 +45,9 @@ export interface ProjectFullData{
 
 export async function retrieveProject(projectId : string) : Promise<ProjectFullData>{
     return apiClient.get(`/projects/${projectId}`).then(response => response.data);
+}
+
+
+export async function removeProjectPlug(projectId : string, rightOrientation : boolean, label : string) : Promise<AxiosResponse<void>>{
+    return apiClient.put(`/projects/${projectId}/${rightOrientation ? "output" : "input"}/remove/${label}`);
 }

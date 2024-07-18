@@ -46,8 +46,8 @@ export class GOF{
     private setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>;
     private setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>;
     private setMenu : React.Dispatch<React.SetStateAction<JSX.Element>>;
-    private mod : PanelMods = PanelMods.CURSOR;
-
+    private mod : PanelMods;
+    private refresh : () => void;
     
 
     public constructor(
@@ -57,7 +57,9 @@ export class GOF{
         dynamic : DynamicCanvasConfig,
         setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>,
         setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>,
-        setMenu : React.Dispatch<React.SetStateAction<JSX.Element>>
+        setMenu : React.Dispatch<React.SetStateAction<JSX.Element>>,
+        mod : PanelMods,
+        refresh : () => void
     ){
         this.config = config;
         this.projectData = projectData;
@@ -66,6 +68,9 @@ export class GOF{
         this.setDynamic = setDynamic;
         this.setProjectGraph = setProjectGraph;
         this.setMenu = setMenu;
+        this.mod = mod;
+        this.refresh = refresh;
+
     }
 
     public getProjectGraph() : ProjectGraph{
@@ -133,7 +138,7 @@ export class GOF{
             }
         })
 
-        console.log(event.clientX + " " + event.clientY);
+        // console.log(event.clientX + " " + event.clientY);
     }
 
     public handleMouseMove  = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => {
@@ -141,10 +146,10 @@ export class GOF{
     
 
         if(!this.dynamic.dragData.isDragging) return;
-        console.log("a");
+
         if(!this.dynamic.dragData.start) return;
-        console.log("b");
-        console.log(this.dynamic.dragData.elem);
+
+
 
         if(this.dynamic.dragData.elem.isNull()){
             this.setDynamic({
@@ -163,7 +168,7 @@ export class GOF{
                 }   
             });
         }else{
-            console.log("dragging jobnode");
+            // console.log("dragging jobnode");
             this.dynamic.dragData.elem.getEventHandler().handleMouseMove(event, mod);
         }
         
@@ -191,7 +196,13 @@ export class GOF{
                 this.setMenu(elem.getMenuComponent());
 
             }],
-            [PanelMods.DELETE, (event) => {}],
+            [PanelMods.DELETE, (event) => {
+                let elem = this.findClickTarget(event.clientX, event.clientY);
+                elem.deleteElement()
+                    ?.then(r => this.refresh())
+                    .catch(e => console.log(e))
+                ;
+            }],
             [PanelMods.CONNECT, (event) => {
 
             }]

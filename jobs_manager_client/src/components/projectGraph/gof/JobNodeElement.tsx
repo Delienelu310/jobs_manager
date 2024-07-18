@@ -11,6 +11,8 @@ import { TextNode } from "./TetxNode";
 import { JobNodeElementEventHandler } from "./eventHandlers/JobNodeElementEventHandler";
 import { GraphElementEventHandler } from "./eventHandlers/GraphElementEventHandler";
 import React from "react";
+import { deleteJobNode } from "../../../api/abstraction/jobNodeApi";
+import { AxiosResponse } from "axios";
 
 
 export interface StaticJobNodeElementConfig{
@@ -54,6 +56,9 @@ export class JobNodeElement implements GraphElement{
 
         this.eventHandler = new JobNodeElementEventHandler(this, setProjectGraph, setDynamic);
 
+    }
+    public deleteElement(): Promise<AxiosResponse<void>> | null {
+        return deleteJobNode(this.getGof().getProjectData().id, this.data.id);
     }
 
 

@@ -1,3 +1,4 @@
+import { AxiosResponse } from "axios";
 import { GraphElementEventHandler } from "./eventHandlers/GraphElementEventHandler";
 import { PlugBarElementEventHandler } from "./eventHandlers/PlugBarElementEventHandler";
 import { GOF } from "./GOF";
@@ -66,6 +67,9 @@ export class PlugBarElement implements GraphElement{
 
         this.eventHandler = new PlugBarElementEventHandler(this);
     }
+    public deleteElement(): Promise<AxiosResponse<void>> | null   {
+        return null;
+    }
     public getMenuComponent(): JSX.Element {
         return <div>This is plug bar menu</div>
     }
@@ -129,8 +133,6 @@ export class PlugBarElement implements GraphElement{
         let [dx, dy] = this.gof.getOffsets();
         x += dx;
         y += dy;
-
-        if(!this.parent.isNull()) console.log((this.rightOrientation ? "output" : "input" ) + " " + this.getCoords() + " " + [dx,dy]);
 
         const height = this.getHeight()
 
