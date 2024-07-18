@@ -39,7 +39,7 @@ const ProjectPlugBarMenu = ({projectFullData, orientation, refresh} : ProjectPlu
                 <input value={newPlugChannelDetails.name} onChange={e => setNewPlugChannelDetails({...newPlugChannelDetails, name : e.target.value})}/>
                 <br/>
                 <select value={newPlugChannelDetails.type}>
-                    {Object.values(ChannelTypes).filter(key => typeof key != "string").map(key => <option value={key}>{ChannelTypes[key as number]}</option>)}
+                    {Object.values(ChannelTypes).map(key => <option value={key}>{key}</option>)}
                 </select>
 
                 <label>Headers: </label>

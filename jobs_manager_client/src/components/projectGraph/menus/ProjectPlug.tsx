@@ -23,7 +23,7 @@ const ProjectPlug = ({element} : ProjectPlugArgs) => {
 
             <div>
                 <h5>Channel: {channelData.channelDetails.name}</h5>
-                <span>Type : {ChannelTypes[channelData.channelDetails.type]}</span>
+                <span>Type : {channelData.channelDetails.type}</span>
                 <br/>
                 <span>Header : {channelData.channelDetails.headers.join(", ")}</span>
   

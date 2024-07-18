@@ -35,7 +35,7 @@ export interface ChannelFullData{
 }
 
 export enum ChannelTypes{
-    MINIO
+    MINIO = "minio"
 }
 
 export interface ChannelDetails{

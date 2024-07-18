@@ -43,15 +43,15 @@ const JobNodePlugMenu = ({
                     {channelList.channelList.map(channelData => (
                         <div>
                             <h5>Channel: {channelData.channelDetails.name}</h5>
-                            <span>Type : {ChannelTypes[channelData.channelDetails.type]}</span>
+                            <span>Type : {channelData.channelDetails.type}</span>
                             <br/>
                             <span>Header : {channelData.channelDetails.headers.join(", ")}</span>
 
-                            {channelData.inputJobs.length > 0 && <><hr/><h6>Input Jobs:</h6></>}
-                            {channelData.inputJobs.map(job => <>{job.jobNodeDetails.name}, id: {job.id} </>)}
+                            {channelData.inputJobs && channelData.inputJobs.length > 0 && <><hr/><h6>Input Jobs:</h6></>}
+                            {channelData.inputJobs && channelData.inputJobs.map(job => <>{job.jobNodeDetails.name}, id: {job.id} </>)}
 
-                            {channelData.outputJobs.length > 0 && <><hr/><h6>Output Jobs:</h6></>}
-                            {channelData.outputJobs.map(job => <>{job.jobNodeDetails.name}, id: {job.id} </>)}
+                            {channelData.outputJobs && channelData.outputJobs.length > 0 && <><hr/><h6>Output Jobs:</h6></>}
+                            {channelData.outputJobs && channelData.outputJobs.map(job => <>{job.jobNodeDetails.name}, id: {job.id} </>)}
                         </div>
                     ))}
                     
