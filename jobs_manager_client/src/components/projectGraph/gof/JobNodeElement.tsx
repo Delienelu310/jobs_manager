@@ -94,7 +94,9 @@ export class JobNodeElement implements GraphElement{
     }
     
     public doesContainPoint(x: number, y: number){
-        const leftCorner = {x : this.vertice.x, y : this.vertice.y};
+
+        const coords = this.getCoords();
+        const leftCorner = {x : coords[0], y : coords[1]};
 
         const width = this.config.width;
         const height = this.config.height;
@@ -105,13 +107,23 @@ export class JobNodeElement implements GraphElement{
          
     }
 
+    public getCoords() : [number, number]{
+        let [x, y] = [this.vertice.x, this.vertice.y];
+        
+        let elemOffset = this.gof.getDynamic().elemOffset[this.getGofId()];
+        if(!elemOffset) elemOffset = {x : 0, y : 0}
+        x += elemOffset.x;
+        y += elemOffset.y;
+
+        return [x, y]
+    }
+
     public draw(ctx : CanvasRenderingContext2D) : void{
 
-        let [x, y] = [this.vertice.x, this.vertice.y];
+        let [x, y] =  this.getCoords();
         let [dx, dy] = this.gof.getOffsets();
         x += dx;
         y += dy;
-
 
         ctx.strokeStyle = "black";
         ctx.lineWidth = 5;

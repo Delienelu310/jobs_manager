@@ -22,18 +22,16 @@ export class JobNodeElementEventHandler implements GraphElementEventHandler{
         this.setDynamic = setDynamic;
 
     }
+
     public handleMouseMove: (event: React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => void = (event, mod) => {
         
         
         let start = this.element.getGof().getDynamic().dragData.start;
-        console.log(start);
-
+     
         let vertCopy = this.element.getGof().getProjectGraph().vertices.map(v => {
             
             if(v.jobNode.id == this.element.getData().id){
-                
-
-                
+                  
                 if(start == null) return v;
                 return {
                     ...v,

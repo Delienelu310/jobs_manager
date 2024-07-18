@@ -24,6 +24,9 @@ export interface DynamicCanvasConfig{
         x : number,
         y : number
     },
+    elemOffset : {
+        [key: string] : {x : number, y : number}    //where key should be gofId
+    }
     dragData : {
         start : {
             x : number,
@@ -77,6 +80,10 @@ export class GOF{
         this.refresh = refresh;
         this.newChannelDetails = newChannelDetails;
 
+    }
+
+    public getSetDynamic(){
+        return this.setDynamic;
     }
 
     public getNewChannelDetails() : ChannelDetails{
@@ -141,7 +148,10 @@ export class GOF{
 
         if(this.mod != PanelMods.CURSOR) return;
 
-        let target = this.findClickTarget(event.clientX, event.clientY);
+        const [dx, dy] = this.getOffsets();
+        const [x, y] = [event.clientX - dx, event.clientY - dy];
+
+        let target = this.findClickTarget(x, y);
         
         this.setDynamic({
             ...this.dynamic,
@@ -155,7 +165,6 @@ export class GOF{
             }
         })
 
-        // console.log(event.clientX + " " + event.clientY);
     }
 
     public handleMouseMove  = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => {
@@ -165,8 +174,6 @@ export class GOF{
         if(!this.dynamic.dragData.isDragging) return;
 
         if(!this.dynamic.dragData.start) return;
-
-
 
         if(this.dynamic.dragData.elem.isNull()){
             this.setDynamic({
@@ -185,8 +192,26 @@ export class GOF{
                 }   
             });
         }else{
-            // console.log("dragging jobnode");
-            this.dynamic.dragData.elem.getEventHandler().handleMouseMove(event, mod);
+            let id = this.dynamic.dragData.elem.getGofId();
+            let elemOffset = this.dynamic.elemOffset[id] ?? {x : 0, y : 0}
+            this.setDynamic({
+                ...this.dynamic,
+                dragData : {
+                    ...this.dynamic.dragData,
+                    start :{
+                        x : event.clientX,
+                        y : event.clientY
+                    }
+
+                },
+                elemOffset: {
+                    ...this.dynamic.elemOffset,
+                    [this.dynamic.dragData.elem.getGofId()] : {
+                        x : elemOffset.x + event.clientX - this.dynamic.dragData.start.x,
+                        y : elemOffset.y + event.clientY - this.dynamic.dragData.start.y,
+                    }
+                }
+            })
         }
         
 

@@ -107,12 +107,13 @@ export class PlugBarElement implements GraphElement{
             [barX, barY] = [this.rightOrientation ? this.getGof().getCanvasConfig().width - this.config.x - this.config.width : this.config.x , this.config.y];
             
         }else{
-            [barX, barY] = [(this.getParent() as JobNodeElement).getVertice().x + 
+            let [parX, parY] = (this.getParent() as JobNodeElement).getCoords();
+            [barX, barY] = [parX+ 
                 (this.rightOrientation ? 
                     (this.getParent() as JobNodeElement).getConfig().width - this.config.x - this.config.width
                     : 
                     this.config.x),
-                    (this.getParent() as JobNodeElement).getVertice().y + this.config.y
+                    parY + this.config.y
                     
             ];
             

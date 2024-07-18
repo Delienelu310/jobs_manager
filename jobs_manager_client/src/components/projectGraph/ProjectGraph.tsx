@@ -47,7 +47,8 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
         connectMod:{
             input : null,
             output : null
-        }
+        },
+        elemOffset : {}
     });
     
     const [newChannelDetails, setNewChannelDetails] = useState<ChannelDetails>({
@@ -57,7 +58,7 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
     });
     const [newHeader, setNewHeader] = useState<string>("");
 
-    
+
     const [gof, setGof] = useState<GOF>(new GOF(
         staticConfig.canvas,
         projectFullData,
