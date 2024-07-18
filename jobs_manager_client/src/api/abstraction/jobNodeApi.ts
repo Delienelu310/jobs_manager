@@ -17,6 +17,8 @@ export async function createJobNode(projectId : string, jobNodeDetails : JobNode
 }
 
 
-
+export async function addJobNodePlug(projectId : string, jobNodeId : string, rightOrientation : boolean, label : string) : Promise<AxiosResponse<void>>{
+    return apiClient.put(`/projects/${projectId}/job_nodes/${jobNodeId}/add/${rightOrientation ? "output" : "input"}/${label}`);
+}
 
 

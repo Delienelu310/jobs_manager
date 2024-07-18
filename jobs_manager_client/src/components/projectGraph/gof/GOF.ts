@@ -1,10 +1,12 @@
-import { ProjectFullData } from "../../../api/abstraction/projectApi";
+import { connect } from "../../../api/abstraction/channelApi";
+import { ChannelDetails, ChannelTypes, ProjectFullData } from "../../../api/abstraction/projectApi";
 import { ProjectGraph } from "../../../api/ui/projectGraphApi";
 import { PanelMods } from "./eventHandlers/PanelMods";
 import { GraphElement } from "./GraphElement";
 import { JobNodeElement } from "./JobNodeElement";
 import { NullGraphElement } from "./NullGraphElement";
-import { StaticPlugBarConfig } from "./PlugBarElement";
+import { PlugBarElement, StaticPlugBarConfig } from "./PlugBarElement";
+import { PlugElement } from "./PlugElement";
 
 
 export interface StaticCanvasConfig{
@@ -29,6 +31,10 @@ export interface DynamicCanvasConfig{
         } | null,
         elem : GraphElement,
         isDragging : boolean
+    },
+    connectMod : {
+        input : PlugElement | null,
+        output : PlugElement | null
     }
 }
 
@@ -47,6 +53,7 @@ export class GOF{
     private setMenu : React.Dispatch<React.SetStateAction<JSX.Element>>;
     private mod : PanelMods;
     private refresh : () => void;
+    private newChannelDetails : ChannelDetails;
     
 
     public constructor(
@@ -57,7 +64,8 @@ export class GOF{
         setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>,
         setMenu : React.Dispatch<React.SetStateAction<JSX.Element>>,
         mod : PanelMods,
-        refresh : () => void
+        refresh : () => void,
+        newChannelDetails : ChannelDetails
     ){
         this.config = config;
         this.projectData = projectData;
@@ -67,7 +75,12 @@ export class GOF{
         this.setMenu = setMenu;
         this.mod = mod;
         this.refresh = refresh;
+        this.newChannelDetails = newChannelDetails;
 
+    }
+
+    public getNewChannelDetails() : ChannelDetails{
+        return this.newChannelDetails;
     }
 
     public getProjectGraph() : ProjectGraph{
@@ -125,6 +138,9 @@ export class GOF{
 
     
     public handleMouseDown = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => {
+
+        if(this.mod != PanelMods.CURSOR) return;
+
         let target = this.findClickTarget(event.clientX, event.clientY);
         
         this.setDynamic({
@@ -144,7 +160,7 @@ export class GOF{
 
     public handleMouseMove  = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => {
 
-    
+        if(this.mod != PanelMods.CURSOR) return;
 
         if(!this.dynamic.dragData.isDragging) return;
 
@@ -177,6 +193,8 @@ export class GOF{
     }
 
     public handleMouseUp = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => {
+
+        if(this.mod != PanelMods.CURSOR) return;
         this.setDynamic({
             ...this.dynamic,
             dragData: {
@@ -190,21 +208,93 @@ export class GOF{
     private clickHandlers : Map<PanelMods, (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>) => void> = 
         new Map<PanelMods, (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>) => void> ([
             [PanelMods.CURSOR, (event) => {
+                const [dx, dy] = this.getOffsets();
 
-                let elem = this.findClickTarget(event.clientX, event.clientY);
+                let elem = this.findClickTarget(event.clientX - dx, event.clientY - dy);
                 if(elem.isNull()) return;
                 
                 this.setMenu(elem.getMenuComponent());
 
             }],
             [PanelMods.DELETE, (event) => {
-                let elem = this.findClickTarget(event.clientX, event.clientY);
+                const [dx, dy] = this.getOffsets();
+
+                let elem = this.findClickTarget(event.clientX - dx, event.clientY - dy);
                 elem.deleteElement()
                     ?.then(r => this.refresh())
                     .catch(e => console.log(e))
                 ;
             }],
             [PanelMods.CONNECT, (event) => {
+                const [dx, dy] = this.getOffsets();
+
+                let elem = this.findClickTarget(event.clientX - dx, event.clientY - dy);
+                if(!(elem instanceof PlugElement)) return;
+
+                let plug = elem as PlugElement;
+
+                let rightOrientation = (plug.getParent() as PlugBarElement).getOrientation();
+                let isOfProject = (plug.getParent().getParent().isNull());
+
+                let newConnectMod = {...this.dynamic.connectMod};
+
+                if(rightOrientation && isOfProject || (!rightOrientation && !isOfProject)){
+                    if(newConnectMod.output != plug){
+                        newConnectMod.output = plug;
+                    }else{
+                        newConnectMod.output = null;
+                    }
+                }else{
+                    if(newConnectMod.input != plug){
+                        newConnectMod.input = plug;
+                    }else{
+                        newConnectMod.input = null;
+                    }
+                }
+
+                
+
+                if(newConnectMod.input && newConnectMod.output){
+                    let isLeftOfProject = newConnectMod.input.getParent().getParent().isNull();
+                    let isRightOfProject = newConnectMod.output.getParent().getParent().isNull();
+
+                    if(isLeftOfProject && isRightOfProject) return;
+
+                    let parameters : string[] = [];
+                    //input parameters
+                    if(isLeftOfProject){
+                        parameters.push(`project_input_label=${newConnectMod.input.getLabel()}`);
+                    }else{
+                        parameters.push(`output_label=${newConnectMod.input.getLabel()}`);
+                        let jobId = (newConnectMod.input.getParent().getParent() as JobNodeElement).getData().id;
+                        parameters.push(`output_job_node_id=${jobId}`);
+                    }
+
+                    if(isRightOfProject){
+                        parameters.push(`project_output_label=${newConnectMod.output.getLabel()}`);
+                    }else{
+                        parameters.push(`input_label=${newConnectMod.output.getLabel()}`);
+                        let jobId = (newConnectMod.output.getParent().getParent() as JobNodeElement).getData().id;
+                        parameters.push(`input_job_node_id=${jobId}`);
+                    }
+
+                    connect(this.getProjectData().id, parameters, this.newChannelDetails)
+                        .then(r => this.refresh())
+                        .then(r => {
+                            this.setDynamic({
+                                ...this.dynamic,
+                                connectMod: {
+                                    ...this.dynamic.connectMod,
+                                    input : null,
+                                    output : null
+                                }
+                            });
+                        }).catch(e => console.log(e));
+
+                }else{
+                    this.setDynamic({...this.dynamic, connectMod : {...this.dynamic.connectMod, input : newConnectMod.input, output : newConnectMod.output}});
+                }
+
 
             }]
         ]);

@@ -368,6 +368,9 @@ public class JobsNodeController {
             repositoryFactory.getChannelsRepository().updateChannelFull(channel);
             repositoryFactory.getJobNodesRepository().updateJobNodeFull(inputJob);
             repositoryFactory.getJobNodesRepository().updateJobNodeFull(outputJob);
+
+            project.getChannels().add(channel);
+            repositoryFactory.getProjectRepository().updateProjectFull(project);
         }
     }
 

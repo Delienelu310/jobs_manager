@@ -1,22 +1,64 @@
-import { ChannelList, JobNodeFullData } from "../../../api/abstraction/projectApi";
+
+import { useState } from "react";
+import { JobNodeElement } from "../gof/JobNodeElement";
+import { PlugBarElement } from "../gof/PlugBarElement";
+import { PlugElement } from "../gof/PlugElement";
+import { ChannelList, ChannelTypes } from "../../../api/abstraction/projectApi";
+import { removeJobNodePlug } from "../../../api/abstraction/jobNodeApi";
 
 
 
 export interface JobNodePlugMenuArgs{
-    label : string,
-    jobNodeData : JobNodeFullData,
-    refresh : () => void
+    element : PlugElement
 }
 
 const JobNodePlugMenu = ({
-    label,
-    jobNodeData,
-    refresh
+    element
 } : JobNodePlugMenuArgs) => {
+
+
+    const [channels, setChannels] = useState<{[key:string]:ChannelList}>(
+        (element.getParent() as PlugBarElement).getOrientation() ? 
+            (element.getParent().getParent() as JobNodeElement).getData().output
+            :
+            (element.getParent().getParent() as JobNodeElement).getData().input
+    );
+
     return (
         <div>
-            <h3>{label}</h3>
-            {/* {jobNodeData[]} */}
+            <h3>{element.getLabel()}</h3>
+            <button className="btn btn-danger" onClick={e => {
+                removeJobNodePlug(element.getGof().getProjectData().id, 
+                    (element.getParent().getParent() as JobNodeElement).getData().id,
+                    (element.getParent() as PlugBarElement).getOrientation(), 
+                    element.getLabel()
+                ).then(response => element.getGof().getRefresh()());
+            }}>Delete</button>
+
+
+            <h3>Channel list:</h3>
+            {Object.entries(channels).map( ([key, channelList]) => (
+                <div>
+                    <h3>{key}</h3>
+                    {channelList.channelList.map(channelData => (
+                        <div>
+                            <h5>Channel: {channelData.channelDetails.name}</h5>
+                            <span>Type : {ChannelTypes[channelData.channelDetails.type]}</span>
+                            <br/>
+                            <span>Header : {channelData.channelDetails.headers.join(", ")}</span>
+
+                            {channelData.inputJobs.length > 0 && <><hr/><h6>Input Jobs:</h6></>}
+                            {channelData.inputJobs.map(job => <>{job.jobNodeDetails.name}, id: {job.id} </>)}
+
+                            {channelData.outputJobs.length > 0 && <><hr/><h6>Output Jobs:</h6></>}
+                            {channelData.outputJobs.map(job => <>{job.jobNodeDetails.name}, id: {job.id} </>)}
+                        </div>
+                    ))}
+                    
+                    <hr/>
+                </div>
+            ))}
+            
         </div>
     );
 }

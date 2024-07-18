@@ -81,7 +81,7 @@ export class PlugBarElement implements GraphElement{
                 refresh={this.getGof().getRefresh()}
             />
         }else{
-            return <JobNodePlugBarMenu/>
+            return <JobNodePlugBarMenu element={this}/>
         }
     }
     public getEventHandler(): GraphElementEventHandler {

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { JobNodeVerticeDetails, ProjectGraph, updateJobNodeVertice, updateProjectGraph  } from "../../api/ui/projectGraphApi";
-import { ChannelFullData, JobNodeDetails, ProjectFullData } from "../../api/abstraction/projectApi";
+import { ChannelDetails, ChannelFullData, ChannelTypes, JobNodeDetails, ProjectFullData } from "../../api/abstraction/projectApi";
 
 import { JobNodeElement, StaticJobNodeElementConfig } from "./gof/JobNodeElement";
 import { StaticPlugBarConfig, PlugBarElement } from "./gof/PlugBarElement";
@@ -43,8 +43,21 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
             start : null,
             elem : new NullGraphElement(),
             isDragging: false
+        },
+        connectMod:{
+            input : null,
+            output : null
         }
     });
+    
+    const [newChannelDetails, setNewChannelDetails] = useState<ChannelDetails>({
+        name : "",
+        type : ChannelTypes.MINIO,
+        headers: []
+    });
+    const [newHeader, setNewHeader] = useState<string>("");
+
+    
     const [gof, setGof] = useState<GOF>(new GOF(
         staticConfig.canvas,
         projectFullData,
@@ -53,7 +66,8 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
         setDynamicConfig,
         setMenu,
         mod,
-        refresh
+        refresh,
+        newChannelDetails
     ));
 
 
@@ -63,6 +77,7 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
     });
     const [newJobVerticeDetails, setNewJobVerticeDetails] = useState<JobNodeVerticeDetails>({x: 0, y : 0});
 
+    
 
     function prepareGof(){
 
@@ -74,7 +89,8 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
             setDynamicConfig,
             setMenu,
             mod,
-            refresh
+            refresh,
+            newChannelDetails
         );
 
         //1. prepare job nodes
@@ -262,6 +278,38 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
                                 .catch(e => console.log(e))
                         }>Add JobNode</button>
                     </div>
+
+                    <hr/>
+                    {mod == PanelMods.CONNECT && <div>
+                        <h3>Channel creation panel:</h3>
+                        <label>Channel name : <input value={newChannelDetails.name} onChange={e => 
+                            setNewChannelDetails({...newChannelDetails, name : e.target.value})}/>
+                        </label>
+                        <br/>
+                        <select value={newChannelDetails.type}>
+                            {Object.values(ChannelTypes).filter(key => typeof key != "string").map(key => <option value={key}>{ChannelTypes[key as number]}</option>)}
+                        </select>
+
+                        <label>Headers: </label>
+                        <input value={newHeader} onChange={e => setNewHeader(e.target.value)}/>
+                        <button className="btn btn-primary" onClick={e => {
+                            let newHeaders = Array.from(newChannelDetails.headers);
+                            newHeaders.push(newHeader);
+
+                            setNewChannelDetails({
+                                ...newChannelDetails,
+                                headers: newHeaders
+                            })
+                        }}>Add header</button>
+
+                        {newChannelDetails.headers.map(header => <div key={header}>{header} 
+                            <button className="btn btn-danger" onClick={e => setNewChannelDetails({
+                                ...newChannelDetails,
+                                headers: newChannelDetails.headers.filter(h => h != header)
+                            })}>X</button>
+                        </div>)}
+
+                    </div>}
                 </div>
 
                 <hr/>

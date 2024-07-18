@@ -47,10 +47,10 @@ export class PlugElement implements GraphElement{
         if(this.parent.getParent().isNull()){   
             return <ProjectPlug element={this}/>
         }else{
-            // return <JobNodePlugMenu/>
-            return <div></div>
+            return <JobNodePlugMenu element={this}/>
         }
     }
+
     public getEventHandler(): GraphElementEventHandler {
         return this.eventHandler;
     }
