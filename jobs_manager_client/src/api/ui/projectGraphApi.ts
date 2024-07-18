@@ -1,3 +1,4 @@
+import { AxiosResponse } from "axios";
 import apiClient from "../ApiClient";
 
 
@@ -24,6 +25,11 @@ export interface JobNodeVertice{
     }
 }
 
+export interface JobNodeVerticeDetails{
+    x : number,
+    y : number
+}
+
 export interface ProjectGraph{
     id : string,
     project : {
@@ -37,10 +43,10 @@ export async function retrieveProjectGraph(projectId : string) : Promise<Project
     return apiClient.get(`/projects/${projectId}/graph`).then(response=> response.data);
 }
 
-export async function updateProjectGraph(projectId : string) : Promise<ProjectGraph>{
-    return apiClient.put(`/projects/${projectId}/graph`).then(response=> response.data);
+export async function updateProjectGraph(projectId : string) : Promise<AxiosResponse<void>>{
+    return apiClient.put(`/projects/${projectId}/graph`);
 }
 
-export async function updateJobNodeVertice(projectId : string, jobNodeId : string) : Promise<JobNodeVertice>{
-    return apiClient.put(`/projects/${projectId}/job_nodes/${jobNodeId}/graph`);
+export async function updateJobNodeVertice(projectId : string, jobNodeId : string, jobVerticeDetails : JobNodeVerticeDetails) : Promise<JobNodeVertice>{
+    return apiClient.put(`/projects/${projectId}/job_nodes/${jobNodeId}/graph`, jobVerticeDetails);
 }

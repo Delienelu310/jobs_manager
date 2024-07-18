@@ -3,7 +3,7 @@ import { NullGraphElement } from "./NullGraphElement";
 
 
 import { JobNodeFullData } from "../../../api/abstraction/projectApi";
-import { JobNodeVertice, ProjectGraph } from "../../../api/ui/projectGraphApi";
+import { JobNodeVertice, ProjectGraph, updateProjectGraph } from "../../../api/ui/projectGraphApi";
 import { PlugBarElement, StaticPlugBarConfig } from "./PlugBarElement";
 
 import { DynamicCanvasConfig, GOF } from "./GOF";
@@ -37,7 +37,7 @@ export class JobNodeElement implements GraphElement{
     private config : StaticJobNodeElementConfig;
 
     public constructor(gof : GOF, data : JobNodeFullData, vertice : JobNodeVertice, config : StaticJobNodeElementConfig,
-        setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>,
+        setProjectGraph : (projectGraph: ProjectGraph) => void ,
         setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>
 
     ){
@@ -58,7 +58,9 @@ export class JobNodeElement implements GraphElement{
 
     }
     public deleteElement(): Promise<AxiosResponse<void>> | null {
-        return deleteJobNode(this.getGof().getProjectData().id, this.data.id);
+        return deleteJobNode(this.getGof().getProjectData().id, this.data.id).then(response => {
+            return updateProjectGraph(this.getGof().getProjectData().id);
+        });
     }
 
 

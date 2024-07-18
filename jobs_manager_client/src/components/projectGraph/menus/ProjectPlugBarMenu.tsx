@@ -39,7 +39,7 @@ const ProjectPlugBarMenu = ({projectFullData, orientation, refresh} : ProjectPlu
                 <input value={newPlugChannelDetails.name} onChange={e => setNewPlugChannelDetails({...newPlugChannelDetails, name : e.target.value})}/>
                 <br/>
                 <select value={newPlugChannelDetails.type}>
-                    {Object.values(ChannelTypes).filter(key => typeof key != "string").map(key => <option value={key}>{ChannelTypes[key]}</option>)}
+                    {Object.values(ChannelTypes).filter(key => typeof key != "string").map(key => <option value={key}>{ChannelTypes[key as number]}</option>)}
                 </select>
 
                 <label>Headers: </label>
@@ -74,6 +74,11 @@ const ProjectPlugBarMenu = ({projectFullData, orientation, refresh} : ProjectPlu
                 <h5>{key}</h5>
                 <div>
                     <h5>Channel: {channel.channelDetails.name}</h5>
+                     <button className="btn btn-danger" onClick={e => 
+                            removeProjectPlug(projectFullData.id, orientation, key)
+                                .then(response => refresh())
+                                .catch(e => console.log(e))
+                    }>Delete</button>
                     <span>Type : {channel.channelDetails.type}</span>
                     <br/>
                     <span>Header : {channel.channelDetails.headers.join(", ")}</span>
@@ -87,10 +92,7 @@ const ProjectPlugBarMenu = ({projectFullData, orientation, refresh} : ProjectPlu
                     {channel.outputJobs.map(job => <>{job.jobNodeDetails.name}, id: {job.id} </>)}
                 </div>  
 
-                <button className="btn btn-danger" onClick={e => 
-                    removeProjectPlug(projectFullData.id, orientation, key)
-                        .then(response => refresh())
-                }>Delete</button>
+               
             </div>) )}
         </div>
     );

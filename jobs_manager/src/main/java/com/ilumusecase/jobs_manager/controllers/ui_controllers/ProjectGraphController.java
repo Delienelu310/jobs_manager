@@ -1,5 +1,6 @@
 package com.ilumusecase.jobs_manager.controllers.ui_controllers;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -69,19 +70,23 @@ public class ProjectGraphController {
                 );
             }
         }
+        Set<JobNodeVertice> toRemove =  new HashSet<>();
         for(JobNodeVertice vertice : projectGraph.getVertices()){
             if(!actualJobNodesIds.contains(vertice.getJobNode().getId())){
-                projectGraph.getVertices().remove(vertice);
+                toRemove.add(vertice);
             }
         }
+        for(JobNodeVertice vertice : toRemove){
+            projectGraph.getVertices().remove(vertice);
+        }
+
         return repositoryFactory.getProjectGraphRepository().updateProjectGraph(projectGraph);
 
     }
 
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/graph")
-    @JsonMapperRequest(type="graph", resource = "JobNodeVertice")
-    public Object updateJobNodeVertice(
+    public void updateJobNodeVertice(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @RequestBody JobNodeVertice jobNodeVertice
@@ -92,6 +97,6 @@ public class ProjectGraphController {
         jobNodeVerticeActual.setX(jobNodeVertice.getX());
         jobNodeVerticeActual.setY(jobNodeVertice.getY());
 
-        return repositoryFactory.getJobNodeVerticeRepository().updateJobNodeVertice(jobNodeVerticeActual);
+        repositoryFactory.getJobNodeVerticeRepository().updateJobNodeVertice(jobNodeVerticeActual);
     }
 }

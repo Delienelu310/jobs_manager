@@ -39,22 +39,17 @@ export class PlugElement implements GraphElement{
         
     }
 
+    public getLabel() : string{
+        return this.label;
+    }
+
     public getMenuComponent(): JSX.Element {
-        if(this.parent.getParent().isNull()){
-            
-            let channelData = this.parent.getOrientation() ?
-                this.getGof().getProjectData().outputChannels[this.label]
-                :
-                this.getGof().getProjectData().inputChannels[this.label]
-            ;
-            
-            return <ProjectPlug label={this.label} channel={channelData}/>
+        if(this.parent.getParent().isNull()){   
+            return <ProjectPlug element={this}/>
         }else{
-            return <JobNodePlugMenu/>
+            // return <JobNodePlugMenu/>
+            return <div></div>
         }
-
-
-        return <div>this is plug component</div>
     }
     public getEventHandler(): GraphElementEventHandler {
         return this.eventHandler;

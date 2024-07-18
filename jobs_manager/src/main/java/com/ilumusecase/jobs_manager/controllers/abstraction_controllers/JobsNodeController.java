@@ -73,7 +73,7 @@ public class JobsNodeController {
 
     @PostMapping("/projects/{project_id}/job_nodes")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
-    public MappingJacksonValue createJobNode(
+    public String createJobNode(
         @ProjectId @PathVariable("project_id") String projectId, 
         @RequestBody JobNodeDetails jobNodeDetails
     ){
@@ -84,8 +84,8 @@ public class JobsNodeController {
         project.getJobNodes().add(jobNode);
         repositoryFactory.getProjectRepository().updateProjectFull(project);
 
+        return jobNode.getId();
         
-        return jsonMappersFactory.getJobNodeJsonMapper().getFullJobNode(jobNode);
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}")

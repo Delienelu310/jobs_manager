@@ -44,7 +44,6 @@ export class GOF{
 
     private dynamic : DynamicCanvasConfig;
     private setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>;
-    private setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>;
     private setMenu : React.Dispatch<React.SetStateAction<JSX.Element>>;
     private mod : PanelMods;
     private refresh : () => void;
@@ -56,7 +55,6 @@ export class GOF{
         projectGraph : ProjectGraph,
         dynamic : DynamicCanvasConfig,
         setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>,
-        setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>,
         setMenu : React.Dispatch<React.SetStateAction<JSX.Element>>,
         mod : PanelMods,
         refresh : () => void
@@ -66,7 +64,6 @@ export class GOF{
         this.projectGraph = projectGraph;
         this.dynamic = dynamic;
         this.setDynamic = setDynamic;
-        this.setProjectGraph = setProjectGraph;
         this.setMenu = setMenu;
         this.mod = mod;
         this.refresh = refresh;

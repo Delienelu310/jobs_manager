@@ -4,19 +4,28 @@ import { ProjectGraph, retrieveProjectGraph } from "../api/ui/projectGraphApi";
 import { useParams } from "react-router-dom";
 import { ProjectFullData, retrieveProject } from "../api/abstraction/projectApi";
 
+
+export interface AllProjectData{
+    projectGraph : ProjectGraph,
+    projectFullData : ProjectFullData
+}
+
 const ProjectPage = () => {
 
     const {projectId} = useParams();
 
-    const [projectGraph, setProjectGraph] = useState<ProjectGraph>();
-    const [projectFullData, setProjectFullData] = useState<ProjectFullData>();
+    const [allProjectData, setAllProjectData] = useState<AllProjectData>();
+
 
 
     function refresh(){
         if(!projectId) return;
 
-        retrieveProjectGraph(projectId).then(graph => setProjectGraph(graph)).catch(e => console.log(e));
-        retrieveProject(projectId).then(projectFullData => { console.log(projectFullData);setProjectFullData(projectFullData)}).catch(e => console.log(e));
+        retrieveProjectGraph(projectId)
+            .then(graph => {
+                return retrieveProject(projectId)
+                    .then(projectFullData => setAllProjectData({projectFullData : projectFullData, projectGraph : graph}))
+            }).catch(e => console.log(e));
     }
 
     useEffect(() => {
@@ -25,12 +34,12 @@ const ProjectPage = () => {
 
     return (
         <div>
-            {projectGraph && projectFullData && 
+            {allProjectData && 
                 <ProjectGraphComponent 
                     refresh={refresh}
-                    projectGraph={projectGraph} 
-                    setProjectGraph={setProjectGraph}
-                    projectFullData={projectFullData}
+                    projectGraph={allProjectData.projectGraph} 
+                    setProjectGraph={(projectGraph) => setAllProjectData({...allProjectData, projectGraph : projectGraph})}
+                    projectFullData={allProjectData.projectFullData}
                     staticConfig={{
                         canvas : {
                             width : 900,

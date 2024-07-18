@@ -7,16 +7,19 @@ export interface ChannelList{
     channelList: ChannelFullData[];
 }
 
+
+export interface JobNodeDetails{
+    name : string
+}
+
 export interface JobNodeFullData{
     id : string,
-    jobNodeDetails : {
-        name : string
-    },
+    jobNodeDetails : JobNodeDetails,
     input : {[key:string] :  ChannelList},
-    output : {[key:string] :  ChannelList}
+    output : {[key:string] :  ChannelList},
 
     project : any,
-    privileges :  {[key:string] : {id: string, list: string[]}}
+    privileges :  {[key:string] : {id: string, list: string[]}},
 
 
 }

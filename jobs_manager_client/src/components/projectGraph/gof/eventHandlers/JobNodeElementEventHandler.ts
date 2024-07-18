@@ -10,11 +10,11 @@ import { PanelMods } from "./PanelMods";
 export class JobNodeElementEventHandler implements GraphElementEventHandler{
     
     private element : JobNodeElement;
-    private setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>;
+    private setProjectGraph : (projectGraph: ProjectGraph) => void;
     private setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>;
 
     constructor(element : JobNodeElement, 
-        setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>,
+        setProjectGraph : (projectGraph: ProjectGraph) => void,
         setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>
     ){
         this.element = element;

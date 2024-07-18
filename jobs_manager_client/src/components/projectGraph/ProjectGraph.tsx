@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { ProjectGraph  } from "../../api/ui/projectGraphApi";
-import { ChannelFullData, ProjectFullData } from "../../api/abstraction/projectApi";
+import { JobNodeVerticeDetails, ProjectGraph, updateJobNodeVertice, updateProjectGraph  } from "../../api/ui/projectGraphApi";
+import { ChannelFullData, JobNodeDetails, ProjectFullData } from "../../api/abstraction/projectApi";
 
 import { JobNodeElement, StaticJobNodeElementConfig } from "./gof/JobNodeElement";
 import { StaticPlugBarConfig, PlugBarElement } from "./gof/PlugBarElement";
@@ -9,6 +9,7 @@ import { NullGraphElement } from "./gof/NullGraphElement";
 import { PlugElement } from "./gof/PlugElement";
 import { ChannelElement, StaticChannelConfig } from "./gof/ChannelElement";
 import { PanelMods } from "./gof/eventHandlers/PanelMods";
+import { createJobNode } from "../../api/abstraction/jobNodeApi";
 
 interface StaticGraphCanvasConfig{
     
@@ -22,7 +23,7 @@ interface StaticGraphCanvasConfig{
 interface ProjectGraphComponent{
     refresh : () => void,
     projectGraph : ProjectGraph,
-    setProjectGraph : React.Dispatch<React.SetStateAction<ProjectGraph | undefined>>
+    setProjectGraph : (projectGraph : ProjectGraph) => void,
     projectFullData : ProjectFullData,
     staticConfig : StaticGraphCanvasConfig,
 
@@ -30,6 +31,9 @@ interface ProjectGraphComponent{
 
 const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, setProjectGraph, refresh} : ProjectGraphComponent) => {
 
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [mod, setMod] = useState<PanelMods>(PanelMods.CURSOR);
+    const [menu, setMenu] = useState<JSX.Element>(<div>Choose Element...</div>);
     const [dynamicConfig, setDynamicConfig] = useState<DynamicCanvasConfig>({
         offset : {
             x : 0,
@@ -41,27 +45,23 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
             isDragging: false
         }
     });
-
-
-    const [menu, setMenu] = useState<JSX.Element>(<div>Choose Element...</div>);
-
-
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    
-
-    const [mod, setMod] = useState<PanelMods>(PanelMods.CURSOR);
     const [gof, setGof] = useState<GOF>(new GOF(
         staticConfig.canvas,
         projectFullData,
         projectGraph,
         dynamicConfig,
         setDynamicConfig,
-        setProjectGraph,
         setMenu,
         mod,
         refresh
     ));
-    const [jobNodeName, setJobNodeName] = useState<string>("");
+
+
+
+    const [newJobNodeDetails, setNewJobNodeDetails] = useState<JobNodeDetails>({
+        name : ""
+    });
+    const [newJobVerticeDetails, setNewJobVerticeDetails] = useState<JobNodeVerticeDetails>({x: 0, y : 0});
 
 
     function prepareGof(){
@@ -72,7 +72,6 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
             projectGraph,
             dynamicConfig,
             setDynamicConfig,
-            setProjectGraph,
             setMenu,
             mod,
             refresh
@@ -85,8 +84,8 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
 
         //1. 
         for(let jobNode of projectFullData.jobNodes){
-            let vertice = projectGraph.vertices.filter(v => v.jobNode.id == jobNode.id)[0];
-
+            let verticesFiltered = projectGraph.vertices.filter(v => v.jobNode.id == jobNode.id);
+            let vertice = verticesFiltered[0];
             let jobNodeElement = new JobNodeElement(
                 newGof, 
                 jobNode, 
@@ -227,9 +226,41 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
                     <button onClick={e => setMod(PanelMods.CURSOR)}>Cursor</button>
                     <button onClick={e => setMod(PanelMods.CONNECT)}>Connect</button>
                     <button onClick={e => setMod(PanelMods.DELETE)}>Delete</button>
-                    <button>Add JobNode</button>
+                    
                     <div>
-                        <input value={jobNodeName} onChange={e => setJobNodeName(e.target.value)}/>
+                        <label>Name:</label>
+                        <input className="m-2" value={newJobNodeDetails.name} onChange={e => setNewJobNodeDetails(
+                            {
+                                ...newJobNodeDetails,
+                                name : e.target.value
+                            }
+                        )}/>
+                        <br/>
+                        <label>x: < input type="number" className="m-2" value={newJobVerticeDetails.x} onChange={e => {
+                            try{
+                                setNewJobVerticeDetails({...newJobVerticeDetails, x: parseInt(e.target.value) })
+                            }catch(e){}
+                        }}/></label>
+                        <br/>
+                        <label>y: < input type="number" className="m-2" value={newJobVerticeDetails.y} onChange={e => {
+                            try{
+                                setNewJobVerticeDetails({...newJobVerticeDetails, y: parseInt(e.target.value) })
+                            }catch(e){};
+                            
+                        }}/></label>
+                        <br/>
+
+                        <button className="btn btn-success" onClick={e => 
+                            createJobNode(projectFullData.id, newJobNodeDetails)
+                                .then(response => {
+                                    return updateProjectGraph(projectFullData.id).then(response2 => {
+                                        return updateJobNodeVertice(projectFullData.id, response.data, newJobVerticeDetails);
+                                    });
+                                }).then(response => {
+                                    refresh();
+                                })
+                                .catch(e => console.log(e))
+                        }>Add JobNode</button>
                     </div>
                 </div>
 
