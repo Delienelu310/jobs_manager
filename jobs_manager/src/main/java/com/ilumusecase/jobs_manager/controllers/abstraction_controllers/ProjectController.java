@@ -141,8 +141,7 @@ public class ProjectController {
 
     @PutMapping("/projects/{id}/input/add/{label}")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
-    @JsonMapperRequest(type="full", resource = "Project")
-    public Object addInputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label, @RequestBody ChannelDetails channelDetails){
+    public void addInputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label, @RequestBody ChannelDetails channelDetails){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
         Channel channel =  repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
 
@@ -152,13 +151,12 @@ public class ProjectController {
         project.getInputChannels().put(label, channel);
         project.getChannels().add(channel);
 
-        return repositoryFactory.getProjectRepository().updateProjectFull(project);
+        repositoryFactory.getProjectRepository().updateProjectFull(project);
     }
 
     @PutMapping("/projects/{id}/input/remove/{label}")
     @AuthorizeProjectRoles(roles= { ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR })
-    @JsonMapperRequest(type="full", resource = "Project")
-    public Object removeInputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label){
+    public void removeInputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
 
         if(  !project.getInputChannels().containsKey(label) || project.getInputChannels().get(label) == null){
@@ -168,14 +166,13 @@ public class ProjectController {
 
         channelController.deleteChannelById(id, channel.getId());
         
-        return repositoryFactory.getProjectRepository().retrieveProjectById(id);
+        repositoryFactory.getProjectRepository().retrieveProjectById(id);
 
     }
 
     @PutMapping("/projects/{id}/output/add/{label}")
     @AuthorizeProjectRoles(roles= { ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR })
-    @JsonMapperRequest(type="full", resource = "Project")
-    public Object addOutputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label, @RequestBody ChannelDetails channelDetails){
+    public void addOutputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label, @RequestBody ChannelDetails channelDetails){
 
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
         Channel channel =  repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
@@ -186,14 +183,13 @@ public class ProjectController {
         project.getOutputChannels().put(label, channel);
         project.getChannels().add(channel);
 
-        return repositoryFactory.getProjectRepository().updateProjectFull(project);
+        repositoryFactory.getProjectRepository().updateProjectFull(project);
         
     }
 
     @PutMapping("/projects/{id}/output/remove/{label}")
     @AuthorizeProjectRoles(roles= { ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR })
-    @JsonMapperRequest(type="full", resource = "Project")
-    public Object removeOutputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label){
+    public void removeOutputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
 
         if(  !project.getOutputChannels().containsKey(label) || project.getOutputChannels().get(label) == null){
@@ -203,7 +199,7 @@ public class ProjectController {
 
         channelController.deleteChannelById(id, channel.getId());
         
-        return repositoryFactory.getProjectRepository().retrieveProjectById(id);
+        repositoryFactory.getProjectRepository().retrieveProjectById(id);
         
 
     }

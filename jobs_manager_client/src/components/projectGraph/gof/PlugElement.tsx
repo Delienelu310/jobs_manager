@@ -9,6 +9,8 @@ import { JobNodeElement } from "./JobNodeElement";
 
 import { PlugBarElement } from "./PlugBarElement";
 import { TextNode } from "./TetxNode";
+import JobNodePlugMenu from "../menus/JobNodePlugMenu";
+import ProjectPlug from "../menus/ProjectPlug";
 
 
 export class PlugElement implements GraphElement{
@@ -38,6 +40,20 @@ export class PlugElement implements GraphElement{
     }
 
     public getMenuComponent(): JSX.Element {
+        if(this.parent.getParent().isNull()){
+            
+            let channelData = this.parent.getOrientation() ?
+                this.getGof().getProjectData().outputChannels[this.label]
+                :
+                this.getGof().getProjectData().inputChannels[this.label]
+            ;
+            
+            return <ProjectPlug label={this.label} channel={channelData}/>
+        }else{
+            return <JobNodePlugMenu/>
+        }
+
+
         return <div>this is plug component</div>
     }
     public getEventHandler(): GraphElementEventHandler {

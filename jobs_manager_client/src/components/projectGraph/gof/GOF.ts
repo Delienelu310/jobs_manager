@@ -81,6 +81,10 @@ export class GOF{
         return this.mod;
     }
 
+    public getRefresh() : () => void {
+        return this.refresh;
+    }
+
     public setMod(mod : PanelMods) : void{
         this.mod = mod;
     }

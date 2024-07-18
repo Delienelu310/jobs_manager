@@ -7,6 +7,8 @@ import { GraphElement } from "./GraphElement";
 import { JobNodeElement } from "./JobNodeElement";
 import { NullGraphElement } from "./NullGraphElement";
 import { PlugElement } from "./PlugElement";
+import ProjectPlugBarMenu from "../menus/ProjectPlugBarMenu";
+import JobNodePlugBarMenu from "../menus/JobNodePlugBarMenu";
 
 
 
@@ -71,7 +73,16 @@ export class PlugBarElement implements GraphElement{
         return null;
     }
     public getMenuComponent(): JSX.Element {
-        return <div>This is plug bar menu</div>
+
+        if(this.parent.isNull()){
+            return <ProjectPlugBarMenu
+                projectFullData={this.getGof().getProjectData()}
+                orientation={this.getOrientation()}
+                refresh={this.getGof().getRefresh()}
+            />
+        }else{
+            return <JobNodePlugBarMenu/>
+        }
     }
     public getEventHandler(): GraphElementEventHandler {
         return this.eventHandler;
