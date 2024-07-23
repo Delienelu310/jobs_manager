@@ -44,12 +44,14 @@ export interface ChannelDetails{
     headers : string[]
 }
 
+export interface ProjectDetails{
+    name : string,
+    description : string
+}
+
 export interface ProjectFullData{
     id : string,
-    projectDetails : {
-        name : string,
-        description : string
-    },
+    projectDetails : ProjectDetails,
     admin : string,
     jobNodes : JobNodeFullData[],
     channels : ChannelFullData[],

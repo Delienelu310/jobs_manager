@@ -1,5 +1,7 @@
 package com.ilumusecase.jobs_manager.controllers.ilum_controllers.resources_controllers;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -7,6 +9,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,10 +24,12 @@ import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
 import com.ilumusecase.jobs_manager.resources.ilum.JobsFile;
 import com.ilumusecase.jobs_manager.resources.ilum.JobsFileDetails;
+import com.ilumusecase.jobs_manager.resources.ilum.JobsFileState;
 import com.ilumusecase.jobs_manager.s3clients.S3ClientFactory;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
+import io.minio.StatObjectResponse;
 import jakarta.validation.constraints.Min;
 
 @RestController
@@ -96,6 +102,27 @@ public class JobsFileController {
         return jobsFile;
     }
 
+    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_files/{jobs_file_id}/state")
+    public JobsFileState retrieveJobsFileState(
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
+        @PathVariable("jobs_file_id") String jobsFileId
+    ){
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId);
+
+        if( ! projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
+        if( ! jobNodeId.equals(jobsFile.getJobNode().getId())) throw new RuntimeException(); 
+   
+
+        Optional<StatObjectResponse> metadata = s3ClientFactory.getJobS3Client().getMetadata(jobsFile);
+        
+        if(metadata.isPresent()){
+            return JobsFileState.OK;
+        }else{
+            return JobsFileState.NOFILE;
+        }
+    } 
 
     @PostMapping(value = "/projects/{project_id}/job_nodes/{job_node_id}/jobs_files", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public String  uploadJobsFile(
@@ -146,7 +173,6 @@ public class JobsFileController {
 
     @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_files/{jobs_file_id}")
     public void deleteJobsFile(
-        Authentication authentication,
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("jobs_file_id") String jobsFileId
@@ -164,6 +190,66 @@ public class JobsFileController {
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
         repositoryFactory.getJobsFileRepositoryInterface().deleteJobsFileById(jobsFileId);
         s3ClientFactory.getJobS3Client().deleteJob(jobsFile);
+
+    }
+
+
+    @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_files/{jobs_file_id}/job_details")
+    public void updateJobsFileDetails(
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
+        @PathVariable("jobs_file_id") String jobsFileId,
+        @RequestBody JobsFileDetails jobsFileDetails
+    ){
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId);
+
+        if( ! projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
+        if( ! jobNodeId.equals(jobsFile.getJobNode().getId())) throw new RuntimeException(); 
+   
+
+        jobsFile.setJobDetails(jobsFileDetails);
+
+        repositoryFactory.getJobsFileRepositoryInterface().updateJobsFileFull(jobsFile);
+    }
+
+
+    @PutMapping(
+        value = "/projects/{project_id}/job_nodes/{job_node_id}/jobs_files/{jobs_file_id}/file", 
+        consumes = { MediaType.MULTIPART_FORM_DATA_VALUE }
+    )
+    public void updateJobsFileFile(
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
+        @PathVariable("jobs_file_id") String jobsFileId,
+        @RequestParam("files") MultipartFile file,
+        @RequestParam("extension") String extension
+    ){
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId);
+
+        if( ! projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
+        if( ! jobNodeId.equals(jobsFile.getJobNode().getId())) throw new RuntimeException(); 
+   
+        //1. check state
+        JobsFileState state = retrieveJobsFileState(projectId, jobNodeId, jobsFileId);
+        //delete if jobsFile state is ok
+        if(state == JobsFileState.OK){
+            s3ClientFactory.getJobS3Client().deleteJob(jobsFile);
+        }
+
+        //2. upload file
+        jobsFile.setExtension(extension);
+        jobsFile.setAllClasses(
+            filesValidatorFactory.getValidator(jobsFile.getExtension())
+                .orElseThrow(RuntimeException::new)
+                .retrieveFileClasses(file)
+        );
+        repositoryFactory.getJobsFileRepositoryInterface().updateJobsFileFull(jobsFile);
+
+        //send file to s3
+        s3ClientFactory.getJobS3Client().uploadJob(jobsFile, file);
+
 
     }
 

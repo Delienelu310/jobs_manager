@@ -1,14 +1,17 @@
-import { useState } from "react";
-import { JobsFileDetails, JobsFileSimple, JobsFileState } from "../api/ilum_resources/jobsFilesApi";
+import { useEffect, useState } from "react";
+import { checkJobsFileState, deleteJobsFile, JobsFileDetails, JobsFileExtension, JobsFileSimple, JobsFileState, retrieveJobsFile, updateJobsFileDetails, updateJobsFileFile } from "../api/ilum_resources/jobsFilesApi";
 
 
-export interface JobsFileMenu{
-    data : JobsFileSimple
+export interface JobsFileMenuArgs{
+    data : JobsFileSimple,
+    setJobsFileListDependency : React.Dispatch<React.SetStateAction<number>>,
+    setMenu : React.Dispatch<React.SetStateAction<JSX.Element | null>>
 }
 
-const JobsFileMenu = ({data} : JobsFileMenu) => {
+const JobsFileMenu = ({data, setJobsFileListDependency, setMenu} : JobsFileMenuArgs) => {
 
 
+    const [fullData, setFullData] = useState<JobsFileSimple | null>(null);
 
     const [newJobsFileDetails, setNewJobsFileDetails] = useState<JobsFileDetails>({
         name : "",
@@ -16,18 +19,65 @@ const JobsFileMenu = ({data} : JobsFileMenu) => {
     });
     
     const [newFile, setNewFile] = useState<File | null>(null);
+    const [newExtension, setNewExtension] = useState<string>(JobsFileExtension.JAR);
     const [state, setState] = useState<JobsFileState>(JobsFileState.UNKNOWN);
 
+    function refresh(){
+        retrieveJobsFile(data.project.id, data.jobNode.id, data.id)
+            .then(response => setFullData(response.data))
+            .catch(e => console.log(e));
+    }
+
+    function checkState(){
+        checkJobsFileState(data.project.id, data.jobNode.id, data.id)
+            .then(response => {
+                console.log(response.data);
+                setState(response.data)
+            })
+            .catch(e => console.log(e));
+    }
+
+    function deleteJob(){
+        deleteJobsFile(data.project.id, data.jobNode.id, data.id)
+            .then(r => {
+                setMenu(null);
+                setJobsFileListDependency(Math.random());
+            })
+            .catch(e => console.log(e));
+    }
+
+    function updateDetails(){
+        updateJobsFileDetails(data.project.id, data.jobNode.id, data.id, newJobsFileDetails)
+            .then(response => {
+                refresh();
+                setJobsFileListDependency(Math.random());
+            }).catch(e => console.log(e));
+    }
+
+    function updateFile(){
+        if(!newFile) return;
+
+        updateJobsFileFile(data.project.id, data.jobNode.id, data.id, newExtension, newFile)
+            .then(r => {
+                refresh();
+                setJobsFileListDependency(Math.random())
+            }).catch(e => console.log(e));
+    }
+
+
+    useEffect(() => {
+        refresh();
+    }, []);
 
     return (
         <div>
-            <h3>{data.jobDetails.name}</h3>
+            <h3>{fullData && fullData.jobDetails.name}</h3>
 
-            <button className="btn btn-danger">Delete</button>
+            <button className="btn btn-danger" onClick={e => deleteJob()}>Delete</button>
             <br/>
 
             <strong>{state}</strong>
-            <button className="btn btn-primary">Check state</button>
+            <button className="btn btn-primary" onClick={e => checkState()}>Check state</button>
             <br/>
             
             <label>
@@ -39,7 +89,14 @@ const JobsFileMenu = ({data} : JobsFileMenu) => {
                 }}/>
             </label>
             <br/>
-            <button className="btn btn-success">Update file</button>
+            <label>
+                Extension:
+                <select value={newExtension} onChange={e => setNewExtension(e.target.value)}>
+                    {Object.values(JobsFileExtension).map(type => <option value={type}>{type}</option>)}
+                </select>
+            </label>
+            <br/>
+            <button className="btn btn-success" onClick={e => updateFile()}>Update file</button>
             <br/>
 
             <label>
@@ -49,12 +106,14 @@ const JobsFileMenu = ({data} : JobsFileMenu) => {
             
             <label>
                 Description:
-                <input value={newJobsFileDetails.name} onChange={e => setNewJobsFileDetails({...newJobsFileDetails, description : e.target.value})}/>
+                <input value={newJobsFileDetails.description} onChange={e => setNewJobsFileDetails({...newJobsFileDetails, description : e.target.value})}/>
             </label>
 
 
-            <button className="btn btn-success">Update details</button>
+            <button className="btn btn-success" onClick={e => updateDetails()}>Update details</button>
     
+            <hr/>
+
         </div>
     );
 

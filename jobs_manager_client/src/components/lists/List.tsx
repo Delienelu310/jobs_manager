@@ -33,11 +33,12 @@ export interface SourceArg{
     }
 }
 
-export interface WrapperProps<Data>{
-    data : Data
+export interface WrapperProps<Data, Context>{
+    data : Data,
+    context : Context
 } 
 
-export interface ListProperties<Data>{
+export interface ListProperties<Data, Context>{
     pager : {
         defaultPageSize : number
     },
@@ -49,20 +50,24 @@ export interface ListProperties<Data>{
         sourceCount : (sourceCountArg : SourceCountArg) => Promise<number>,
         sourceData : (sourceArg : SourceArg) => Promise<Data[]>
     }
-    Wrapper : React.FC<WrapperProps<Data>>
+    Wrapper : React.FC<WrapperProps<Data, Context>>,
+    context : Context,
+    dependencies : any[]
 }
 
 
 
 
-const List = <Data,>({
+const List = <Data, Context>({
     pager : {defaultPageSize},
     filter: {parameters},
     source: {sourceCount, sourceData},
-    Wrapper 
+    Wrapper,
+    context,
+    dependencies
 
 
-} : ListProperties<Data>) => {
+} : ListProperties<Data, Context>) => {
 
     //search bar
     const [queue, setQueue] = useState<string>("");
@@ -146,11 +151,11 @@ const List = <Data,>({
     useEffect(() => {
         count();
         search();
-    }, []);
+    }, [...dependencies]);
 
     useEffect(() => {
         search();
-    }, [pageChosen]);
+    }, [...dependencies, pageChosen]);
 
 
     return (
@@ -161,7 +166,7 @@ const List = <Data,>({
 
             <div>
                 {data.map(d => (
-                    <Wrapper data={d}/>
+                    <Wrapper data={d} context={context}/>
                 ))}
             </div>
 

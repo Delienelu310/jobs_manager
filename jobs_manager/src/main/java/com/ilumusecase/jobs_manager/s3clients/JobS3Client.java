@@ -17,6 +17,9 @@ import io.minio.GetObjectResponse;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import io.minio.StatObjectArgs;
+import io.minio.StatObjectResponse;
+import io.minio.errors.ErrorResponseException;
 
 @Component
 public class JobS3Client {
@@ -57,6 +60,25 @@ public class JobS3Client {
             return Optional.of(getObjectResponse.readAllBytes());
         }catch(Exception e){
             return Optional.empty();
+        }
+    }
+
+    public Optional<StatObjectResponse> getMetadata(JobsFile jobsFile){
+        try{
+            StatObjectResponse statObjectResponse = minioClient.statObject(
+                StatObjectArgs.builder()
+                    .bucket(bucket)
+                    .object("jars/projects/" + jobsFile.getProject().getId() + "/job_nodes/" + jobsFile.getJobNode().getId() + "/jobs/" + 
+                        jobsFile.getId() +  "." + jobsFile.getExtension())
+                    .build()
+            );
+
+            return Optional.of(statObjectResponse);
+        }catch(ErrorResponseException e){
+            return Optional.empty();
+        }catch(Exception e){
+            //...
+            throw new RuntimeException(e);
         }
     }
 

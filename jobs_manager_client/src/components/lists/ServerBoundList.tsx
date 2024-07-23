@@ -2,7 +2,7 @@ import apiClient, { convertSourceArgsToRequestParams, convertSourceCountArgsToRe
 import List, { Field, SourceArg, SourceCountArg, WrapperProps } from "./List"
 
 
-export interface ServerBoundListProps<Data>{
+export interface ServerBoundListProps<Data, Context>{
     pager : {
         defaultPageSize : number
     },
@@ -10,17 +10,19 @@ export interface ServerBoundListProps<Data>{
         parameters: Field[]
     }
 
-    Wrapper : React.FC<WrapperProps<Data>>,
+    Wrapper : React.FC<WrapperProps<Data, Context>>,
+    context : Context,
     endpoint: {
         resourse : string,
         count : string
     }
+    dependencies : any[]
 } 
 
 
 
-const ServerBoundList = <Data,>(
-    props : ServerBoundListProps<Data>
+const ServerBoundList = <Data,Context>(
+    props : ServerBoundListProps<Data, Context>
 ) => {
 
     async function sourceData(arg : SourceArg) : Promise<Data[]>{
@@ -34,7 +36,7 @@ const ServerBoundList = <Data,>(
 
     return (
         <div>
-            <List<Data>
+            <List<Data, Context>
                 filter={props.filter}
                 pager={props.pager}
                 Wrapper={props.Wrapper}
@@ -42,6 +44,8 @@ const ServerBoundList = <Data,>(
                     sourceData: sourceData,
                     sourceCount: sourceCount
                 }}
+                context={props.context}
+                dependencies={props.dependencies}
             />
         </div>
     );

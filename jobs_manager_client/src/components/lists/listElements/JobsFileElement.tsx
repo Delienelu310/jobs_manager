@@ -1,10 +1,18 @@
+import React from "react";
 import { JobsFileSimple } from "../../../api/ilum_resources/jobsFilesApi";
+import JobsFileMenu from "../../JobsFileMenu";
 
-export interface JobsFileElementArgs{
-    data : JobsFileSimple
+export interface JobsFileListContext{
+    setMenu : React.Dispatch<React.SetStateAction<JSX.Element | null>>
+    setJobsFileListDependency : React.Dispatch<React.SetStateAction<number>>
 }
 
-const JobsFileElement = ({data} : JobsFileElementArgs) => {
+export interface JobsFileElementArgs{
+    data : JobsFileSimple,
+    context : JobsFileListContext
+}
+
+const JobsFileElement = ({data, context} : JobsFileElementArgs) => {
     return (
         <div>
             <hr/>
@@ -19,7 +27,18 @@ const JobsFileElement = ({data} : JobsFileElementArgs) => {
             </p>
             <h5>Classes used:</h5>
             {data.allClasses.map(cl => <><i>{cl}</i> <br/></>)}
+            
+            <br/>
+            <button className="btn btn-primary" onClick={e => context.setMenu((
+                <JobsFileMenu
+                    data={data}
+                    setMenu={context.setMenu}
+                    setJobsFileListDependency={context.setJobsFileListDependency}
+                />
+            ))}>More...</button>
             <hr/>
+
+            
         
         </div>
     );

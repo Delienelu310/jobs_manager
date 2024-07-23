@@ -5,10 +5,14 @@ import ProjectElement from "../components/lists/listElements/ProjectElement";
 import ServerBoundList from "../components/lists/ServerBoundList";
 
 
+export interface ProjectListPageContext{
+
+}
+
 const ProjectListPage = () => {
     return (
         <div>
-            <ServerBoundList<ProjectSimple> 
+            <ServerBoundList<ProjectSimple, ProjectListPageContext> 
                 pager={{
                     defaultPageSize: 10
                 }} 
@@ -18,6 +22,8 @@ const ProjectListPage = () => {
                     resourse: "/projects",
                     count: "/projects/count"
                 }}
+                context={{}}
+                dependencies={[]}
             />
         </div>
     );
