@@ -24,6 +24,7 @@ const ServerBoundList = <Data,>(
 ) => {
 
     async function sourceData(arg : SourceArg) : Promise<Data[]>{
+        console.log(convertSourceArgsToRequestParams(arg));
         return apiClient.get(props.endpoint.resourse + "?" + convertSourceArgsToRequestParams(arg)).then( response=> response.data);
     }
 

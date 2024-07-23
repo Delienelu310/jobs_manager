@@ -5,6 +5,25 @@ import java.util.List;
 import com.ilumusecase.jobs_manager.resources.ilum.JobsFile;
 
 public interface JobsFileRepositoryInterface {
+
+
+    public List<JobsFile> retrieveJobsFilesOfJobNode(
+        String jobNodeId, 
+        String query, 
+        String extenstion, 
+        String className, 
+        String publisher, 
+        Integer pageSize, 
+        Integer pageNumber
+    );
+
+    public long countJobsFilesOfJobNode(
+        String jobNodeId, 
+        String query, 
+        String extenstion, 
+        String className, 
+        String publisher
+    );
     
     public JobsFile retrieveJobsFileById(String id);
     public List<JobsFile> retrieveJobsFilesByAuthorUsername(String username);

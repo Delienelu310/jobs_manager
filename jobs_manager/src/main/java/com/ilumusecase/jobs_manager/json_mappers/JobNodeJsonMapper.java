@@ -29,6 +29,7 @@ public class JobNodeJsonMapper {
 
         .addFilter("ilum_resource_project_reference", SimpleBeanPropertyFilter.filterOutAllExcept("id", "projectDetails"))
         .addFilter("ilum_resource_job_node_reference", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
+        .addFilter("ilum_resource_publisher", SimpleBeanPropertyFilter.filterOutAllExcept("username", "appUserDetails", "authorities"))
 
         .addFilter("job_script_jobs_files", SimpleBeanPropertyFilter.serializeAll())
         .addFilter("ilum_groups_jobs", SimpleBeanPropertyFilter.serializeAllExcept("ilumGroup"))

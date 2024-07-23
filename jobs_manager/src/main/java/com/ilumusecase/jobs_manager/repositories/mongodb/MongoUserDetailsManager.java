@@ -51,7 +51,6 @@ public class MongoUserDetailsManager implements AppUserRepository{
         appUser.setNewState(user);
 
         AppUserDetails defaultAppUserDetails = new AppUserDetails();
-        defaultAppUserDetails.setJobCreatedCounter(0);
         appUser.setAppUserDetails(defaultAppUserDetails);
 
         mongoAppUser.save(appUser);

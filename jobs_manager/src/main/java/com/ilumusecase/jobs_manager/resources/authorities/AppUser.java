@@ -4,6 +4,9 @@ package com.ilumusecase.jobs_manager.resources.authorities;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -24,6 +27,7 @@ public class AppUser implements UserDetails {
     
     @Id
     private String username;
+    @JsonIgnore
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
 

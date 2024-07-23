@@ -13,6 +13,7 @@ import { GraphElementEventHandler } from "./eventHandlers/GraphElementEventHandl
 import React from "react";
 import { deleteJobNode } from "../../../api/abstraction/jobNodeApi";
 import { AxiosResponse } from "axios";
+import JobNodeMenu from "../menus/JobNodeMenu";
 
 
 export interface StaticJobNodeElementConfig{
@@ -65,11 +66,7 @@ export class JobNodeElement implements GraphElement{
 
 
     public getMenuComponent(): JSX.Element {
-        return (
-            <div>
-                This is jobnode menu component
-            </div>
-        );
+        return <JobNodeMenu element={this}/>
     }
 
 

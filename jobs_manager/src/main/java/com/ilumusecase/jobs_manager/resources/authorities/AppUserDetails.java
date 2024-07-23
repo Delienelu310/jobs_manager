@@ -7,5 +7,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AppUserDetails {
     String fullname;
-    Integer jobCreatedCounter = 0;
 }

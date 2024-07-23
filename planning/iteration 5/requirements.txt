@@ -73,14 +73,14 @@
             delete jobs file, if not used by job entity in queue
             view jobs files assigned to this jobnode
                 search query
-                filter by jobnode ids
                 filter by publisher
                 filter by extension
+                filter jobs files by given classname
             view job scripts, that make use of this jobsfile
             update jobs file details
             update jobs file
             check jobs file state
-            find jobs files by given classname
+            
 
         job scripts    
             create 

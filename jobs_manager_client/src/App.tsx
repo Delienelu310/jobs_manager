@@ -7,6 +7,7 @@ import AuthProvider from './authentication/AuthContext';
 import WelcomePage from './pages/WelcomePage';
 import ProjectListPage from './pages/ProjectsListPage';
 import ProjectPage from './pages/ProjectPage';
+import JobNodePage from './pages/JobNodePage';
 
 
 function App() {
@@ -22,6 +23,9 @@ function App() {
             <Route path={"/projects"} Component={ProjectListPage}/>
 
             <Route path={"/projects/:projectId"} Component={ProjectPage}/>
+
+            <Route path={"/projects/:projectId/job_nodes/:jobNodeId"} Component={JobNodePage}/>
+            
           </Routes>
         </BrowserRouter>
       </AuthProvider>

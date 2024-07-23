@@ -35,6 +35,7 @@ public class JobsFile {
     private JobNode jobNode;
 
     @DBRef(lazy = true)
+    @JsonFilter("ilum_resource_publisher")
     private AppUser publisher;
     
     private Set<String> allClasses = new HashSet<>();
