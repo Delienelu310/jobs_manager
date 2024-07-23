@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.JobScriptRepository;
@@ -45,6 +47,19 @@ public class JobScriptsMongoRepository implements JobScriptRepository{
     @Override
     public List<JobScript> retrieveJobScriptsByJobNodeId(String jobNodeId) {
         return mongoJobScripts.retrieveByJobNodeId(jobNodeId);
+    }
+
+    @Override
+    public List<JobScript> retrieveJobScriptsOfJobNode(String jobNodeId, String query, String extenstion,
+        String publisher, Integer pageSize, Integer pageNumber
+    ) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        return mongoJobScripts.retrieveJobScriptsOfJobNode(jobNodeId, query, extenstion, publisher, pageable);
+    }
+
+    @Override
+    public long countJobScriptsOfJobNode(String jobNodeId, String query, String extenstion, String publisher) {
+        return mongoJobScripts.countJobScriptsOfJobNode(jobNodeId, query, extenstion, publisher);
     }
     
 }

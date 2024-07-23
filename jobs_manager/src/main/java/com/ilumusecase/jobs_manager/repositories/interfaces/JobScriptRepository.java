@@ -7,6 +7,22 @@ import com.ilumusecase.jobs_manager.resources.ilum.JobScript;
 
 public interface JobScriptRepository {
 
+    public List<JobScript> retrieveJobScriptsOfJobNode(
+        String jobNodeId, 
+        String query, 
+        String extenstion, 
+        String publisher, 
+        Integer pageSize, 
+        Integer pageNumber
+    );
+
+    public long countJobScriptsOfJobNode(
+        String jobNodeId, 
+        String query, 
+        String extenstion, 
+        String publisher
+    );
+    
     public List<JobScript> retrieveAllJobScripts();
     public Optional<JobScript> retrieveJobScriptById(String id);
     public JobScript updateFullJobScript(JobScript jobScript);

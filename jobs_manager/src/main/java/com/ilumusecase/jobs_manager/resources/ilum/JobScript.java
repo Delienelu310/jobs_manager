@@ -26,6 +26,8 @@ public class JobScript {
     private String classFullName;
     private String extension;
 
+    private JobScriptDetails jobScriptDetails;
+
     @DBRef(lazy = true)
     @JsonFilter("job_script_jobs_files")
     private List<JobsFile> jobsFiles = new LinkedList<>();
@@ -39,6 +41,7 @@ public class JobScript {
     private JobNode jobNode;
 
     @DBRef(lazy = true)
+    @JsonFilter("ilum_resource_publisher")
     private AppUser author;
 
     @Override
