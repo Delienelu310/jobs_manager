@@ -1,5 +1,6 @@
 import { JobNodeDetails, ProjectDetails } from "../abstraction/projectApi";
 import apiClient from "../ApiClient";
+import { AppUserSimple } from "../authorization/users";
 import { JobScriptSimple } from "./jobScriptsApi";
 
 export interface JobEntityDetails{
@@ -25,5 +26,6 @@ export interface JobEntitySimple{
         id : string,
         jobNodeDetails : JobNodeDetails
 
-    }
+    },
+    author : AppUserSimple
 }

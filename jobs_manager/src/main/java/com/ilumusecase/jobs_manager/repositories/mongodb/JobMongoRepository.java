@@ -1,6 +1,7 @@
 package com.ilumusecase.jobs_manager.repositories.mongodb;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -79,12 +80,66 @@ public class JobMongoRepository implements JobRepository{
             unwindQueue, 
             projectQueue,
             replaceRootWithJobEntity,
-            matchJobEntities
+            matchJobEntities,
+            Aggregation.skip(pageSize * pageNumber),
+            Aggregation.limit(pageSize)
         );
 
         AggregationResults<JobEntity> results = mongoTemplate.aggregate(aggregation, "jobNode", JobEntity.class);
 
         return results.getMappedResults();
+    }
+
+    @Override
+    public long retrieveQueueCount(
+        String jobNodeId, String queueType, String jobEntityName, String author
+    ){
+
+        MatchOperation matchJobNode = Aggregation.match(
+            Criteria.where("_id").is(jobNodeId)
+        );
+
+        LookupOperation lookupJobEntities = Aggregation.lookup(
+            "jobEntity", 
+            queueType + ".$id",   
+            "_id",      
+            "jobEntity"    
+        );
+        
+        UnwindOperation unwindQueue = Aggregation.unwind("jobEntity");
+        ProjectionOperation projectQueue = Aggregation.project()
+            .and("jobEntity").as("jobEntity");
+
+        
+        Criteria criteria = Criteria.where("jobEntityDetails.name").regex("^" + jobEntityName);
+        if(!author.equals("")){
+            criteria = criteria.and("author.$id").is(author);
+        }
+        MatchOperation matchJobEntities = Aggregation.match(criteria);
+
+        ReplaceRootOperation replaceRootWithJobEntity = Aggregation.replaceRoot("jobEntity");
+
+
+        Aggregation aggregation = Aggregation.newAggregation(
+            matchJobNode,
+            lookupJobEntities,
+            unwindQueue, 
+            projectQueue,
+            replaceRootWithJobEntity,
+            matchJobEntities,
+            Aggregation.count().as("count")
+        );
+
+
+        AggregationResults<Map> countResults = mongoTemplate.aggregate(aggregation, "jobNode", Map.class);
+        long totalCount = 0;
+        
+        // Get the count from the Map
+        if (countResults.getUniqueMappedResult() != null) {
+            totalCount = ((Number) countResults.getUniqueMappedResult().get("count")).intValue();
+        }
+
+        return totalCount;
     }
 
     

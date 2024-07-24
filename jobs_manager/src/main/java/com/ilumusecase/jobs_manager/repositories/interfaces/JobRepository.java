@@ -16,6 +16,9 @@ public interface JobRepository {
         Integer pageSize,
         Integer pageNumber
     );
+    public long retrieveQueueCount(
+        String jobNodeId, String queueType, String jobEntityName, String author
+    );
 
     public JobEntity retrieveJobEntity(String id);
     public void deleteJob(String id);

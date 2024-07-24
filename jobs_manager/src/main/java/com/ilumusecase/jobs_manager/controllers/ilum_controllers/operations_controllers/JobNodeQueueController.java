@@ -98,6 +98,21 @@ public class JobNodeQueueController {
         return repositoryFactory.getJobRepository().retrieveQueue(jobNodeId, queueType, query, author, pageSize, pageNumber);
     }
 
+    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/queue/{queue_type}/count")
+    public long retrieveQueueCount(
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
+        @PathVariable("queue_type") String queueType,
+        @RequestParam(name="author", required = false, defaultValue = "") String author,
+        @RequestParam(name="query", required = false, defaultValue = "") String query      
+    ){
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        if(!jobNode.getProject().getId().equals(projectId)) throw new RuntimeException();
+
+
+        return repositoryFactory.getJobRepository().retrieveQueueCount(jobNodeId, queueType, query, author);
+    }
+
     @PostMapping("/projects/{project_id}/job_nodes/{job_node_id}/{queue_type}/job_entity/{job_script_id}")
     public String addJobEntityToQueue(
         Authentication authentication,

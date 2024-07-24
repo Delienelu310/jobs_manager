@@ -9,6 +9,8 @@ import { JobScriptSimple } from "../api/ilum_resources/jobScriptsApi";
 import JobScriptElement, { JobScriptListContext } from "../components/lists/listElements/JobScriptElement";
 import JobScriptCreator from "../components/JobScriptCreator";
 import List from "../components/lists/List";
+import JobEntityElement, { JobEntityElementContext } from "../components/lists/listElements/JobEntityElement";
+import { JobEntitySimple } from "../api/ilum_resources/jobEntityApi";
 
 
 export interface JobNodePageInterface{
@@ -29,13 +31,16 @@ const JobNodePage = ({} : JobNodePageInterface) => {
     const [menu, setMenu] = useState<JSX.Element | null>(null);
     const [jobsFilesListDependency, setJobsFileListDependency] = useState<number>(0);
     const [jobScriptsListDependency, setJobSciptsListDependency] = useState<number>(0);
+    const [jobQueueDependency, setJobQueueDependency] = useState<number>(0);
+    const [testJobsDependency, setTestJobsDependnency] = useState<number>(0);
 
     const [showJobsFiles, setShowJobsFiles] = useState<boolean>(false);
     const [showJobScripts, setShowJobScripts] = useState<boolean>(false);
     const [showJobsQueue, setShowJobsQueue] = useState<boolean>(false);
+    const [showTestJobsQueue, setTestJobsQueue] = useState<boolean>(false);
 
     useEffect(() => {
-        console.log(jobNodeId, projectId);
+  
     }, []);
 
 
@@ -127,7 +132,48 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                 <hr/>
                 <h3>Jobs Queue:</h3>
                 
+                <ServerBoundList<JobEntitySimple, JobEntityElementContext>
+                    endpoint={{
+                        resourse: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/jobsQueue`,
+                        count: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/jobsQueue/count`
+                    }}
+                    filter={{parameters: [
+                        {label: "author", additionalData: [], fieldType: FieldType.SingleInput}
+                    ]}}
+                    Wrapper={JobEntityElement}
+                    context={{setMenu, setQueueDependency : setJobQueueDependency}}
+                    dependencies={[jobQueueDependency]}
+                    pager={{defaultPageSize: 10}}
+                
+                />
+                <hr/>
+            </>}
 
+            <br/>
+
+            <button className="m-3 btn btn-primary" onClick={e => setTestJobsQueue(!showTestJobsQueue)}>
+                {showTestJobsQueue ? "Close Test Jobs Queue" : "Show Test Jobs Queue"}
+            </button>
+
+            {showTestJobsQueue && <>
+                <hr/>
+                <h3>Jobs Queue:</h3>
+                
+                <ServerBoundList<JobEntitySimple, JobEntityElementContext>
+                    endpoint={{
+                        resourse: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/testingJobs`,
+                        count: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/testingJobs/count`
+                    }}
+                    filter={{parameters: [
+                        {label: "author", additionalData: [], fieldType: FieldType.SingleInput}
+                    ]}}
+                    Wrapper={JobEntityElement}
+                    context={{setMenu, setQueueDependency : setTestJobsDependnency}}
+                    dependencies={[testJobsDependency]}
+                    pager={{defaultPageSize: 10}}
+                
+                />
+                <hr/>
             </>}
 
 
