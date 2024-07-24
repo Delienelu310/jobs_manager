@@ -7,6 +7,7 @@ import { FieldType } from "../components/lists/Filter";
 import JobsFileUploader from "../components/JobsFileUploader";
 import { JobScriptSimple } from "../api/ilum_resources/jobScriptsApi";
 import JobScriptElement, { JobScriptListContext } from "../components/lists/listElements/JobScriptElement";
+import JobScriptCreator from "../components/JobScriptCreator";
 
 
 export interface JobNodePageInterface{
@@ -36,7 +37,9 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                 {menu}
             </div>
 
-            <h3>Jobs Files:</h3>
+            <hr/>
+
+            {/* <h3>Jobs Files:</h3>
             
             {projectId && jobNodeId && <JobsFileUploader
                 projectId={projectId}
@@ -60,8 +63,15 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                 }}
                 context={{setMenu, setJobsFileListDependency}}
                 dependencies={[jobsFilesListDependency]}
-            />
+            /> */}
 
+
+            {projectId && jobNodeId && <JobScriptCreator
+                projectId={projectId}
+                jobNodeId={jobNodeId}
+                setJobSciptsListDependency={setJobSciptsListDependency}
+            />}
+            <hr/>
 
             <h3>List of Job Scripts</h3>
 
@@ -72,7 +82,7 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                     count: `/projects/${projectId}/job_nodes/${jobNodeId}/job_scripts/count`
                 }}
                 dependencies={[jobScriptsListDependency]}
-                context={{setMenu, setJobSciptsListDependency}}
+                context={{setMenu, setJobSciptsListDependency, setJobsFileListDependency}}
                 Wrapper={JobScriptElement}
                 filter={{ parameters: [
                     {label: "publisher", additionalData: [], fieldType: FieldType.SingleInput},

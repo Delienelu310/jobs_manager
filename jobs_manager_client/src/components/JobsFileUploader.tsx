@@ -10,7 +10,7 @@ export interface JobsFileUplaoderArgs{
 const JobsFileUploader = ({projectId, jobNodeId} : JobsFileUplaoderArgs) => {
 
     const [file, setFile] = useState<File | null>(null);
-    const [extension, setExtension] = useState<string>("jar");
+    const [extension, setExtension] = useState<string>(JobsFileExtension.JAR);
     const [jobsFileDetails, setJobsFileDetails] = useState<JobsFileDetails>({
         name : "",
         description: ""
