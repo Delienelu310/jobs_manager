@@ -82,7 +82,7 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                     count: `/projects/${projectId}/job_nodes/${jobNodeId}/job_scripts/count`
                 }}
                 dependencies={[jobScriptsListDependency]}
-                context={{setMenu, setJobSciptsListDependency, setJobsFileListDependency}}
+                context={{setMenu, setJobSciptsListDependency, setJobsFileListDependency, jobsFilesListDependency}}
                 Wrapper={JobScriptElement}
                 filter={{ parameters: [
                     {label: "publisher", additionalData: [], fieldType: FieldType.SingleInput},

@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { act, useEffect, useState } from "react";
 import { deleteJobScript, JobScriptDetails, JobScriptSimple, retreiveJobScript, updateJobScriptDetails } from "../api/ilum_resources/jobScriptsApi";
 import List, { SourceArg, SourceCountArg } from "./lists/List";
 import JobsFileRemoveElement, { JobsFileRemoveElementContext } from "./lists/listElements/JobsFileRemoveElement";
 import { JobsFileSimple } from "../api/ilum_resources/jobsFilesApi";
 import { FieldType } from "./lists/Filter";
+import ServerBoundList from "./lists/ServerBoundList";
+import JobsFileAddElement, { JobsFileAddElementArgs, JobsFileAddElementContext } from "./lists/listElements/JobsFileAddElement";
 
 
 
@@ -11,15 +13,15 @@ export interface JobScriptMenu{
     data : JobScriptSimple,
     setMenu : React.Dispatch<React.SetStateAction<JSX.Element | null>>,
     setJobSciptsListDependency :  React.Dispatch<React.SetStateAction<number>>,
-    setJobsFileListDependency : React.Dispatch<React.SetStateAction<number>>
-
+    setJobsFileListDependency : React.Dispatch<React.SetStateAction<number>>,
+    jobsFilesListDependency : number
 }
 
 
 
 
 
-const JobScriptMenu = ({data, setMenu, setJobSciptsListDependency, setJobsFileListDependency} : JobScriptMenu) => {
+const JobScriptMenu = ({data, setMenu, setJobSciptsListDependency, setJobsFileListDependency, jobsFilesListDependency} : JobScriptMenu) => {
     
     const [actualData, setActualData] = useState<JobScriptSimple | null>(null);
     
@@ -58,46 +60,50 @@ const JobScriptMenu = ({data, setMenu, setJobSciptsListDependency, setJobsFileLi
 
     function getJobsFilesUsedList({filter, search, pager} : SourceArg) : Promise<JobsFileSimple[]>{
 
-        return new Promise<JobsFileSimple[]>(() => {
-            if(!actualData) return [];
+        return new Promise<JobsFileSimple[]>((resolve, reject) => {
 
-            let classNames : string[] | undefined = filter.values.get("classname");
-            if(!classNames || !classNames[0]) return [];
-            const className : string = classNames[0];
+            if(!actualData) {
+                resolve([]);
+                return;
+            };
+            let result : JobsFileSimple[] = actualData.jobsFiles;
+            result = result.filter(jobsFile => jobsFile.jobDetails.name.startsWith(search));
+      
+            const className : string = (filter.values.get("classname") ?? [""])[0];
+            if(className != "") result = result.filter(jobsFile => jobsFile.allClasses.includes(className))
 
-            let publisherVal : string[] | undefined = filter.values.get("publisher");
-            if(!publisherVal || publisherVal[0]) return [];
-            const publisher : string = publisherVal[0];
+        
+            const publisher : string = (filter.values.get("publisher") ?? [""])[0];
+            if(publisher != "") result = result.filter(jobsFile => jobsFile.publisher.username == publisher);
 
             let offset : number = pager.pageSize * pager.pageChosen
-            
-            return actualData.jobsFiles
-                .filter(jobsFile => jobsFile.jobDetails.name.startsWith(search))
-                .filter(jobsFile => jobsFile.allClasses.includes(className))
-                .filter(jobsFile => jobsFile.publisher.username == publisher)
+    
+            resolve(result
                 .filter((jobsFile, index) => index >= offset && index < offset + pager.pageSize)
+            );
         });
     }
 
     function getJobsFilesUsedCount({filter, search} : SourceCountArg): Promise<number>{
 
-        return new Promise<number>(() => {
-            if(!actualData) return 0;
-
-            let classNames : string[] | undefined = filter.values.get("classname");
-            if(!classNames || !classNames[0]) return 0;
-            const className : string = classNames[0];
-
-            let publisherVal : string[] | undefined = filter.values.get("publisher");
-            if(!publisherVal || publisherVal[0]) return 0;
-            const publisher : string = publisherVal[0];
-
+        return new Promise<number>((resolve, reject) => {
             
-            return actualData.jobsFiles
-                .filter(jobsFile => jobsFile.jobDetails.name.startsWith(search))
-                .filter(jobsFile => jobsFile.allClasses.includes(className))
-                .filter(jobsFile => jobsFile.publisher.username == publisher)
-                .length
+            if(!actualData){
+                resolve(0);
+                return;
+            }
+
+            let result : JobsFileSimple[] = actualData?.jobsFiles;
+            result = result.filter(jobsFile => jobsFile.jobDetails.name.startsWith(search));
+
+            const className : string = (filter.values.get("classname") ?? [""])[0];
+            if(className != "") result = result.filter(jobsFile => jobsFile.allClasses.includes(className))
+
+        
+            const publisher : string = (filter.values.get("publisher") ?? [""])[0];
+            if(publisher != "") result = result.filter(jobsFile => jobsFile.publisher.username == publisher);
+            
+            resolve(result.length);
         });
     }
     
@@ -132,17 +138,39 @@ const JobScriptMenu = ({data, setMenu, setJobSciptsListDependency, setJobsFileLi
                     </label>
                     <br/>
                     <button className="btn btn-success" onClick={updateDetails}>Update details</button>
-
+                    <br/>
 
                     {/* delete job script */}
 
-                    <button className="btn btn-danger" onClick={deleteJobScriptElement}>Delete</button>
-
+                    <button className="btn btn-danger m-2" onClick={deleteJobScriptElement}>Delete</button>
+                    <br/>
                     {/* browse the list of jobs files not used by job script and add it */}
                    
-                    <button className="btn btn-primary">{jobSearchListOpened ? "Close" : "Add jobs file"}</button>
+
+                    <button className="btn btn-primary m-2" onClick={e => setJobSearchListOpened(!jobSearchListOpened)}>
+                        {jobSearchListOpened ? "Close" : "Add jobs file"}
+                    </button>
                     
-                    {jobSearchListOpened && <></>}
+                    {jobSearchListOpened && <ServerBoundList<JobsFileSimple, JobsFileAddElementContext>
+                        endpoint={{
+                            resourse: `/projects/${data.project.id}/job_nodes/${data.jobNode.id}/jobs_files`,
+                            count :  `/projects/${data.project.id}/job_nodes/${data.jobNode.id}/jobs_files/count`
+                        }}
+                        Wrapper={JobsFileAddElement}
+                        pager={{defaultPageSize: 10}}
+                        context={{
+                            setMenu: setMenu,
+                            refreshJobScript: refresh,
+                            setJobsFileListDependency: setJobSciptsListDependency,
+                            jobScript : actualData
+                        }}
+                        dependencies={[jobsFilesListDependency]}
+                        filter={{parameters: [
+                            {label: "publisher", additionalData: [], fieldType: FieldType.SingleInput},
+                            {label: "classname", additionalData: [], fieldType: FieldType.SingleInput},
+                            {label: "extension", additionalData: ["py", "jar"], fieldType: FieldType.SingleSelection}
+                        ]}}
+                    />}
 
 
 
@@ -160,9 +188,10 @@ const JobScriptMenu = ({data, setMenu, setJobSciptsListDependency, setJobsFileLi
                         context={{
                             setMenu: setMenu,
                             setJobsFileListDependency: setJobsFileListDependency,
-                            refreshJobScript: refresh
+                            refreshJobScript: refresh,
+                            jobScript : actualData
                         }}
-                        dependencies={[]}
+                        dependencies={[actualData]}
                         filter={{parameters: [
                             {label: "publisher", additionalData: [], fieldType: FieldType.SingleInput},
                             {label: "classname", additionalData: [], fieldType: FieldType.SingleInput},

@@ -112,8 +112,8 @@ public class JobScriptController {
         
     }
 
-    @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_scripts/{job_script_id}/toggle/jobs_files/{jobs_file_id}")
-    public void toggleJobScriptJobsFile(
+    @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_scripts/{job_script_id}/jobs_files/{jobs_file_id}")
+    public void addJobScriptJobsFile(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("jobs_file_id") String jobsFileId,
@@ -128,17 +128,36 @@ public class JobScriptController {
         if(!jobsFile.getJobNode().getId().equals(jobNodeId)) throw new RuntimeException();
         if(!jobScript.getJobNode().getId().equals(jobNodeId)) throw new RuntimeException();
 
-        if(jobScript.getJobsFiles().contains(jobsFile)){
-            jobScript.getJobsFiles().remove(jobsFile);
-        }else{
-            if( ! jobScript.getExtension().equals(jobsFile.getExtension())){
-                throw new RuntimeException();
-            }
-            jobScript.getJobsFiles().add(jobsFile);
+        
+        if( ! jobScript.getExtension().equals(jobsFile.getExtension())){
+            throw new RuntimeException();
         }
+        jobScript.getJobsFiles().add(jobsFile);
+   
 
         repositoryFactory.getJobScriptRepository().updateFullJobScript(jobScript);
 
+    }
+
+    @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_scripts/{job_script_id}/jobs_files/{jobs_file_id}")
+    public void removeJobScriptJobsFile(
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
+        @PathVariable("jobs_file_id") String jobsFileId,
+        @PathVariable("job_script_id") String jobScriptId
+    ){
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+
+        JobScript jobScript = repositoryFactory.getJobScriptRepository().retrieveJobScriptById(jobScriptId).orElseThrow(RuntimeException::new);
+        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId);
+
+        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
+        if(!jobsFile.getJobNode().getId().equals(jobNodeId)) throw new RuntimeException();
+        if(!jobScript.getJobNode().getId().equals(jobNodeId)) throw new RuntimeException();
+
+        jobScript.getJobsFiles().remove(jobsFile);
+
+        repositoryFactory.getJobScriptRepository().updateFullJobScript(jobScript);
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_scripts/{job_script_id}/job_script_details")

@@ -5,7 +5,8 @@ import JobScriptMenu from "../../JobScriptMenu";
 export interface JobScriptListContext{
     setMenu : React.Dispatch<React.SetStateAction<JSX.Element | null>>,
     setJobSciptsListDependency :  React.Dispatch<React.SetStateAction<number>>,
-    setJobsFileListDependency : React.Dispatch<React.SetStateAction<number>>
+    setJobsFileListDependency : React.Dispatch<React.SetStateAction<number>>,
+    jobsFilesListDependency : number
 }
 
 export interface JobScriptElementArgs{
@@ -33,6 +34,7 @@ const JobScriptElement = ({data, context} : JobScriptElementArgs) => {
                         setMenu={context.setMenu}
                         setJobSciptsListDependency={context.setJobSciptsListDependency}
                         setJobsFileListDependency={context.setJobsFileListDependency}
+                        jobsFilesListDependency={context.jobsFilesListDependency}
                     />
                 ));
             }}>More...</button>

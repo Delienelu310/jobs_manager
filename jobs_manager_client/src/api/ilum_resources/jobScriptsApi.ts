@@ -57,3 +57,16 @@ export async function createJobScript(projectId : string, jobNodeId : string, jo
 ) : Promise<AxiosResponse<string>>{
     return apiClient.post(`/projects/${projectId}/job_nodes/${jobNodeId}/job_scripts`, jobsScriptDTO);
 }
+
+
+export async function addJobsFileToJobScript(
+    projectId : string, jobNodeId : string, jobScriptId : string, jobsFileId  : string
+) : Promise<AxiosResponse<void>>{
+    return apiClient.put(`/projects/${projectId}/job_nodes/${jobNodeId}/job_scripts/${jobScriptId}/jobs_files/${jobsFileId}`);
+}
+
+export async function removeJobsFileFromJobScript(
+    projectId : string, jobNodeId : string, jobScriptId : string, jobsFileId  : string
+) : Promise<AxiosResponse<void>>{
+    return apiClient.delete(`/projects/${projectId}/job_nodes/${jobNodeId}/job_scripts/${jobScriptId}/jobs_files/${jobsFileId}`);
+}
