@@ -90,7 +90,7 @@ public class JobsNodeController {
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
-    public MappingJacksonValue updateJobNodeDetails(
+    public void updateJobNodeDetails(
         @ProjectId @PathVariable("project_id") String projectId, 
         @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
         @RequestBody JobNodeDetails jobNodeDetails
@@ -100,9 +100,8 @@ public class JobsNodeController {
             throw new RuntimeException();
         }
         
-        return jsonMappersFactory.getJobNodeJsonMapper().getFullJobNode(
-            repositoryFactory.getJobNodesRepository().updateJobNode(jobNodeId, jobNodeDetails)
-        );
+        repositoryFactory.getJobNodesRepository().updateJobNode(jobNodeId, jobNodeDetails);
+        
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/add/input/{label}")

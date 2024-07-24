@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
+import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,10 @@ public class JobEntity {
     private JobScript jobScript;
     private String configuration;
     private JobEntityDetails jobEntityDetails;
+
+    @DBRef(lazy = true)
+    @JsonFilter("ilum_resource_publisher")
+    private AppUser author; 
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_job_node_reference")

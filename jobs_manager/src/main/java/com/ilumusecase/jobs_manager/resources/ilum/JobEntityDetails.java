@@ -6,5 +6,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class JobEntityDetails {
+    private String name;
     private String description;
 }

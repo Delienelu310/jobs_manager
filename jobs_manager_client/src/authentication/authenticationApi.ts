@@ -1,4 +1,4 @@
-import { AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import { AxiosResponse } from "axios";
 import  apiClient from "../api/ApiClient";
 import React from "react";
 
