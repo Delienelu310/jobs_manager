@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
@@ -23,6 +25,7 @@ import com.ilumusecase.jobs_manager.repositories.interfaces.authorization.AppUse
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.authorization.MongoAppUser;
 import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
 import com.ilumusecase.jobs_manager.resources.authorities.AppUserDetails;
+import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
 import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 
 
@@ -95,9 +98,25 @@ public class MongoUserDetailsManager implements AppUserRepository{
     }
 
     @Override
-    public List<AppUser> retrieveUsers() {
-        return mongoAppUser.findAll();
+    public List<AppUser> retrieveUsers(
+        String query,
+        String fullname,
+        Integer pageSize,
+        Integer pageNumber
+    ) {
+        Pageable pageable =  PageRequest.of(pageNumber, pageSize);
+
+        return mongoAppUser.retrieveUsers(query, fullname, pageable);
     }
+
+    @Override
+    public long retrieveUsersCount(
+        String query,
+        String fullname
+    ) {
+        return mongoAppUser.retrieveUsersCount(query, fullname);
+    }
+
 
     @Override
     public AppUser retrieveUserById(String id) {
@@ -114,15 +133,15 @@ public class MongoUserDetailsManager implements AppUserRepository{
         return mongoAppUser.save(user);
     }
 
-    private List<AggregationOperation> getProjectPrivilegesRetrievementOperations(String projectId, String query,
-        List<ProjectPrivilege> projectPrivileges
+    private List<AggregationOperation> getPrivilegesRetrievementOperations(String id, String query,
+        List privileges
     ){
 
 
         List<AggregationOperation> operations = new LinkedList<>();
 
         MatchOperation matchProject = Aggregation.match(
-            Criteria.where("_id").is(projectId)
+            Criteria.where("_id").is(id)
         );
 
 
@@ -148,8 +167,8 @@ public class MongoUserDetailsManager implements AppUserRepository{
 
         Criteria criteria2 = Criteria.where("username").regex("^");
         List<Criteria> privilegeCriterias = new LinkedList<>();
-        if(!projectPrivileges.isEmpty()){
-            for(ProjectPrivilege privilege : projectPrivileges){
+        if(!privileges.isEmpty()){
+            for(Object privilege : privileges){
                 privilegeCriterias.add(Criteria.where("privilege").is(privilege.toString()));
             }
         }
@@ -189,7 +208,7 @@ public class MongoUserDetailsManager implements AppUserRepository{
         Integer pageNumber
     ) {
 
-        List<AggregationOperation> operations = getProjectPrivilegesRetrievementOperations(projectId, query, projectPrivileges);
+        List<AggregationOperation> operations = getPrivilegesRetrievementOperations(projectId, query, projectPrivileges);
     
         operations.add(Aggregation.skip(pageSize * pageNumber));
         operations.add(Aggregation.limit(pageSize));
@@ -203,9 +222,10 @@ public class MongoUserDetailsManager implements AppUserRepository{
 
     @Override
     public long retrieveProjectPrivilegesCount(String projectId, String query, 
-            List<ProjectPrivilege> projectPrivileges
+        List<ProjectPrivilege> projectPrivileges
     ){
-        List<AggregationOperation> operations = getProjectPrivilegesRetrievementOperations(projectId, query, projectPrivileges);
+
+        List<AggregationOperation> operations = getPrivilegesRetrievementOperations(projectId, query, projectPrivileges);
     
         operations.add(Aggregation.count().as("count"));
 
@@ -222,5 +242,45 @@ public class MongoUserDetailsManager implements AppUserRepository{
 
         
     }
+
+
+
+    @Override
+    public List<AppUser> retrieveJobNodePrivileges(String jobNodeId, String query,
+        List<JobNodePrivilege> jobNodePrivileges, Integer pageSize, Integer pageNumber
+    ) {
+        List<AggregationOperation> operations = getPrivilegesRetrievementOperations(jobNodeId, query, jobNodePrivileges);
     
+        operations.add(Aggregation.skip(pageSize * pageNumber));
+        operations.add(Aggregation.limit(pageSize));
+
+        Aggregation aggregation = Aggregation.newAggregation(operations );
+
+        AggregationResults<AppUser> results = mongoTemplate.aggregate(aggregation, "jobNode", AppUser.class);
+
+        return results.getMappedResults();
+        
+    }
+
+    @Override
+    public long retrieveJobNodePrivilegesCount(String jobNodeId, String query,
+        List<JobNodePrivilege> jobNodePrivileges
+    ) {
+        List<AggregationOperation> operations = getPrivilegesRetrievementOperations(jobNodeId, query, jobNodePrivileges);
+    
+        operations.add(Aggregation.count().as("count"));
+
+        Aggregation aggregation = Aggregation.newAggregation(operations );
+
+        AggregationResults<Map> countResults = mongoTemplate.aggregate(aggregation, "jobNode", Map.class);
+
+        long totalCount = 0;
+        if (countResults.getUniqueMappedResult() != null) {
+            totalCount = ((Number) countResults.getUniqueMappedResult().get("count")).intValue();
+        }
+
+        return totalCount;
+    }
+ 
+
 }

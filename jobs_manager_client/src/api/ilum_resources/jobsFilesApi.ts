@@ -1,5 +1,5 @@
 import { AxiosResponse } from "axios"
-import { AppUserSimple } from "../authorization/users"
+import { AppUserSimple } from "../authorization/usersApi"
 import apiClient from "../ApiClient"
 import { JobNodeDetails, ProjectDetails } from "../abstraction/projectApi"
 

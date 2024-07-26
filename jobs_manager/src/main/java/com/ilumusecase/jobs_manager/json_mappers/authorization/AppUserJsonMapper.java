@@ -1,33 +1,27 @@
 package com.ilumusecase.jobs_manager.json_mappers.authorization;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
+import com.ilumusecase.jobs_manager.json_mappers.ResourceJsonMapper;
 
-@Component
-public class AppUserJsonMapper {
+@Component("AppUser")
+public class AppUserJsonMapper implements ResourceJsonMapper{
 
     private final FilterProvider fullUserFilter = new SimpleFilterProvider();
     
-    public MappingJacksonValue getFulLAppUser(AppUser appUser){
-        MappingJacksonValue result = new MappingJacksonValue(appUser);
-
-        result.setFilters(fullUserFilter);
-
-        return result;
+    private Map<String, FilterProvider> filters = new HashMap<>();
+    {  
+        filters.put("full", fullUserFilter);
     }
 
-    public MappingJacksonValue getFullAppUserList(List<AppUser> users){
-        MappingJacksonValue result = new MappingJacksonValue(users);
-
-        result.setFilters(fullUserFilter);
-
-        return result;
+    @Override
+    public FilterProvider getFilterProvider(String type) {
+        return filters.get(type);
     }
 
 }

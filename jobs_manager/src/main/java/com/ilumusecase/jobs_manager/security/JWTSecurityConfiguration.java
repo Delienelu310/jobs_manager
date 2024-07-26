@@ -16,6 +16,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
+import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
+import com.ilumusecase.jobs_manager.resources.authorities.AppUserDetails;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -86,6 +88,13 @@ public class JWTSecurityConfiguration {
         ;
 
         repositoryFactory.getUserDetailsManager().createUser(adminUser);
+
+        AppUser user = repositoryFactory.getUserDetailsManager().findByUsername("admin");
+        AppUserDetails appUserDetails = new AppUserDetails();
+        appUserDetails.setFullname("somefullname");
+        user.setAppUserDetails(appUserDetails);
+        repositoryFactory.getUserDetailsManager().saveAppUser(user);
+
         return repositoryFactory.getUserDetailsManager();
     }
 

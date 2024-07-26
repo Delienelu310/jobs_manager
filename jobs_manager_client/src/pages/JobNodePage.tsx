@@ -11,7 +11,9 @@ import JobScriptCreator from "../components/JobScriptCreator";
 import JobEntityElement, { JobEntityElementContext } from "../components/lists/listElements/JobEntityElement";
 import { JobEntitySimple } from "../api/ilum_resources/jobEntityApi";
 import { QueueTypes } from "../api/ilum_resources/queueOperationsApi";
-
+import { AppUserSimple } from "../api/authorization/usersApi";
+import AppUserElement, { AppUserElementContext } from "../components/lists/listElements/AppUserElement";
+import { JobNodePrivilege } from "../api/authorization/privilegesApi";
 
 
 interface JobNodePageDependenciesSetters{
@@ -232,9 +234,24 @@ const JobNodePage = ({} : JobNodePageInterface) => {
             </button>
             {showJobNodePrivileges && 
                 <>
+                    <hr/>
                     <h3>Job Node Privilege List</h3>
 
-                    
+                    <ServerBoundList<AppUserSimple, AppUserElementContext>
+                        Wrapper={AppUserElement}
+                        dependencies={[jobNodePrivilegesDependency]}
+                        context={{jobNodePageRefresh}}
+                        filter={{parameters : [
+                            {label : "jobNodePrivileges", additionalData : Object.values(JobNodePrivilege), fieldType : FieldType.MultipleSelection}
+                        ]}}
+                        pager={{defaultPageSize:10}}
+                        endpoint={{
+                            resourse: `/projects/${projectId}/job_nodes/${jobNodeId}/privileges`,
+                            count: `/projects/${projectId}/job_nodes/${jobNodeId}/privileges/count`
+                        }}
+                    />
+
+                    <hr/>
                 </>
             }
             

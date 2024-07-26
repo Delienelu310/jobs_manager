@@ -1,7 +1,7 @@
 import { AxiosResponse } from "axios";
 import { JobNodeDetails, ProjectDetails } from "../abstraction/projectApi";
 import apiClient from "../ApiClient";
-import { AppUserSimple } from "../authorization/users";
+import { AppUserSimple } from "../authorization/usersApi";
 import { JobsFileExtension, JobsFileSimple } from "./jobsFilesApi";
 
 

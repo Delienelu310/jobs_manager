@@ -23,7 +23,6 @@ const Filter = ({parameters, values} : FilterProperties) => {
     const [multipleInput, setMultipleInput] = useState<string>("");
     const [multipleInputList, setMultipleInputList] = useState<string[]>([]);
 
-
     return (
         <div>
             <h5>Filter</h5>
@@ -40,14 +39,18 @@ const Filter = ({parameters, values} : FilterProperties) => {
                             <label>{label}</label>
                             <input value={multipleInput} onChange={(e) => setMultipleInput(e.target.value)}/>
                             <button onClick={(e) => {
-                                setMultipleInputList([...multipleInputList, multipleInput]);
                                 fieldValue.setter([...multipleInputList, multipleInput]);
+                                setMultipleInputList([...multipleInputList, multipleInput]);
+                                
                             }}>Add</button>
 
                             {multipleInputList.map(input => <div key={label + "_" +input}>
                                 <span>{input}</span>
                                 <button 
-                                    onClick={(e) => setMultipleInputList(multipleInputList.filter(val => val != input))} 
+                                    onClick={(e) => {
+                                        fieldValue.setter(multipleInputList.filter(val => val != input));
+                                        setMultipleInputList(multipleInputList.filter(val => val != input));
+                                    }} 
                                     className="btn btn-danger"
                                 >X</button>
                             </div>)}
@@ -68,6 +71,23 @@ const Filter = ({parameters, values} : FilterProperties) => {
                         :
                         fieldValue.fieldType == FieldType.MultipleSelection ? 
                         <div>
+                            <h6>{label}</h6>
+
+                            <select multiple value={values.get(label)} onChange={e => {
+                                const currentValue = values.get(label) ?? [];
+                                console.log(currentValue);
+                                if(currentValue.includes(e.target.value)){
+                                    fieldValue.setter(currentValue.filter(v => v != e.target.value));
+                                }else{
+                                    fieldValue.setter([...currentValue, e.target.value]);
+                                }
+                            }}>
+                                {fieldValue.additionalData.map(str => <option value={str}>
+                                    {str}
+                                </option>)}
+                            </select>
+                            <br/>
+                            <button className="btn btn-primary" onClick={e => fieldValue.setter([])}>Deselect</button>
 
                         </div>
                         :
