@@ -71,7 +71,7 @@ public class JobNode {
 
     @DBRef(lazy = true)
     @JsonFilter("job_node_ilum_groups")
-    private List<IlumGroup> ilumGroups = new LinkedList<>();
+    private IlumGroup ilumGroup = null;
 
     @Override
     public int hashCode() {

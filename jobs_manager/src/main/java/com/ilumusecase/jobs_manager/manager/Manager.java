@@ -128,6 +128,26 @@ public class Manager {
             .bodyToMono(JsonNode.class).block().get("groupId").asText();
     }
 
+    public void stopGroup(IlumGroup ilumGroup){
+        String url = endpoint + versionPath + "group/" + ilumGroup.getIlumId() + "/stop";
+
+        webClient.post()
+            .uri(url)
+            .retrieve()
+            .toBodilessEntity()
+            .block();
+    }
+
+    public void deleteGroup(IlumGroup ilumGroup){
+        String url = endpoint + versionPath + "group/" + ilumGroup.getIlumId();
+
+        webClient.delete()
+            .uri(url)
+            .retrieve()
+            .toBodilessEntity()
+            .block();
+    }
+
     private String mapToJson(Map<String, String> map){
         StringBuilder result = new StringBuilder();
         result.append("{");

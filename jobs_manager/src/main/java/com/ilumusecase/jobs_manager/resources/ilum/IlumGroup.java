@@ -29,7 +29,7 @@ public class IlumGroup {
 
     private int currentIndex = 0;
     private int currentTestingIndex = 0;
-    private String mod;
+    private String mod = "NORMAL";
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_group_jobs")

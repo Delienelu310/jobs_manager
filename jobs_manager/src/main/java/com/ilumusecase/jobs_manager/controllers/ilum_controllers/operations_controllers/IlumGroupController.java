@@ -1,25 +1,25 @@
 package com.ilumusecase.jobs_manager.controllers.ilum_controllers.operations_controllers;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.converter.json.MappingJacksonValue;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
 import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroupConfiguraion;
+import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
 import com.ilumusecase.jobs_manager.schedulers.JobEntityScheduler;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
@@ -32,39 +32,19 @@ public class IlumGroupController {
     private RepositoryFactory repositoryFactory;
 
     @Autowired
-    private JsonMappersFactory jsonMappersFactory;
-
-    @Autowired
     private Manager manager;
 
     @Autowired
     private JobEntityScheduler jobEntityScheduler;
 
 
-
-    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/ilum_group/{ilum_group_id}")
-    public MappingJacksonValue retrieveIlumGroupById(
-        @ProjectId @PathVariable("project_id") String projectId,
-        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("ilum_group_id") String ilumGroupId
-    ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
-        IlumGroup ilumGroup = repositoryFactory.getIlumGroupRepository().retrieveById(ilumGroupId);
-
-        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
-        if(!ilumGroup.getJobNode().getId().equals(jobNodeId)) throw new RuntimeException();
-
-        return jsonMappersFactory.getIlumGroupMapper().mapSimpleIlumGroup(ilumGroup);
-    }
-
-
-
-    @PostMapping("/projects/{project_id}/job_nodes/{job_node_id}/ilum_group")
-    public MappingJacksonValue createIlumGroup(
+    @PostMapping("/projects/{project_id}/job_nodes/{job_node_id}/start")
+    public void startJobNode(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @RequestBody IlumGroupConfiguraion ilumGroupConfiguraion
     ){
+        //step 0 : validation
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
@@ -76,37 +56,32 @@ public class IlumGroupController {
             throw new RuntimeException("The testing jobs are absent");
         }
 
-
+        // step 1: create ilum group on ilum-core:
         IlumGroup ilumGroup = new IlumGroup();
-        ilumGroup.setIlumGroupConfiguraion(ilumGroupConfiguraion);
-        ilumGroup.setJobs(jobNode.getJobsQueue());
-        ilumGroup.setTestingJobs(jobNode.getTestingJobs());
+        
         ilumGroup.setJobNode(jobNode);
         ilumGroup.setProject(project);
+        ilumGroup.setIlumGroupConfiguraion(ilumGroupConfiguraion);
 
-
+        List<JobEntity> jobs = new ArrayList<>(jobNode.getJobsQueue().size());
+        jobs.addAll(jobNode.getJobsQueue());
+        List<JobEntity> tests = new ArrayList<>(jobNode.getTestingJobs().size());
+        tests.addAll(jobNode.getTestingJobs());
+        ilumGroup.setJobs( jobs);
+        ilumGroup.setTestingJobs(tests);
+        
+        
         String groupId = manager.createGroup(ilumGroup);
+
+        // step 2: create  ilum group 
+
         ilumGroup.setIlumId(groupId);
-        ilumGroup = repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
+        repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
 
-
-        jobNode.getIlumGroups().add(ilumGroup);
+        jobNode.setIlumGroup(ilumGroup);
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
-    
 
-        return jsonMappersFactory.getIlumGroupMapper().mapSimpleIlumGroup(ilumGroup);
-    }
-
-    @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/ilum_groups/{ilum_group_id}/start")
-    public void startIlumGroup(
-        @ProjectId @PathVariable("project_id") String projectId,
-        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("ilum_group_id") String ilumGroupId
-    ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
-        IlumGroup ilumGroup = repositoryFactory.getIlumGroupRepository().retrieveById(ilumGroupId);
-        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
-        if(!jobNodeId.equals(ilumGroup.getJobNode().getId())) throw new RuntimeException();
+        // step 3 submit first job
 
         //initial ilum group config:
         ilumGroup.setCurrentIndex(0);
@@ -128,44 +103,50 @@ public class IlumGroupController {
         String ilumId = manager.submitJob(ilumGroup, ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()), config);
         ilumGroup.getCurrentJob().setIlumId(ilumId);
         repositoryFactory.getJobRepository().updateJobFull(ilumGroup.getCurrentJob());
+
+        // step 4 start lifecycle
+
         try{
             jobEntityScheduler.startIlumGroupLifecycle(ilumGroup);
         }catch(Exception e){
             throw new RuntimeException();
         }
-        
+
     }
 
 
-    // @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/ilum_groups/{ilum_group_id}/stop")
-    // public void stopIlumGroup(
-    //     @ProjectId @PathVariable("project_id") String projectId,
-    //     @JobNodeId @PathVariable("job_node_id") String jobNodeId
-    // ){
-    //     JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
-    //     if(jobNode.getCurrentGroup() == null){
-    //         throw new RuntimeException();
-    //     }
-    //     IlumGroup ilumGroup = jobNode.getCurrentGroup();
 
+    @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/stop")
+    public void stopIlumGroup(
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId
+    ){
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        if(jobNode.getIlumGroup() == null){
+            throw new RuntimeException();
+        }
+        IlumGroup ilumGroup = jobNode.getIlumGroup();
+        
+        //step 1: stop the lifecycle
+        try{
+            jobEntityScheduler.stopIlumGroupLifecycle(ilumGroup);
+        }catch(Exception e){
+            throw new RuntimeException();
+        }
 
-    //     manager.stopJob(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()));
+        //step 2: stop current job
+        manager.stopJob(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()));
 
-    //     try{
-    //         // jobEntityScheduler.deleteGroupStatusCheckScheduler(ilumGroup);
-    //         // jobEntityScheduler.deleteJobEntityStop(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()));
-    //     }catch(Exception e){
-    //         throw new RuntimeException();
-    //     }
+        
+        //step 3: delete ilum group in ilum-core
+        manager.stopGroup(ilumGroup);
+        manager.deleteGroup(ilumGroup);
 
-    //     for(int i = 0; i < ilumGroup.getCurrentIndex(); i++){
-    //         JobEntity jobEntity = ilumGroup.getJobs().get(i);
-    //         jobNode.getJobsQueue().removeIf(jb -> jb.equals(jobEntity));
-    //     }
+        //step 4: delete ilum group metadata
+        jobNode.setIlumGroup(null);
+        repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+        repositoryFactory.getIlumGroupRepository().deleteById(ilumGroup.getId());
 
-    //     repositoryFactory.getIlumGroupRepository().deleteById(ilumGroup.getId());
-
-    //     jobNode.setCurrentGroup(null);
-    //     repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
-    // }
+        
+    }
 }
