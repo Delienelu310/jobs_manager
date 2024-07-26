@@ -1,27 +1,30 @@
-import { act, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import { deleteJobScript, JobScriptDetails, JobScriptSimple, retreiveJobScript, updateJobScriptDetails } from "../api/ilum_resources/jobScriptsApi";
 import List, { SourceArg, SourceCountArg } from "./lists/List";
 import JobsFileRemoveElement, { JobsFileRemoveElementContext } from "./lists/listElements/JobsFileRemoveElement";
 import { JobsFileSimple } from "../api/ilum_resources/jobsFilesApi";
 import { FieldType } from "./lists/Filter";
 import ServerBoundList from "./lists/ServerBoundList";
-import JobsFileAddElement, { JobsFileAddElementArgs, JobsFileAddElementContext } from "./lists/listElements/JobsFileAddElement";
+import JobsFileAddElement, { JobsFileAddElementContext } from "./lists/listElements/JobsFileAddElement";
+import JobEntityCreator from "./JobEntityCreator";
+import { QueueTypes } from "../api/ilum_resources/queueOperationsApi";
+import { JobNodePageRefresh } from "../pages/JobNodePage";
 
 
+export interface JobScriptMenuContext{
+    jobNodePageRefresh : JobNodePageRefresh,
+}
 
 export interface JobScriptMenu{
     data : JobScriptSimple,
-    setMenu : React.Dispatch<React.SetStateAction<JSX.Element | null>>,
-    setJobSciptsListDependency :  React.Dispatch<React.SetStateAction<number>>,
-    setJobsFileListDependency : React.Dispatch<React.SetStateAction<number>>,
-    jobsFilesListDependency : number
+    context : JobScriptMenuContext,
 }
 
 
-
-
-
-const JobScriptMenu = ({data, setMenu, setJobSciptsListDependency, setJobsFileListDependency, jobsFilesListDependency} : JobScriptMenu) => {
+const JobScriptMenu = ({
+    data, 
+    context
+} : JobScriptMenu) => {
     
     const [actualData, setActualData] = useState<JobScriptSimple | null>(null);
     
@@ -42,8 +45,8 @@ const JobScriptMenu = ({data, setMenu, setJobSciptsListDependency, setJobsFileLi
     function deleteJobScriptElement(){
         deleteJobScript(data.project.id, data.jobNode.id, data.id)
             .then(r => {
-                setMenu(null);
-                setJobSciptsListDependency(Math.random);
+                context.jobNodePageRefresh.setMenu(null);
+                context.jobNodePageRefresh.dependenciesSetters.setJobSciptsListDependency(Math.random);
             })
             .catch(e => console.log(e));   
     }
@@ -52,7 +55,7 @@ const JobScriptMenu = ({data, setMenu, setJobSciptsListDependency, setJobsFileLi
         updateJobScriptDetails(data.project.id, data.jobNode.id, data.id, newDetails)
             .then(r => {
                 refresh();
-                setJobSciptsListDependency(Math.random());
+                context.jobNodePageRefresh.dependenciesSetters.setJobSciptsListDependency(Math.random());
             })
             .catch(e => console.log(e));
 
@@ -130,6 +133,18 @@ const JobScriptMenu = ({data, setMenu, setJobSciptsListDependency, setJobsFileLi
                     <strong>{actualData.classFullName}</strong>
                     <br/>
 
+                    {/* create job entity */}
+
+                    <button className="btn btn-success m-2" onClick={e => context.jobNodePageRefresh.setMenu(<JobEntityCreator
+                        context={{
+                            jobNodePageRefresh : context.jobNodePageRefresh
+                        }}
+                        projectId={data.project.id}
+                        jobNodeId={data.jobNode.id}
+                        jobScriptId={data.id}
+                    />)}>Add to Queue</button>
+
+                    <br/>
 
                     {/* update job script details */}
                     <label>
@@ -159,12 +174,11 @@ const JobScriptMenu = ({data, setMenu, setJobSciptsListDependency, setJobsFileLi
                         Wrapper={JobsFileAddElement}
                         pager={{defaultPageSize: 10}}
                         context={{
-                            setMenu: setMenu,
+                            jobNodePageRefresh : context.jobNodePageRefresh,
                             refreshJobScript: refresh,
-                            setJobsFileListDependency: setJobSciptsListDependency,
                             jobScript : actualData
                         }}
-                        dependencies={[jobsFilesListDependency]}
+                        dependencies={[context.jobNodePageRefresh.dependencies.jobsFilesListDependency]}
                         filter={{parameters: [
                             {label: "publisher", additionalData: [], fieldType: FieldType.SingleInput},
                             {label: "classname", additionalData: [], fieldType: FieldType.SingleInput},
@@ -186,8 +200,7 @@ const JobScriptMenu = ({data, setMenu, setJobSciptsListDependency, setJobsFileLi
                             
                         }}
                         context={{
-                            setMenu: setMenu,
-                            setJobsFileListDependency: setJobsFileListDependency,
+                            jobNodePageRefresh : context.jobNodePageRefresh,
                             refreshJobScript: refresh,
                             jobScript : actualData
                         }}

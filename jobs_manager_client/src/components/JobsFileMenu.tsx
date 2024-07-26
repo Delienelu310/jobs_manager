@@ -1,14 +1,19 @@
 import { useEffect, useState } from "react";
 import { checkJobsFileState, deleteJobsFile, JobsFileDetails, JobsFileExtension, JobsFileSimple, JobsFileState, retrieveJobsFile, updateJobsFileDetails, updateJobsFileFile } from "../api/ilum_resources/jobsFilesApi";
+import { JobNodePageRefresh } from "../pages/JobNodePage";
 
+
+
+export interface JobsFileMenuContext{
+    jobNodePageRefresh : JobNodePageRefresh
+}
 
 export interface JobsFileMenuArgs{
     data : JobsFileSimple,
-    setJobsFileListDependency : React.Dispatch<React.SetStateAction<number>>,
-    setMenu : React.Dispatch<React.SetStateAction<JSX.Element | null>>
+    context : JobsFileMenuContext
 }
 
-const JobsFileMenu = ({data, setJobsFileListDependency, setMenu} : JobsFileMenuArgs) => {
+const JobsFileMenu = ({data, context} : JobsFileMenuArgs) => {
 
 
     const [fullData, setFullData] = useState<JobsFileSimple | null>(null);
@@ -40,8 +45,8 @@ const JobsFileMenu = ({data, setJobsFileListDependency, setMenu} : JobsFileMenuA
     function deleteJob(){
         deleteJobsFile(data.project.id, data.jobNode.id, data.id)
             .then(r => {
-                setMenu(null);
-                setJobsFileListDependency(Math.random());
+                context.jobNodePageRefresh.setMenu(null);
+                context.jobNodePageRefresh.dependenciesSetters.setJobsFileListDependency(Math.random());
             })
             .catch(e => console.log(e));
     }
@@ -50,7 +55,7 @@ const JobsFileMenu = ({data, setJobsFileListDependency, setMenu} : JobsFileMenuA
         updateJobsFileDetails(data.project.id, data.jobNode.id, data.id, newJobsFileDetails)
             .then(response => {
                 refresh();
-                setJobsFileListDependency(Math.random());
+                context.jobNodePageRefresh.dependenciesSetters.setJobsFileListDependency(Math.random());
             }).catch(e => console.log(e));
     }
 
@@ -60,7 +65,7 @@ const JobsFileMenu = ({data, setJobsFileListDependency, setMenu} : JobsFileMenuA
         updateJobsFileFile(data.project.id, data.jobNode.id, data.id, newExtension, newFile)
             .then(r => {
                 refresh();
-                setJobsFileListDependency(Math.random())
+                context.jobNodePageRefresh.dependenciesSetters.setJobsFileListDependency(Math.random())
             }).catch(e => console.log(e));
     }
 

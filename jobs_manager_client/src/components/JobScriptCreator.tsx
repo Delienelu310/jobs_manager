@@ -1,17 +1,21 @@
 import { useState } from "react";
 import { createJobScript, JobScriptDTO } from "../api/ilum_resources/jobScriptsApi";
 import { JobsFileExtension } from "../api/ilum_resources/jobsFilesApi";
+import { JobNodePageRefresh } from "../pages/JobNodePage";
 
+
+export interface JobScriptCreatorContext{
+    jobNodePageRefresh : JobNodePageRefresh
+}
 
 export interface JobScriptCreatorArgs{
     projectId : string,
     jobNodeId : string,
-    setJobSciptsListDependency :  React.Dispatch<React.SetStateAction<number>>,
-
+    context : JobScriptCreatorContext
 }
 
 
-const JobScriptCreator = ({projectId, jobNodeId, setJobSciptsListDependency} : JobScriptCreatorArgs) => {
+const JobScriptCreator = ({projectId, jobNodeId, context} : JobScriptCreatorArgs) => {
     
     const [jobScriptDTO, setJobScriptDTO] = useState<JobScriptDTO>({
         extension : JobsFileExtension.JAR,
@@ -24,7 +28,7 @@ const JobScriptCreator = ({projectId, jobNodeId, setJobSciptsListDependency} : J
     function create(){
         createJobScript(projectId, jobNodeId, jobScriptDTO)
             .then(response => {
-                setJobSciptsListDependency(Math.random());
+                context.jobNodePageRefresh.dependenciesSetters.setJobSciptsListDependency(Math.random());
                 console.log(response.data);
             })
             .catch(e => console.log(e));

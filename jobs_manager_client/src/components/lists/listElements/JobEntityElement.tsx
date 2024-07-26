@@ -1,9 +1,13 @@
 import { JobEntitySimple } from "../../../api/ilum_resources/jobEntityApi";
+import { QueueTypes } from "../../../api/ilum_resources/queueOperationsApi";
+import { JobNodePageRefresh } from "../../../pages/JobNodePage";
+import JobEntityMenu from "../../JobEntityMenu";
+import JobScriptElement from "./JobScriptElement";
 
 
 export interface JobEntityElementContext{
-    setMenu : React.Dispatch<React.SetStateAction<JSX.Element | null>>,
-    setQueueDependency :  React.Dispatch<React.SetStateAction<number>>,
+    jobNodePageRefresh : JobNodePageRefresh
+    queueType : QueueTypes,
 }
 
 export interface JobEntityElementArgs{
@@ -20,9 +24,18 @@ const JobEntityElement = ({data, context} : JobEntityElementArgs) => {
             <h6>Description:</h6>
             <span>{data.jobEntityDetails.description}</span>
             <br/>
-            <button className="btn btn-success m-2">More...</button>
-            <br/>
-            <button className="btn btn-danger m-2">Remove</button>
+            <h5>Job Script: {data.jobScript.jobScriptDetails.name}</h5>
+            <strong>Class name:</strong>
+            <i>{data.jobScript.classFullName}</i>
+            <button className="btn btn-success m-2" onClick={e => context.jobNodePageRefresh.setMenu(<JobScriptElement
+                context={context}
+                data={data.jobScript}
+            />)}>Job scribt</button>
+
+            <button className="btn btn-success m-2" onClick={e => context.jobNodePageRefresh.setMenu(<JobEntityMenu
+                data={data}
+                context={context}
+            />)}>More...</button>
         </div>
     )
 }

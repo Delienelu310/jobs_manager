@@ -8,20 +8,33 @@ import JobsFileUploader from "../components/JobsFileUploader";
 import { JobScriptSimple } from "../api/ilum_resources/jobScriptsApi";
 import JobScriptElement, { JobScriptListContext } from "../components/lists/listElements/JobScriptElement";
 import JobScriptCreator from "../components/JobScriptCreator";
-import List from "../components/lists/List";
 import JobEntityElement, { JobEntityElementContext } from "../components/lists/listElements/JobEntityElement";
 import { JobEntitySimple } from "../api/ilum_resources/jobEntityApi";
+import { QueueTypes } from "../api/ilum_resources/queueOperationsApi";
 
+
+
+interface JobNodePageDependenciesSetters{
+    setJobsFileListDependency : React.Dispatch<React.SetStateAction<number>>,
+    setJobSciptsListDependency : React.Dispatch<React.SetStateAction<number>>,
+    queueSetters : Map<QueueTypes, React.Dispatch<React.SetStateAction<number>>>
+}
+
+interface JobNodePageDependencies{
+    jobsFilesListDependency : number,
+    jobScriptsListDependency : number, 
+    queueDependencies : Map<QueueTypes, number>
+}
+
+export interface JobNodePageRefresh{
+    dependenciesSetters : JobNodePageDependenciesSetters,
+    dependencies : JobNodePageDependencies
+    setMenu : React.Dispatch<React.SetStateAction<JSX.Element | null>>,
+}
 
 export interface JobNodePageInterface{
-
+    
 }
-
-
-enum ChosenFolder{
-    JOBS_FILES, JOB_SCRIPTS, JOBS_QUEUE, TESTS_QUEUE
-}
-
 
 const JobNodePage = ({} : JobNodePageInterface) => {
 
@@ -38,6 +51,26 @@ const JobNodePage = ({} : JobNodePageInterface) => {
     const [showJobScripts, setShowJobScripts] = useState<boolean>(false);
     const [showJobsQueue, setShowJobsQueue] = useState<boolean>(false);
     const [showTestJobsQueue, setTestJobsQueue] = useState<boolean>(false);
+
+    const [jobNodePageRefresh, setJobNodePageRefresh] = useState<JobNodePageRefresh>({
+        setMenu : setMenu,
+        dependenciesSetters : {
+            queueSetters : new Map<QueueTypes, React.Dispatch<React.SetStateAction<number>>>([
+                [QueueTypes.JOBS_QUEUE, setJobQueueDependency],
+                [QueueTypes.TESTING_JOBS, setTestJobsDependnency]
+            ]),
+            setJobSciptsListDependency : setJobSciptsListDependency,
+            setJobsFileListDependency : setJobsFileListDependency
+        },
+        dependencies : {
+            queueDependencies : new Map<QueueTypes, number>([
+                [QueueTypes.JOBS_QUEUE, jobQueueDependency],
+                [QueueTypes.TESTING_JOBS, testJobsDependency]
+            ]),
+            jobsFilesListDependency : jobsFilesListDependency,
+            jobScriptsListDependency : jobScriptsListDependency
+        }
+    });
 
     useEffect(() => {
   
@@ -82,7 +115,7 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                         resourse : `/projects/${projectId}/job_nodes/${jobNodeId}/jobs_files`,
                         count : `/projects/${projectId}/job_nodes/${jobNodeId}/jobs_files/count`
                     }}
-                    context={{setMenu, setJobsFileListDependency}}
+                    context={{jobNodePageRefresh: jobNodePageRefresh}}
                     dependencies={[jobsFilesListDependency]}
                 />
 
@@ -98,7 +131,9 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                 {projectId && jobNodeId && <JobScriptCreator
                     projectId={projectId}
                     jobNodeId={jobNodeId}
-                    setJobSciptsListDependency={setJobSciptsListDependency}
+                    context={{
+                        jobNodePageRefresh : jobNodePageRefresh
+                    }}
                 />}
                 <hr/>
 
@@ -111,7 +146,9 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                         count: `/projects/${projectId}/job_nodes/${jobNodeId}/job_scripts/count`
                     }}
                     dependencies={[jobScriptsListDependency]}
-                    context={{setMenu, setJobSciptsListDependency, setJobsFileListDependency, jobsFilesListDependency}}
+                    context={{
+                        jobNodePageRefresh : jobNodePageRefresh
+                    }}
                     Wrapper={JobScriptElement}
                     filter={{ parameters: [
                         {label: "publisher", additionalData: [], fieldType: FieldType.SingleInput},
@@ -134,14 +171,17 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                 
                 <ServerBoundList<JobEntitySimple, JobEntityElementContext>
                     endpoint={{
-                        resourse: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/jobsQueue`,
-                        count: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/jobsQueue/count`
+                        resourse: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/${QueueTypes.JOBS_QUEUE}`,
+                    count: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/${QueueTypes.JOBS_QUEUE}/count`
                     }}
                     filter={{parameters: [
                         {label: "author", additionalData: [], fieldType: FieldType.SingleInput}
                     ]}}
                     Wrapper={JobEntityElement}
-                    context={{setMenu, setQueueDependency : setJobQueueDependency}}
+                    context={{
+                        jobNodePageRefresh: jobNodePageRefresh,
+                        queueType : QueueTypes.JOBS_QUEUE
+                    }}
                     dependencies={[jobQueueDependency]}
                     pager={{defaultPageSize: 10}}
                 
@@ -161,14 +201,17 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                 
                 <ServerBoundList<JobEntitySimple, JobEntityElementContext>
                     endpoint={{
-                        resourse: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/testingJobs`,
-                        count: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/testingJobs/count`
+                        resourse: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/${QueueTypes.TESTING_JOBS}`,
+                        count: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/${QueueTypes.TESTING_JOBS}/count`
                     }}
                     filter={{parameters: [
                         {label: "author", additionalData: [], fieldType: FieldType.SingleInput}
                     ]}}
                     Wrapper={JobEntityElement}
-                    context={{setMenu, setQueueDependency : setTestJobsDependnency}}
+                    context={{
+                        jobNodePageRefresh : jobNodePageRefresh,
+                        queueType : QueueTypes.TESTING_JOBS
+                    }}
                     dependencies={[testJobsDependency]}
                     pager={{defaultPageSize: 10}}
                 

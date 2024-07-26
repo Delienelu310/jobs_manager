@@ -1,11 +1,11 @@
 import { addJobsFileToJobScript, JobScriptSimple, removeJobsFileFromJobScript } from "../../../api/ilum_resources/jobScriptsApi";
 import { JobsFileSimple } from "../../../api/ilum_resources/jobsFilesApi";
+import { JobNodePageRefresh } from "../../../pages/JobNodePage";
 import JobsFileMenu from "../../JobsFileMenu";
 
 
 export interface JobsFileAddElementContext{
-    setMenu : React.Dispatch<React.SetStateAction<JSX.Element | null>>
-    setJobsFileListDependency : React.Dispatch<React.SetStateAction<number>>
+    jobNodePageRefresh : JobNodePageRefresh,
     refreshJobScript : () => void,
     jobScript : JobScriptSimple
 }
@@ -58,11 +58,12 @@ const JobsFileAddElement = ({data, context} : JobsFileAddElementArgs) => {
             
 
             <br/>
-            <button className="btn btn-primary" onClick={e => context.setMenu((
+            <button className="btn btn-primary" onClick={e => context.jobNodePageRefresh.setMenu((
                 <JobsFileMenu
                     data={data}
-                    setMenu={context.setMenu}
-                    setJobsFileListDependency={context.setJobsFileListDependency}
+                    context={{
+                        jobNodePageRefresh : context.jobNodePageRefresh
+                    }}
                 />
             ))}>More...</button>
             <hr/>

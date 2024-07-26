@@ -1,12 +1,9 @@
-import React from "react";
 import { JobScriptSimple } from "../../../api/ilum_resources/jobScriptsApi";
 import JobScriptMenu from "../../JobScriptMenu";
+import { JobNodePageRefresh } from "../../../pages/JobNodePage";
 
 export interface JobScriptListContext{
-    setMenu : React.Dispatch<React.SetStateAction<JSX.Element | null>>,
-    setJobSciptsListDependency :  React.Dispatch<React.SetStateAction<number>>,
-    setJobsFileListDependency : React.Dispatch<React.SetStateAction<number>>,
-    jobsFilesListDependency : number
+    jobNodePageRefresh : JobNodePageRefresh
 }
 
 export interface JobScriptElementArgs{
@@ -28,13 +25,10 @@ const JobScriptElement = ({data, context} : JobScriptElementArgs) => {
             <strong>{data.classFullName}</strong>
 
             <button className="btn btn-success" onClick={e => {
-                context.setMenu((
+                context.jobNodePageRefresh.setMenu((
                     <JobScriptMenu
                         data={data}
-                        setMenu={context.setMenu}
-                        setJobSciptsListDependency={context.setJobSciptsListDependency}
-                        setJobsFileListDependency={context.setJobsFileListDependency}
-                        jobsFilesListDependency={context.jobsFilesListDependency}
+                        context={context}
                     />
                 ));
             }}>More...</button>

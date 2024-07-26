@@ -1,10 +1,10 @@
 import React from "react";
 import { JobsFileSimple } from "../../../api/ilum_resources/jobsFilesApi";
 import JobsFileMenu from "../../JobsFileMenu";
+import { JobNodePageRefresh } from "../../../pages/JobNodePage";
 
 export interface JobsFileListContext{
-    setMenu : React.Dispatch<React.SetStateAction<JSX.Element | null>>
-    setJobsFileListDependency : React.Dispatch<React.SetStateAction<number>>
+    jobNodePageRefresh : JobNodePageRefresh
 }
 
 export interface JobsFileElementArgs{
@@ -29,11 +29,12 @@ const JobsFileElement = ({data, context} : JobsFileElementArgs) => {
             {data.allClasses.map(cl => <><i>{cl}</i> <br/></>)}
             
             <br/>
-            <button className="btn btn-primary" onClick={e => context.setMenu((
+            <button className="btn btn-primary" onClick={e => context.jobNodePageRefresh.setMenu((
                 <JobsFileMenu
                     data={data}
-                    setMenu={context.setMenu}
-                    setJobsFileListDependency={context.setJobsFileListDependency}
+                    context={{
+                        jobNodePageRefresh : context.jobNodePageRefresh
+                    }}
                 />
             ))}>More...</button>
             <hr/>

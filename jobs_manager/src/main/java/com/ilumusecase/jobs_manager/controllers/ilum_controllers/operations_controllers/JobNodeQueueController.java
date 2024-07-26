@@ -113,7 +113,7 @@ public class JobNodeQueueController {
         return repositoryFactory.getJobRepository().retrieveQueueCount(jobNodeId, queueType, query, author);
     }
 
-    @PostMapping("/projects/{project_id}/job_nodes/{job_node_id}/{queue_type}/job_entity/{job_script_id}")
+    @PostMapping("/projects/{project_id}/job_nodes/{job_node_id}/{queue_type}/job_entities/{job_script_id}")
     public String addJobEntityToQueue(
         Authentication authentication,
         @ProjectId @PathVariable("project_id") String projectId,
@@ -145,9 +145,9 @@ public class JobNodeQueueController {
 
         jobEntity = repositoryFactory.getJobRepository().updateJobFull(jobEntity);
 
-        if(queueType.equals("jobs_queue")){
+        if(queueType.equals("jobsQueue")){
             jobNode.getJobsQueue().add(jobEntity);
-        }else if(queueType.equals("testing_jobs")){
+        }else if(queueType.equals("testingJobs")){
             jobNode.getTestingJobs().add(jobEntity);
         }else {
             throw new RuntimeException();
@@ -159,7 +159,7 @@ public class JobNodeQueueController {
     }
 
 
-    @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/{queue_type}/job_entity/{job_entity_id}")
+    @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/{queue_type}/job_entities/{job_entity_id}")
     public void removeJobEntityFromQueue(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
@@ -172,14 +172,14 @@ public class JobNodeQueueController {
         if(!jobNodeId.equals(jobEntity.getJobNode().getId())) throw new RuntimeException();
 
 
-        if(queueType.equals("jobs_queue")){
+        if(queueType.equals("jobsQueue")){
             if(jobNode.getJobsQueue().contains(jobEntity)){
                 jobNode.getJobsQueue().remove(jobEntity);
             }else{
                throw new RuntimeException();
             }
     
-        }else if(queueType.equals("testing_jobs")){
+        }else if(queueType.equals("testingJobs")){
             if(jobNode.getTestingJobs().contains(jobEntity)){
                 jobNode.getTestingJobs().remove(jobEntity);
             }else{
