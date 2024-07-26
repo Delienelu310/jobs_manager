@@ -1,4 +1,4 @@
-package com.ilumusecase.jobs_manager.json_mappers;
+package com.ilumusecase.jobs_manager.json_mappers.ilum;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.ilumusecase.jobs_manager.json_mappers.ResourceJsonMapper;
 
 @Component("JobsFile")
 public class JobsFileJsonMapper implements ResourceJsonMapper {

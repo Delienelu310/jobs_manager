@@ -1,4 +1,4 @@
-package com.ilumusecase.jobs_manager.json_mappers;
+package com.ilumusecase.jobs_manager.json_mappers.authorization;
 
 import java.util.List;
 

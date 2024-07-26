@@ -21,8 +21,8 @@ public class JobResult {
     @Id
     private String id;
 
-    private Integer efficiency;
-    private Integer quality;
+    private Long informationUnits;
+    private Long quality;
     private String status;
 
     private LocalDateTime startTime;

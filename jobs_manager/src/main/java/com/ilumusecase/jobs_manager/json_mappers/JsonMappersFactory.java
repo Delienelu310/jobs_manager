@@ -3,6 +3,13 @@ package com.ilumusecase.jobs_manager.json_mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.ilumusecase.jobs_manager.json_mappers.abstraction.ChannelJsonMapper;
+import com.ilumusecase.jobs_manager.json_mappers.abstraction.JobNodeJsonMapper;
+import com.ilumusecase.jobs_manager.json_mappers.authorization.AppUserJsonMapper;
+import com.ilumusecase.jobs_manager.json_mappers.ilum.JobEntityMapper;
+import com.ilumusecase.jobs_manager.json_mappers.ilum.JobScriptMapper;
+import com.ilumusecase.jobs_manager.json_mappers.ilum.JobsFileJsonMapper;
+
 
 @Component
 public class JsonMappersFactory {
