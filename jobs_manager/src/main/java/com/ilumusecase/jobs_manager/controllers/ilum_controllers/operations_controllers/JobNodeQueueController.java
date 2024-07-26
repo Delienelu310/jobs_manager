@@ -113,6 +113,11 @@ public class JobNodeQueueController {
         return repositoryFactory.getJobRepository().retrieveQueueCount(jobNodeId, queueType, query, author);
     }
 
+
+    private record JobEntityPost(JobEntityDetails details, String configuration){
+
+    }
+
     @PostMapping("/projects/{project_id}/job_nodes/{job_node_id}/{queue_type}/job_entities/{job_script_id}")
     public String addJobEntityToQueue(
         Authentication authentication,
@@ -120,8 +125,7 @@ public class JobNodeQueueController {
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("job_script_id") String jobScriptId,
         @PathVariable("queue_type") String queueType,
-        @RequestParam(name = "configuration", required = false, defaultValue = "") String configuration,
-        @RequestBody JobEntityDetails jobEntityDetails
+        @RequestBody JobEntityPost jobEntityPost
     ){
 
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
@@ -136,8 +140,8 @@ public class JobNodeQueueController {
         if(!checkJarsCompatibility(jobNode, jobScript)) throw new RuntimeException();
 
         JobEntity jobEntity = new JobEntity();
-        jobEntity.setConfiguration(configuration);
-        jobEntity.setJobEntityDetails(jobEntityDetails);
+        jobEntity.setConfiguration(jobEntityPost.configuration());
+        jobEntity.setJobEntityDetails(jobEntityPost.details());
         jobEntity.setJobScript(jobScript);
         jobEntity.setProject(project);
         jobEntity.setJobNode(jobNode);

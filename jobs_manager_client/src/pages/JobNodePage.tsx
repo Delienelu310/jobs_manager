@@ -17,19 +17,23 @@ import { QueueTypes } from "../api/ilum_resources/queueOperationsApi";
 interface JobNodePageDependenciesSetters{
     setJobsFileListDependency : React.Dispatch<React.SetStateAction<number>>,
     setJobSciptsListDependency : React.Dispatch<React.SetStateAction<number>>,
-    queueSetters : Map<QueueTypes, React.Dispatch<React.SetStateAction<number>>>
+    queueSetters : Map<string, React.Dispatch<React.SetStateAction<number>>>
 }
 
 interface JobNodePageDependencies{
     jobsFilesListDependency : number,
     jobScriptsListDependency : number, 
-    queueDependencies : Map<QueueTypes, number>
+    queueDependencies : Map<string, number>
 }
 
 export interface JobNodePageRefresh{
+    projectId : string,
+    jobNodeId : string
+
     dependenciesSetters : JobNodePageDependenciesSetters,
     dependencies : JobNodePageDependencies
     setMenu : React.Dispatch<React.SetStateAction<JSX.Element | null>>,
+    
 }
 
 export interface JobNodePageInterface{
@@ -53,9 +57,11 @@ const JobNodePage = ({} : JobNodePageInterface) => {
     const [showTestJobsQueue, setTestJobsQueue] = useState<boolean>(false);
 
     const [jobNodePageRefresh, setJobNodePageRefresh] = useState<JobNodePageRefresh>({
+        projectId : projectId ?? "",
+        jobNodeId : jobNodeId ?? "",
         setMenu : setMenu,
         dependenciesSetters : {
-            queueSetters : new Map<QueueTypes, React.Dispatch<React.SetStateAction<number>>>([
+            queueSetters : new Map<string, React.Dispatch<React.SetStateAction<number>>>([
                 [QueueTypes.JOBS_QUEUE, setJobQueueDependency],
                 [QueueTypes.TESTING_JOBS, setTestJobsDependnency]
             ]),
@@ -63,7 +69,7 @@ const JobNodePage = ({} : JobNodePageInterface) => {
             setJobsFileListDependency : setJobsFileListDependency
         },
         dependencies : {
-            queueDependencies : new Map<QueueTypes, number>([
+            queueDependencies : new Map<string, number>([
                 [QueueTypes.JOBS_QUEUE, jobQueueDependency],
                 [QueueTypes.TESTING_JOBS, testJobsDependency]
             ]),
@@ -129,8 +135,6 @@ const JobNodePage = ({} : JobNodePageInterface) => {
             </button>
             {showJobScripts && <>
                 {projectId && jobNodeId && <JobScriptCreator
-                    projectId={projectId}
-                    jobNodeId={jobNodeId}
                     context={{
                         jobNodePageRefresh : jobNodePageRefresh
                     }}

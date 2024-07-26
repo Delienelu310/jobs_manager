@@ -7,21 +7,21 @@ import { JobNodePageRefresh } from "../pages/JobNodePage";
 
 export interface JobEntityMenuContext{
     jobNodePageRefresh : JobNodePageRefresh
-    queueType : QueueTypes
+    queueType : string
 }
 
 export interface JobEntityMenuArgs{
-    data : JobEntitySimple,
+    jobEntityId : string,
     context : JobEntityMenuContext
     
 }
 
-const JobEntityMenu = ({data, context} : JobEntityMenuArgs) => {
+const JobEntityMenu = ({context, jobEntityId} : JobEntityMenuArgs) => {
     
     const [actualData, setActualData] = useState<JobEntitySimple | null>(null);
     
     function retrieve(){
-        retrieveJobEntityById(data.project.id, data.jobNode.id, data.id)
+        retrieveJobEntityById(context.jobNodePageRefresh.projectId, context.jobNodePageRefresh.jobNodeId, jobEntityId)
             .then(response => {
                 setActualData(response.data);
             })
@@ -29,8 +29,8 @@ const JobEntityMenu = ({data, context} : JobEntityMenuArgs) => {
     }
 
     function deleteJob(){
-        if(!actualData) return;
-        removeJobEntityFromQueue(data.project.id, data.jobNode.id, context.queueType, actualData.id)
+
+        removeJobEntityFromQueue(context.jobNodePageRefresh.projectId, context.jobNodePageRefresh.jobNodeId, context.queueType, jobEntityId)
             .then(r => {
                 
                 const setter = context.jobNodePageRefresh.dependenciesSetters.queueSetters.get(context.queueType);
@@ -53,21 +53,21 @@ const JobEntityMenu = ({data, context} : JobEntityMenuArgs) => {
         <>
             {actualData && <div>
                 
-                <h3>{data.jobEntityDetails.name}</h3>
-                <strong>Author: {data.author.username}</strong>
+                <h3>{actualData.jobEntityDetails.name}</h3>
+                <strong>Author: {actualData.author.username}</strong>
                 <br/>
                 <h6>Description:</h6>
-                <span>{data.jobEntityDetails.description}</span>
+                <span>{actualData.jobEntityDetails.description}</span>
                 <br/>
 
                 
-                <h5>Job Script: {data.jobScript.jobScriptDetails.name}</h5>
+                <h5>Job Script: {actualData.jobScript.jobScriptDetails.name}</h5>
                 <strong>Class name:</strong>
-                <i>{data.jobScript.classFullName}</i>
+                <i>{actualData.jobScript.classFullName}</i>
 
                 <button className="btn btn-success m-2" onClick={e => context.jobNodePageRefresh.setMenu(<JobScriptMenu
                     context={context}
-                    data={data.jobScript}
+                    data={actualData.jobScript}
                 />)}>Job scribt</button>
                 <br/>
 

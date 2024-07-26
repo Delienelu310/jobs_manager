@@ -9,13 +9,11 @@ export interface JobScriptCreatorContext{
 }
 
 export interface JobScriptCreatorArgs{
-    projectId : string,
-    jobNodeId : string,
     context : JobScriptCreatorContext
 }
 
 
-const JobScriptCreator = ({projectId, jobNodeId, context} : JobScriptCreatorArgs) => {
+const JobScriptCreator = ({context} : JobScriptCreatorArgs) => {
     
     const [jobScriptDTO, setJobScriptDTO] = useState<JobScriptDTO>({
         extension : JobsFileExtension.JAR,
@@ -26,7 +24,7 @@ const JobScriptCreator = ({projectId, jobNodeId, context} : JobScriptCreatorArgs
     });
 
     function create(){
-        createJobScript(projectId, jobNodeId, jobScriptDTO)
+        createJobScript(context.jobNodePageRefresh.projectId, context.jobNodePageRefresh.jobNodeId, jobScriptDTO)
             .then(response => {
                 context.jobNodePageRefresh.dependenciesSetters.setJobSciptsListDependency(Math.random());
                 console.log(response.data);

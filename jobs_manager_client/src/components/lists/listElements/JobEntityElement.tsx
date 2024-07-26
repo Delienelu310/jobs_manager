@@ -33,7 +33,7 @@ const JobEntityElement = ({data, context} : JobEntityElementArgs) => {
             />)}>Job scribt</button>
 
             <button className="btn btn-success m-2" onClick={e => context.jobNodePageRefresh.setMenu(<JobEntityMenu
-                data={data}
+                jobEntityId={data.id}
                 context={context}
             />)}>More...</button>
         </div>
