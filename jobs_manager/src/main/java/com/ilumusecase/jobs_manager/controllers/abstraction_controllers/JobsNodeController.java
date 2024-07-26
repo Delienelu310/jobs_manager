@@ -52,7 +52,7 @@ public class JobsNodeController {
     }
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.VIEWER, ProjectPrivilege.CONTRIBUTOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.VIEWER, ProjectPrivilege.SCRIPTER})
     @AuthorizeJobRoles(roles = {JobNodePrivilege.VIEWER, JobNodePrivilege.CONTRIBUTOR})
     public MappingJacksonValue retrieveById(
         @ProjectId @PathVariable("project_id") String projectId, 
@@ -64,7 +64,7 @@ public class JobsNodeController {
     }
 
     @GetMapping("/projects/{project_id}/job_nodes")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.VIEWER, ProjectPrivilege.CONTRIBUTOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.VIEWER, ProjectPrivilege.SCRIPTER})
     public MappingJacksonValue retrieveJobNodesByProjectId(@ProjectId @PathVariable("project_id") String projectId){
         return jsonMappersFactory.getJobNodeJsonMapper().getFullJobNodeList(
             repositoryFactory.getJobNodesRepository().retrieveByProjectId(projectId)

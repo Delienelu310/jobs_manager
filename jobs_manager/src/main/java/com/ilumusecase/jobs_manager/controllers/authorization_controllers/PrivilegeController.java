@@ -1,8 +1,13 @@
 package com.ilumusecase.jobs_manager.controllers.authorization_controllers;
 
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
@@ -11,7 +16,11 @@ import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
 import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
 import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeJobRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
+
+import jakarta.validation.constraints.Min;
 
 @RestController
 public class PrivilegeController {
@@ -20,8 +29,30 @@ public class PrivilegeController {
     private RepositoryFactory repositoryFactory;
     
 
+
+    @GetMapping("/projects/{project_id}/privileges")
+    public Object retrievePrivileges(
+        @ProjectId @PathVariable("project_id") String projectId,
+        @RequestParam(name = "query", defaultValue = "", required = false) String query,
+        @RequestParam(name = "jobNodeId", defaultValue = "", required = false) String jobNodeId,
+        @RequestParam(name = "jobPrivileges", defaultValue = "", required = false) List<JobNodePrivilege> jobNodePrivileges,
+        @RequestParam(name = "projectPrivileges", defaultValue = "", required = false) List<ProjectPrivilege> projectPrivileges,
+
+        @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
+        @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber
+    ){
+        return repositoryFactory.getUserDetailsManager().retrieveProjectPrivileges(
+            projectId, 
+            query, 
+            projectPrivileges, 
+            pageSize, 
+            pageNumber
+        );
+    }
+
     @PutMapping("/project/{project_id}/job_nodes/{job_node_id}/privilege/add/{user_id}/{privilege}")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeJobRoles(roles = JobNodePrivilege.MANAGER)
     public void addPrivilegeToJobNode(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,

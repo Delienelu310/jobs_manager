@@ -104,7 +104,7 @@ public class JobMongoRepository implements JobRepository{
             queueType + ".$id",   
             "_id",      
             "jobEntity"    
-        );
+        ); 
         
         UnwindOperation unwindQueue = Aggregation.unwind("jobEntity");
         ProjectionOperation projectQueue = Aggregation.project()

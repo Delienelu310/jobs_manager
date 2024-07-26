@@ -50,11 +50,13 @@ const JobNodePage = ({} : JobNodePageInterface) => {
     const [jobScriptsListDependency, setJobSciptsListDependency] = useState<number>(0);
     const [jobQueueDependency, setJobQueueDependency] = useState<number>(0);
     const [testJobsDependency, setTestJobsDependnency] = useState<number>(0);
+    const [jobNodePrivilegesDependency, setJobNodePrivilegesDependency] = useState<number>(0);
 
     const [showJobsFiles, setShowJobsFiles] = useState<boolean>(false);
     const [showJobScripts, setShowJobScripts] = useState<boolean>(false);
     const [showJobsQueue, setShowJobsQueue] = useState<boolean>(false);
     const [showTestJobsQueue, setTestJobsQueue] = useState<boolean>(false);
+    const [showJobNodePrivileges, setShowJobNodePrivileges] = useState<boolean>(false);
 
     const [jobNodePageRefresh, setJobNodePageRefresh] = useState<JobNodePageRefresh>({
         projectId : projectId ?? "",
@@ -223,7 +225,18 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                 <hr/>
             </>}
 
+            <br/>
 
+            <button className="m-3 btn btn-primary" onClick={e => setShowJobNodePrivileges(!showJobNodePrivileges)}>
+                {showJobNodePrivileges ? "Close Privilege List" : "Open Privilege List "}
+            </button>
+            {showJobNodePrivileges && 
+                <>
+                    <h3>Job Node Privilege List</h3>
+
+                    
+                </>
+            }
             
         </div>
     );

@@ -1,6 +1,7 @@
 package com.ilumusecase.jobs_manager.repositories.mongodb;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
@@ -34,6 +35,9 @@ import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 
 @Repository
 public class MongoRepository implements RepositoryFactory{
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Autowired
     private JobNodesMongoRepository jobNodesRepository;
@@ -88,7 +92,7 @@ public class MongoRepository implements RepositoryFactory{
 
     @Override
     public AppUserRepository getUserDetailsManager() {
-        return new MongoUserDetailsManager(mongoAppUser);
+        return new MongoUserDetailsManager(mongoAppUser, mongoTemplate);
     }
 
     @Override
