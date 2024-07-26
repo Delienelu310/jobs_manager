@@ -1,5 +1,17 @@
 package com.ilumusecase.jobs_manager.repositories.interfaces;
 
+import com.ilumusecase.jobs_manager.repositories.interfaces.abstraction.ChannelListRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.abstraction.ChannelsRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.abstraction.JobNodesRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.abstraction.ProjectRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.authorization.AppUserRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.authorization.PrivilegeListRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.IlumGroupRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.JobRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.JobScriptRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.JobsFileRepositoryInterface;
+import com.ilumusecase.jobs_manager.repositories.interfaces.ui.JobNodeVerticeRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.ui.ProjectGraphRepository;
 import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
 import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 
