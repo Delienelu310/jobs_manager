@@ -14,6 +14,7 @@ import { QueueTypes } from "../api/ilum_resources/queueOperationsApi";
 import { AppUserSimple } from "../api/authorization/usersApi";
 import AppUserElement, { AppUserElementContext } from "../components/lists/listElements/AppUserElement";
 import { JobNodePrivilege } from "../api/authorization/privilegesApi";
+import AppUserAdditionComponent from "../components/AppUserAdditionComponent";
 
 
 interface JobNodePageDependenciesSetters{
@@ -93,6 +94,7 @@ const JobNodePage = ({} : JobNodePageInterface) => {
 
             <div>
                 <h3>Current menu</h3>
+                {menu && <button className="btn btn-danger" onClick={e => setMenu(null)}>Close</button>}
                 {menu || <div>No menu</div>}
             </div>
 
@@ -236,6 +238,14 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                 <>
                     <hr/>
                     <h3>Job Node Privilege List</h3>
+
+                    <hr/>
+                    <AppUserAdditionComponent
+                        context={{
+                            jobNodePageRefresh : jobNodePageRefresh
+                        }}
+                    />
+                    <hr/>
 
                     <ServerBoundList<AppUserSimple, AppUserElementContext>
                         Wrapper={AppUserElement}

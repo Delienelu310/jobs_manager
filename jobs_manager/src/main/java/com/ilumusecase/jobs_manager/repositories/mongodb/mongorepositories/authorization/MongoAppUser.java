@@ -15,7 +15,7 @@ public interface MongoAppUser extends MongoRepository<AppUser, String>{
 
     @Query("{ '_id' : { $regex : '^?0', $options : 'i'}, 'appUserDetails.fullname' : {$regex : '^?1', $options : 'i'}}")
     List<AppUser> retrieveUsers(String query, String fullname, Pageable pageable);
-    @Query(value="{_id : { $regex : '^?0'}, appUserDetails.fullName : {$regex : '^?1'}}", count=true)
+    @Query(value="{ '_id' : { $regex : '^?0', $options : 'i'}, 'appUserDetails.fullname' : {$regex : '^?1', $options : 'i'}}", count=true)
     long retrieveUsersCount(String query, String fullname);
 
     Optional<AppUser> findByUsername(String username);

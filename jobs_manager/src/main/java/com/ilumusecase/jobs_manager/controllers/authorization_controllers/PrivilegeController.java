@@ -134,7 +134,7 @@ public class PrivilegeController {
     }
 
 
-    @PutMapping("/project/{project_id}/job_nodes/{job_node_id}/privileges/users/{user_id}/{privilege}")
+    @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/privileges/users/{user_id}/{privilege}")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
     @AuthorizeJobRoles(roles = JobNodePrivilege.MANAGER)
     public void addPrivilegeToJobNode(
@@ -161,7 +161,7 @@ public class PrivilegeController {
     }
 
 
-    @DeleteMapping("/project/{project_id}/job_nodes/{job_node_id}/privileges/users/{user_id}/{privilege}")
+    @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/privileges/users/{user_id}/{privilege}")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
     public void removePrivilegeFromJobNode(
         @PathVariable("project_id") String projectId,
@@ -182,7 +182,7 @@ public class PrivilegeController {
         repositoryFactory.getJobNodePrivilegeList().update(jobNode.getPrivileges().get(appUser.getUsername()));
     }
 
-    @PutMapping("/project/{project_id}/privileges/users/{user_id}/{privilege}")
+    @PutMapping("/projects/{project_id}/privileges/users/{user_id}/{privilege}")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
     public void addPrivilegeToProject(
         @PathVariable("project_id") String projectId,
@@ -210,7 +210,7 @@ public class PrivilegeController {
     }
 
 
-    @DeleteMapping("/project/{project_id}/privileges/users/{user_id}/{privilege}")
+    @DeleteMapping("/projects/{project_id}/privileges/users/{user_id}/{privilege}")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
     public void removePrivilegeFromProject(
         @PathVariable("project_id") String projectId,
@@ -230,7 +230,7 @@ public class PrivilegeController {
         repositoryFactory.getProjectPrivilegeList().update(project.getPrivileges().get(appUser.getUsername()));
     }
 
-    @PutMapping("/project/{project_id}/privileges/moderators/{user_id}")
+    @PutMapping("/projects/{project_id}/privileges/moderators/{user_id}")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN})
     public void addModeratorToProject(
         @PathVariable("project_id") String projectId,
@@ -254,7 +254,7 @@ public class PrivilegeController {
     }
 
 
-    @PutMapping("/project/{project_id}/privileges/moderators/{user_id}/MODERATOR")
+    @PutMapping("/projects/{project_id}/privileges/moderators/{user_id}/MODERATOR")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN})
     public void removeModeratorFromProject(
         @PathVariable("project_id") String projectId,

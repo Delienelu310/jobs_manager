@@ -53,7 +53,7 @@ public class JobsNodeController {
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.VIEWER, ProjectPrivilege.SCRIPTER})
-    @AuthorizeJobRoles(roles = {JobNodePrivilege.VIEWER, JobNodePrivilege.CONTRIBUTOR})
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.VIEWER, JobNodePrivilege.SCRIPTER})
     public MappingJacksonValue retrieveById(
         @ProjectId @PathVariable("project_id") String projectId, 
         @JobNodeId @PathVariable("job_node_id") String jobNodeId
