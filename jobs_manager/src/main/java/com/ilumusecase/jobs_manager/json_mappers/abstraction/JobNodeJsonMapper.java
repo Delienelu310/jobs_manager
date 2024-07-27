@@ -30,7 +30,7 @@ public class JobNodeJsonMapper implements ResourceJsonMapper {
         .addFilter("ilum_resource_project_reference", SimpleBeanPropertyFilter.filterOutAllExcept("id", "projectDetails"))
         .addFilter("ilum_resource_job_node_reference", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
         .addFilter("ilum_resource_publisher", SimpleBeanPropertyFilter.filterOutAllExcept("username", "appUserDetails", "authorities"))
-        .addFilter("ilum_groups_jobs", SimpleBeanPropertyFilter.serializeAllExcept("ilumGroup"))
+        .addFilter("ilum_group_jobs", SimpleBeanPropertyFilter.serializeAllExcept("ilumGroup"))
         .addFilter("job_entity_job_script", SimpleBeanPropertyFilter.serializeAll())
         .addFilter("job_script_jobs_files", SimpleBeanPropertyFilter.filterOutAll())
     ;
@@ -53,7 +53,7 @@ public class JobNodeJsonMapper implements ResourceJsonMapper {
         .addFilter("ilum_resource_publisher", SimpleBeanPropertyFilter.filterOutAllExcept("username", "appUserDetails", "authorities"))
 
         .addFilter("job_script_jobs_files", SimpleBeanPropertyFilter.serializeAll())
-        .addFilter("ilum_groups_jobs", SimpleBeanPropertyFilter.serializeAllExcept("ilumGroup"))
+        .addFilter("ilum_group_jobs", SimpleBeanPropertyFilter.serializeAllExcept("ilumGroup"))
         .addFilter("job_entity_ilum_group", SimpleBeanPropertyFilter.serializeAll())
         .addFilter("job_entity_job_script", SimpleBeanPropertyFilter.serializeAll())
     ;

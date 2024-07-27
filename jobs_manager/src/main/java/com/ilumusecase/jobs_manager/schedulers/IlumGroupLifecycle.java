@@ -75,7 +75,7 @@ public class IlumGroupLifecycle implements Job{
             
         if(
             ilumGroup.getMod().equals("TEST") &&
-            ilumGroup.getCurrentTestingIndex() < testingJobsCount
+            ilumGroup.getCurrentTestingIndex() < testingJobsCount - 1
         ){
             ilumGroup.setCurrentTestingIndex(ilumGroup.getCurrentTestingIndex() + 1);
 
@@ -95,11 +95,11 @@ public class IlumGroupLifecycle implements Job{
         }else if(
             ilumGroup.getMod().equals("NORMAL") && 
             isError &&
-            ilumGroup.getCurrentIndex() < jobsQueueCount
+            ilumGroup.getCurrentIndex() < jobsQueueCount - 1
             ||
             ilumGroup.getMod().equals("TEST") &&
-            ilumGroup.getCurrentTestingIndex() >= testingJobsCount &&
-            ilumGroup.getCurrentIndex() < jobsQueueCount
+            ilumGroup.getCurrentTestingIndex() >= testingJobsCount - 1 &&
+            ilumGroup.getCurrentIndex() < jobsQueueCount - 1
 
         ){
             ilumGroup.setCurrentIndex(ilumGroup.getCurrentIndex() + 1);
@@ -121,10 +121,10 @@ public class IlumGroupLifecycle implements Job{
         }else if(
             ilumGroup.getMod().equals("NORMAL") && 
             isError &&
-            ilumGroup.getCurrentIndex() >= jobsQueueCount
+            ilumGroup.getCurrentIndex() >= jobsQueueCount - 1
             ||
-            ilumGroup.getCurrentTestingIndex() >= testingJobsCount &&
-            ilumGroup.getCurrentIndex() >=jobsQueueCount
+            ilumGroup.getCurrentTestingIndex() >= testingJobsCount - 1 &&
+            ilumGroup.getCurrentIndex() >=jobsQueueCount - 1
         ){
             try {
                 JobKey jobKey = new JobKey(ilumGroup.getId());

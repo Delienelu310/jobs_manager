@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
@@ -103,6 +106,7 @@ public class IlumGroupController {
     }
 
 
+    Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
 
     @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/stop")
     public void stopIlumGroup(
@@ -119,7 +123,8 @@ public class IlumGroupController {
         try{
             jobEntityScheduler.stopIlumGroupLifecycle(ilumGroup);
         }catch(Exception e){
-            throw new RuntimeException();
+            logger.info(e.getMessage());
+            // throw new RuntimeException();
         }
 
         //step 2: stop current job

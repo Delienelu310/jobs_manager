@@ -81,7 +81,7 @@ public class DataSupplierClient {
     }
 
     public JobNodeDTO retrieveJobNode(String projectId, String nodeId, String token) throws Exception{
-        String resposne = retrieveJsonString("/projects/" + projectId + "/job_nodes/" + nodeId, token);
+        String resposne = retrieveJsonString("/projects/" + projectId + "/job_nodes/" + nodeId + "/ilum", token);
         ObjectMapper objectMapper = new ObjectMapper();
         JobNodeDTO jobNodeDTO = objectMapper.readValue(resposne, JobNodeDTO.class);
         return jobNodeDTO;

@@ -102,13 +102,20 @@ const JobNodePage = ({} : JobNodePageInterface) => {
 
     function start(){
         if(!(projectId && jobNodeId)) return;
-        startJobNode(projectId, jobNodeId, ilumGroupConfig);
+        startJobNode(projectId, jobNodeId, ilumGroupConfig)
+            .then(response => {
+                getJobNodeData();
+            }).catch(e => console.log(e));
 
     }
 
     function stop(){
         if(!(projectId && jobNodeId)) return;
-        stopJobNode(projectId, jobNodeId);
+        stopJobNode(projectId, jobNodeId)
+            .then(response => {
+                getJobNodeData();
+            }).catch(e => console.log(e));
+
     }
 
     useEffect(() => {
@@ -131,7 +138,7 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                         <div>
                             <h5>Job is running</h5>
 
-                            <button className="btn btn-danger m-2" onClick={stop}></button>
+                            <button className="btn btn-danger m-2" onClick={stop}>Stop</button>
                         </div>
                         :
                         <div>

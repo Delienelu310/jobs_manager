@@ -64,7 +64,7 @@ public final class App {
         
         try {
             generateCsv("./data.csv", 1000);
-            uploadFile("http://localhost:9000", "minioadmin", "minioadmin", "ilum-files", "jobs-manager/internal_668918b352348c74eaa837d1/data.csv", "data.csv");
+            uploadFile("http://localhost:9000", "minioadmin", "minioadmin", "ilum-files", "jobs-manager/internal_66a4dcb7f0246322a7bcd692/data.csv", "data.csv");
         } catch (IOException e) {
             e.printStackTrace();
         }

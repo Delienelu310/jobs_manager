@@ -23,22 +23,35 @@ spec:
           env:
             - name: ILUM_CORE_URL
               value: http://ilum-core:9888
+            - name: ILUM_CORE_VERSION_PATH
+              value: /api/v1/
+
             - name: MINIO_ENDPOINT
               value: http://ilum-minio:9000
             - name: MINIO_USERNAME
               value: minioadmin
             - name: MINIO_PASSWORD
               value: minioadmin
+            - name: MINIO_BUCKET
+              value: ilum-files
+            
+
             - name: MONGODB_HOST
               value: my-new-mongodb-service
             - name: MONGODB_DATABASE
               value: jobs_manager_db
             - name: MONGODB_PORT
               value: '27017'
+            - name : MONGODB_USERNAME
+              value : myroot
+            - name : MONGODB_PASSWORD 
+              value : mypass
+
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: ilum-kafka:9092
+
             - name: QUARTZ_MONGO_URI
-              value: mongodb://ilum-mongodb-headless:27017
+              value: mongodb://myroot:mypass@localhost:27017
             - name: QUARTZ_MONGO_DATABASE
               value: jobs_manager_db
             
