@@ -65,7 +65,7 @@ public class Manager {
 
         Set<String> jobsFilesUsed = new HashSet<>();
 
-        for(JobEntity jobEntity : ilumGroup.getJobs()){
+        for(JobEntity jobEntity : ilumGroup.getJobNode().getJobsQueue()){
             for(JobsFile jobsFile : jobEntity.getJobScript().getJobsFiles()){
                 if(jobsFilesUsed.contains(jobsFile.getId())) continue;
 
@@ -85,7 +85,7 @@ public class Manager {
             
         }
 
-        for(JobEntity jobEntity : ilumGroup.getTestingJobs()){
+        for(JobEntity jobEntity : ilumGroup.getJobNode().getTestingJobs()){
             for(JobsFile jobsFile : jobEntity.getJobScript().getJobsFiles()){
                 if(jobsFilesUsed.contains(jobsFile.getId())) continue;
 

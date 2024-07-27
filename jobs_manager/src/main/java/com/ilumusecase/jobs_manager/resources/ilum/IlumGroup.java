@@ -36,15 +36,6 @@ public class IlumGroup {
     private JobEntity currentJob;
     private LocalDateTime currentStartTime;
 
-    @DBRef(lazy = true)    
-    @JsonFilter("ilum_group_jobs")
-    private List<JobEntity> jobs = new ArrayList<>();
-
-    @DBRef(lazy = true)
-    @JsonFilter("ilum_group_jobs")
-    private List<JobEntity> testingJobs = new ArrayList<>();
-
-
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_project_reference")
     private Project project;

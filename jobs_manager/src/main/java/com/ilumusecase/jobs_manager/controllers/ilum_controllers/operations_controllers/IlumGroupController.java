@@ -1,9 +1,7 @@
 package com.ilumusecase.jobs_manager.controllers.ilum_controllers.operations_controllers;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +17,6 @@ import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroupConfiguraion;
-import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
 import com.ilumusecase.jobs_manager.schedulers.JobEntityScheduler;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
@@ -58,18 +55,9 @@ public class IlumGroupController {
 
         // step 1: create ilum group on ilum-core:
         IlumGroup ilumGroup = new IlumGroup();
-        
         ilumGroup.setJobNode(jobNode);
         ilumGroup.setProject(project);
-        ilumGroup.setIlumGroupConfiguraion(ilumGroupConfiguraion);
-
-        List<JobEntity> jobs = new ArrayList<>(jobNode.getJobsQueue().size());
-        jobs.addAll(jobNode.getJobsQueue());
-        List<JobEntity> tests = new ArrayList<>(jobNode.getTestingJobs().size());
-        tests.addAll(jobNode.getTestingJobs());
-        ilumGroup.setJobs( jobs);
-        ilumGroup.setTestingJobs(tests);
-        
+        ilumGroup.setIlumGroupConfiguraion(ilumGroupConfiguraion);     
         
         String groupId = manager.createGroup(ilumGroup);
 
@@ -87,7 +75,7 @@ public class IlumGroupController {
         ilumGroup.setCurrentIndex(0);
         ilumGroup.setCurrentTestingIndex(0);
         ilumGroup.setCurrentStartTime(LocalDateTime.now());
-        ilumGroup.setCurrentJob(ilumGroup.getJobs().get(0));
+        ilumGroup.setCurrentJob(ilumGroup.getJobNode().getJobsQueue().get(0));
         ilumGroup.setMod("NORMAL");
         repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
 
@@ -100,7 +88,7 @@ public class IlumGroupController {
         config.put("token", "Basic YWRtaW46YWRtaW4=");
 
 
-        String ilumId = manager.submitJob(ilumGroup, ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()), config);
+        String ilumId = manager.submitJob(ilumGroup, ilumGroup.getCurrentJob(), config);
         ilumGroup.getCurrentJob().setIlumId(ilumId);
         repositoryFactory.getJobRepository().updateJobFull(ilumGroup.getCurrentJob());
 
@@ -135,7 +123,7 @@ public class IlumGroupController {
         }
 
         //step 2: stop current job
-        manager.stopJob(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()));
+        manager.stopJob(ilumGroup.getCurrentJob());
 
         
         //step 3: delete ilum group in ilum-core

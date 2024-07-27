@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
+import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
 
 @Component
 public class IlumGroupLifecycle implements Job{
@@ -63,28 +64,56 @@ public class IlumGroupLifecycle implements Job{
                 return;
             }
         }
+
+
+        //get count of testing jobs and regular jobs:
+        long testingJobsCount = repositoryFactory.getJobRepository().retrieveQueueCount(
+            ilumGroup.getJobNode().getId(), "testingJobs", "", "");
+        long jobsQueueCount = repositoryFactory.getJobRepository().retrieveQueueCount(
+            ilumGroup.getJobNode().getId(), "jobsQueue", "", "");
         
+            
         if(
             ilumGroup.getMod().equals("TEST") &&
-            ilumGroup.getCurrentTestingIndex() < ilumGroup.getTestingJobs().size()
+            ilumGroup.getCurrentTestingIndex() < testingJobsCount
         ){
             ilumGroup.setCurrentTestingIndex(ilumGroup.getCurrentTestingIndex() + 1);
-            ilumGroup.setCurrentJob(ilumGroup.getTestingJobs().get(ilumGroup.getCurrentIndex()));
+
+            JobEntity newCurrentJob = repositoryFactory.getJobRepository().retrieveQueue(
+                ilumGroup.getJobNode().getId(), 
+                "testingJobs", 
+                "", 
+                "", 
+                1, 
+                ilumGroup.getCurrentIndex()
+            ).get(0);
+            ilumGroup.setCurrentJob(newCurrentJob);
+
             ilumGroup.setCurrentStartTime(LocalDateTime.now());
             repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
 
         }else if(
             ilumGroup.getMod().equals("NORMAL") && 
             isError &&
-            ilumGroup.getCurrentIndex() < ilumGroup.getJobs().size()
+            ilumGroup.getCurrentIndex() < jobsQueueCount
             ||
             ilumGroup.getMod().equals("TEST") &&
-            ilumGroup.getCurrentTestingIndex() >= ilumGroup.getTestingJobs().size() &&
-            ilumGroup.getCurrentIndex() < ilumGroup.getJobs().size()
+            ilumGroup.getCurrentTestingIndex() >= testingJobsCount &&
+            ilumGroup.getCurrentIndex() < jobsQueueCount
 
         ){
             ilumGroup.setCurrentIndex(ilumGroup.getCurrentIndex() + 1);
-            ilumGroup.setCurrentJob(ilumGroup.getJobs().get(ilumGroup.getCurrentIndex()));
+
+            JobEntity newCurrentJob = repositoryFactory.getJobRepository().retrieveQueue(
+                ilumGroup.getJobNode().getId(), 
+                "jobsQueue", 
+                "", 
+                "", 
+                1, 
+                ilumGroup.getCurrentIndex()
+            ).get(0);
+            ilumGroup.setCurrentJob(newCurrentJob);
+
             ilumGroup.setMod("NORMAL");
             ilumGroup.setCurrentStartTime(LocalDateTime.now());
             repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
@@ -92,10 +121,10 @@ public class IlumGroupLifecycle implements Job{
         }else if(
             ilumGroup.getMod().equals("NORMAL") && 
             isError &&
-            ilumGroup.getCurrentIndex() >= ilumGroup.getJobs().size()
+            ilumGroup.getCurrentIndex() >= jobsQueueCount
             ||
-            ilumGroup.getCurrentTestingIndex() >= ilumGroup.getTestingJobs().size() &&
-            ilumGroup.getCurrentIndex() >= ilumGroup.getJobs().size() 
+            ilumGroup.getCurrentTestingIndex() >= testingJobsCount &&
+            ilumGroup.getCurrentIndex() >=jobsQueueCount
         ){
             try {
                 JobKey jobKey = new JobKey(ilumGroup.getId());
@@ -115,7 +144,18 @@ public class IlumGroupLifecycle implements Job{
         ){
             ilumGroup.setMod("TEST");
             ilumGroup.setCurrentTestingIndex(0);
-            ilumGroup.setCurrentJob(ilumGroup.getTestingJobs().get(0));
+
+            JobEntity newCurrentJob = repositoryFactory.getJobRepository().retrieveQueue(
+                ilumGroup.getJobNode().getId(), 
+                "testingJobs", 
+                "", 
+                "", 
+                1, 
+                0
+            ).get(0);
+            ilumGroup.setCurrentJob(newCurrentJob);
+
+
             ilumGroup.setCurrentStartTime(LocalDateTime.now());
             repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
         }else{
