@@ -1,18 +1,39 @@
 package com.ilumusecase.jobs_manager.json_mappers.abstraction;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
+import com.ilumusecase.jobs_manager.json_mappers.ResourceJsonMapper;
 
-@Component
-public class JobNodeJsonMapper {
+@Component("JobNode")
+public class JobNodeJsonMapper implements ResourceJsonMapper {
 
+    private final FilterProvider ilumGroupInformationFilter = new SimpleFilterProvider()
+        .addFilter("node-plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
+        .addFilter("project-reference", SimpleBeanPropertyFilter.serializeAll())
+        .addFilter("plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
+        .addFilter("plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
+
+        .addFilter("job_node_jobs_files", SimpleBeanPropertyFilter.filterOutAll())
+        .addFilter("job_node_job_scripts", SimpleBeanPropertyFilter.filterOutAll())
+        .addFilter("job_node_job_results", SimpleBeanPropertyFilter.filterOutAll())
+        .addFilter("job_node_job_entities", SimpleBeanPropertyFilter.filterOutAll())
+        .addFilter("job_node_jobs_queue", SimpleBeanPropertyFilter.filterOutAll())
+
+        .addFilter("job_node_ilum_groups", SimpleBeanPropertyFilter.serializeAll())
+
+        .addFilter("ilum_resource_project_reference", SimpleBeanPropertyFilter.filterOutAllExcept("id", "projectDetails"))
+        .addFilter("ilum_resource_job_node_reference", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
+        .addFilter("ilum_resource_publisher", SimpleBeanPropertyFilter.filterOutAllExcept("username", "appUserDetails", "authorities"))
+        .addFilter("ilum_groups_jobs", SimpleBeanPropertyFilter.serializeAllExcept("ilumGroup"))
+        .addFilter("job_entity_job_script", SimpleBeanPropertyFilter.serializeAll())
+        .addFilter("job_script_jobs_files", SimpleBeanPropertyFilter.filterOutAll())
+    ;
 
     private final FilterProvider fullJobNodeFilter = new SimpleFilterProvider()
         .addFilter("node-plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
@@ -37,17 +58,18 @@ public class JobNodeJsonMapper {
         .addFilter("job_entity_job_script", SimpleBeanPropertyFilter.serializeAll())
     ;
 
-    public MappingJacksonValue getFullJobNode(JobNode jobNode){
-        MappingJacksonValue wrapper = new MappingJacksonValue(jobNode);
-        wrapper.setFilters(fullJobNodeFilter);
+    private final Map<String, FilterProvider> filters = new HashMap<>();
+    {  
 
-        return wrapper;
+        filters.put("full", fullJobNodeFilter);
+        filters.put("ilumGroup", ilumGroupInformationFilter);
     }
 
-    public MappingJacksonValue getFullJobNodeList(List<JobNode> jobNodes){
-        MappingJacksonValue wrapper = new MappingJacksonValue(jobNodes);
-        wrapper.setFilters(fullJobNodeFilter);
-
-        return wrapper;
+    @Override
+    public FilterProvider getFilterProvider(String type) {
+        return this.filters.get(type);
     }
+
+
+
 }

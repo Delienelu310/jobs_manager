@@ -2,6 +2,29 @@ import { AxiosResponse } from "axios";
 import apiClient from "../ApiClient";
 import { JobNodeDetails } from "./projectApi";
 
+import { ChannelList } from "./projectApi";
+import { IlumGroup } from "../ilum_resources/ilumGroupApi";
+
+export interface JobNodeWithIlumGroup{
+
+    id : string,
+    jobNodeDetails : JobNodeDetails,
+    input : {[key:string] :  ChannelList},
+    output : {[key:string] :  ChannelList},
+
+    project : any,
+    privileges :  {[key:string] : {id: string, list: string[]}},
+
+    ilumGroup : IlumGroup | null
+}
+
+export async function retrieveJobNodeWithIlumGroup(projectId : string, jobNodeId : string
+
+) : Promise<AxiosResponse<JobNodeWithIlumGroup>>{
+    return apiClient.get(`/projects/${projectId}/job_nodes/${jobNodeId}/ilum`);
+}
+
+
 
 export async function deleteJobNode(projectId : string, jobNodeId : string) : Promise<AxiosResponse<void>>{
     return apiClient.delete(`/projects/${projectId}/job_nodes/${jobNodeId}`);

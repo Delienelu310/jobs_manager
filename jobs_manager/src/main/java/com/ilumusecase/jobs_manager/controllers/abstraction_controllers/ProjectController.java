@@ -115,8 +115,7 @@ public class ProjectController {
 
     @PostMapping("/projects")
     @AuthorizeRoles(roles={Roles.MANAGER})
-    @JsonMapperRequest(type="full", resource = "Project")
-    public Object createProject(Authentication authentication, @RequestBody ProjectDetails projectDetails){
+    public String createProject(Authentication authentication, @RequestBody ProjectDetails projectDetails){
 
         // add user as adming of the project
         Project project = repositoryFactory.getProjectRepository().createProject(projectDetails);
@@ -129,7 +128,7 @@ public class ProjectController {
         project.getPrivileges().put(authentication.getName(), privilegeList);
         project = repositoryFactory.getProjectRepository().updateProjectFull(project);
 
-        return project;
+        return project.getId();
     }
 
     @DeleteMapping("/projects/{id}")

@@ -1,9 +1,6 @@
 package com.ilumusecase.jobs_manager.controllers.abstraction_controllers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ilumusecase.jobs_manager.JobsManagerApplication;
-import com.ilumusecase.jobs_manager.json_mappers.JsonMappersFactory;
+import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.Channel;
 import com.ilumusecase.jobs_manager.resources.abstraction.ChannelDetails;
@@ -36,39 +32,48 @@ public class JobsNodeController {
 
     @Autowired
     private RepositoryFactory repositoryFactory;
-    @Autowired
-    private JsonMappersFactory jsonMappersFactory;
 
     @Autowired
     private ChannelController channelController;
 
 
     @GetMapping("/job_nodes")
+    @JsonMapperRequest(type="full", resource = "JobNode")
     @DisableDefaultAuth
-    public MappingJacksonValue retrieveAllNodes(){
-        return jsonMappersFactory.getJobNodeJsonMapper().getFullJobNodeList(
-            repositoryFactory.getJobNodesRepository().retrieveAll()
-        );
+    public Object retrieveAllNodes(){
+        return repositoryFactory.getJobNodesRepository().retrieveAll();
     }
 
-    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}")
+    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/full")
+    @JsonMapperRequest(type="full", resource = "JobNode")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.VIEWER, ProjectPrivilege.SCRIPTER})
     @AuthorizeJobRoles(roles = {JobNodePrivilege.VIEWER, JobNodePrivilege.SCRIPTER})
-    public MappingJacksonValue retrieveById(
+    public Object retrieveByIdFull(
         @ProjectId @PathVariable("project_id") String projectId, 
         @JobNodeId @PathVariable("job_node_id") String jobNodeId
     ){
-        return jsonMappersFactory.getJobNodeJsonMapper().getFullJobNode( 
-            repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
-        );
+        return repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+    
     }
 
-    @GetMapping("/projects/{project_id}/job_nodes")
+    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/ilum")
+    @JsonMapperRequest(type="ilumGroup", resource = "JobNode")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.VIEWER, ProjectPrivilege.SCRIPTER})
-    public MappingJacksonValue retrieveJobNodesByProjectId(@ProjectId @PathVariable("project_id") String projectId){
-        return jsonMappersFactory.getJobNodeJsonMapper().getFullJobNodeList(
-            repositoryFactory.getJobNodesRepository().retrieveByProjectId(projectId)
-        );
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.VIEWER, JobNodePrivilege.SCRIPTER})
+    public Object retrieveByIdWithIlumGroup(
+        @ProjectId @PathVariable("project_id") String projectId, 
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId
+    ){
+        return repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+    }
+
+
+    @GetMapping("/projects/{project_id}/job_nodes/full")
+    @JsonMapperRequest(type="full", resource = "JobNode")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.VIEWER, ProjectPrivilege.SCRIPTER})
+    public Object retrieveJobNodesByProjectId(@ProjectId @PathVariable("project_id") String projectId){
+
+        return repositoryFactory.getJobNodesRepository().retrieveByProjectId(projectId);
     }
 
     @PostMapping("/projects/{project_id}/job_nodes")
@@ -254,9 +259,7 @@ public class JobsNodeController {
 
     }
 
-    Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
-
-
+ 
     @PutMapping("/projects/{project_id}/job_nodes/connect")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
     public void connectJobNodes(

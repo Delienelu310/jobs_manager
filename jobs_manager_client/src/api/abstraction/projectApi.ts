@@ -65,6 +65,10 @@ export async function retrieveProject(projectId : string) : Promise<ProjectFullD
 }
 
 
+export async function createProject(projectDetails : ProjectDetails) : Promise<AxiosResponse<string>>{
+    return apiClient.post(`/projects`, projectDetails);
+}
+
 export async function addProjectPlug(projectId : string, rightOrientation : boolean, label : string, channelDetails : ChannelDetails) : 
     Promise<AxiosResponse<void>>
 {

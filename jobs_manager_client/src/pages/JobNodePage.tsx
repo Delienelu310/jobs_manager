@@ -15,6 +15,8 @@ import { AppUserSimple } from "../api/authorization/usersApi";
 import AppUserElement, { AppUserElementContext } from "../components/lists/listElements/AppUserElement";
 import { JobNodePrivilege } from "../api/authorization/privilegesApi";
 import AppUserAdditionComponent from "../components/AppUserAdditionComponent";
+import { JobNodeWithIlumGroup, retrieveJobNodeWithIlumGroup } from "../api/abstraction/jobNodeApi";
+import { IlumGroupConfiguration, startJobNode, stopJobNode } from "../api/ilum_resources/ilumGroupApi";
 
 
 interface JobNodePageDependenciesSetters{
@@ -83,14 +85,76 @@ const JobNodePage = ({} : JobNodePageInterface) => {
         }
     });
 
+    const [jobNodeData, setJobNodeData] = useState<JobNodeWithIlumGroup | null>(null);
+    const [ilumGroupConfig, setIlumGroupConfig] = useState<IlumGroupConfiguration>({
+        maxJobDuration : 60
+    });
+
+    function getJobNodeData(){
+        if(!(projectId && jobNodeId)) return;
+        retrieveJobNodeWithIlumGroup(projectId, jobNodeId)
+            .then(response => {
+                setJobNodeData(response.data);
+            })
+            .catch(e => console.log(e))
+        ;
+    }
+
+    function start(){
+        if(!(projectId && jobNodeId)) return;
+        startJobNode(projectId, jobNodeId, ilumGroupConfig);
+
+    }
+
+    function stop(){
+        if(!(projectId && jobNodeId)) return;
+        stopJobNode(projectId, jobNodeId);
+    }
+
     useEffect(() => {
-  
+        getJobNodeData();
     }, []);
 
 
 
     return (
         <div>
+
+
+            {/* Main panel */}
+
+            {jobNodeData ? <div>
+                    <h3>Job Node : {jobNodeData?.jobNodeDetails.name}</h3>
+
+                    <h4>State:</h4>
+                    {jobNodeData.ilumGroup ? 
+                        <div>
+                            <h5>Job is running</h5>
+
+                            <button className="btn btn-danger m-2" onClick={stop}></button>
+                        </div>
+                        :
+                        <div>
+                            <h5>Job is not runnning</h5>
+                            <strong>Configuration: </strong>
+                            <br/>
+                            <label>
+                                Max Job Duration: 
+                                <input type="number" value={ilumGroupConfig.maxJobDuration} onChange={e => 
+                                    setIlumGroupConfig({...ilumGroupConfig, maxJobDuration : Number(e.target.value)})
+                                }/>
+                            </label>
+                            <br/>
+                            
+
+                            <button className="btn btn-primary m-2" onClick={start}>Start</button>
+                        </div>
+                    }
+
+                </div>
+                :
+                <div>Loading...</div>            
+            }
 
             <div>
                 <h3>Current menu</h3>
