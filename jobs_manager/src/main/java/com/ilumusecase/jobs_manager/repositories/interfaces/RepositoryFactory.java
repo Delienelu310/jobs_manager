@@ -8,6 +8,7 @@ import com.ilumusecase.jobs_manager.repositories.interfaces.authorization.AppUse
 import com.ilumusecase.jobs_manager.repositories.interfaces.authorization.PrivilegeListRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.IlumGroupRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.JobRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.JobResultRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.JobScriptRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.JobsFileRepositoryInterface;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ui.JobNodeVerticeRepository;
@@ -32,4 +33,5 @@ public interface RepositoryFactory {
 
     public ProjectGraphRepository getProjectGraphRepository();
     public JobNodeVerticeRepository getJobNodeVerticeRepository();
+    public JobResultRepository getJobResultRepository();
 } 

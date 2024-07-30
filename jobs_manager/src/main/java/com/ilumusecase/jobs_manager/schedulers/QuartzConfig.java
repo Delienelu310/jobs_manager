@@ -11,7 +11,7 @@ import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
 @Configuration
 public class QuartzConfig {
-     @Autowired
+    @Autowired
     private AutowireCapableBeanFactory beanFactory;
 
     @Bean

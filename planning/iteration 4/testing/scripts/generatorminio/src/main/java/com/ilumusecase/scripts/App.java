@@ -68,5 +68,7 @@ public final class App {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return;
     }
 }

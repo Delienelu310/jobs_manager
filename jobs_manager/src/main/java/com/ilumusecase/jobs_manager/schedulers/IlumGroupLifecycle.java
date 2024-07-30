@@ -21,6 +21,7 @@ import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
 import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
+import com.ilumusecase.jobs_manager.resources.ilum.JobResult;
 
 @Component
 public class IlumGroupLifecycle implements Job{
@@ -64,6 +65,13 @@ public class IlumGroupLifecycle implements Job{
                 return;
             }
         }
+
+
+        //create job result
+        JobResult jobResult = new JobResult();
+        jobResult.setIlumGroupId(ilumGroupId);
+        jobResult.setIlumId(jobInfo.get("jobInstanceId").asText());
+        //todo: create job result fully
 
 
         //get count of testing jobs and regular jobs:

@@ -26,6 +26,7 @@ import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
 import com.ilumusecase.jobs_manager.resources.ilum.JobsFile;
 import com.ilumusecase.jobs_manager.s3clients.S3ClientFactory;
 
+
 @Service
 public class Manager {
 

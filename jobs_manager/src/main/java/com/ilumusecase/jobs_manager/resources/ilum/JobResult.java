@@ -20,19 +20,22 @@ public class JobResult {
 
     @Id
     private String id;
+    private String ilumId;
 
-    private Long informationUnits;
-    private Long quality;
-    private String status;
+    private String ilumGroupId;
 
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-
-
+    private String targetConfiguration;
     @DBRef(lazy = true)
     private JobEntity tester;
     @DBRef(lazy = true)
     private JobEntity target;
+
+
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    private JobResultDetails jobResultDetails; 
+
+
 
     @DBRef(lazy = true)
     private Project project;

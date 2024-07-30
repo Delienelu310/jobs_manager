@@ -13,6 +13,7 @@ import com.ilumusecase.jobs_manager.repositories.interfaces.authorization.AppUse
 import com.ilumusecase.jobs_manager.repositories.interfaces.authorization.PrivilegeListRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.IlumGroupRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.JobRepository;
+import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.JobResultRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.JobScriptRepository;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.JobsFileRepositoryInterface;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ui.JobNodeVerticeRepository;
@@ -25,6 +26,7 @@ import com.ilumusecase.jobs_manager.repositories.mongodb.authorization.JobNodePr
 import com.ilumusecase.jobs_manager.repositories.mongodb.authorization.MongoUserDetailsManager;
 import com.ilumusecase.jobs_manager.repositories.mongodb.authorization.ProjectPrivilegeListMongoRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.ilum.JobMongoRepository;
+import com.ilumusecase.jobs_manager.repositories.mongodb.ilum.JobResultMongoRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.ilum.JobScriptsMongoRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.ilum.JobsFileMongo;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.authorization.MongoAppUser;
@@ -61,6 +63,8 @@ public class MongoRepository implements RepositoryFactory{
     private JobsFileMongo jobsFileMongo;
     @Autowired
     private JobScriptsMongoRepository jobScriptsMongoRepository;
+    @Autowired
+    private JobResultMongoRepository jobResultMongoRepository;
 
 
 
@@ -133,6 +137,11 @@ public class MongoRepository implements RepositoryFactory{
     @Override
     public JobNodeVerticeRepository getJobNodeVerticeRepository() {
         return jobNodeVerticeMongoRepository;
+    }
+
+    @Override
+    public JobResultRepository getJobResultRepository() {
+        return jobResultMongoRepository;
     }
 
   
