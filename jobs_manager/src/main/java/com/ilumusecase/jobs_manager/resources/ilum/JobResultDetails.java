@@ -1,5 +1,8 @@
 package com.ilumusecase.jobs_manager.resources.ilum;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +15,6 @@ public class JobResultDetails {
     
     private String resultStr;
 
-    private Long quality;
+    private Map<String, String> metrics = new HashMap<>();
     
 }

@@ -32,7 +32,7 @@ public class JobEntityScheduler {
             .forJob(jobDetail)
             .startNow()
             .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                .withIntervalInSeconds(40)
+                .withIntervalInSeconds(20)
                 .repeatForever())
             .build();
 

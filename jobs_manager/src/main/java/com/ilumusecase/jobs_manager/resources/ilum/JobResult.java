@@ -1,12 +1,12 @@
 package com.ilumusecase.jobs_manager.resources.ilum;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 
@@ -26,20 +26,24 @@ public class JobResult {
 
     private String targetConfiguration;
     @DBRef(lazy = true)
-    private JobEntity tester;
+    @JsonFilter("job_result_job_script")
+    private JobScript tester;
     @DBRef(lazy = true)
-    private JobEntity target;
+    @JsonFilter("job_result_job_script")
+    private JobScript target;
 
 
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private Long startTime;
+    private Long endTime;
     private JobResultDetails jobResultDetails; 
 
 
 
     @DBRef(lazy = true)
+    @JsonFilter("ilum_resource_project_reference")
     private Project project;
     @DBRef(lazy = true)
+    @JsonFilter("ilum_resource_job_node_reference")
     private JobNode jobNode;
 
     @Override

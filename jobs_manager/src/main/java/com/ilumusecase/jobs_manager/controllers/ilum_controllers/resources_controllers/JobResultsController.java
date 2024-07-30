@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.ilum.JobResult;
@@ -22,6 +23,15 @@ public class JobResultsController {
     private Manager manager;
     @Autowired
     private RepositoryFactory repositoryFactory;
+
+
+    
+    @GetMapping("/job_results")
+    @JsonMapperRequest(type="simple", resource = "JobResult")
+    public Object retrieveAll(){
+        return repositoryFactory.getJobResultRepository().retrieveAll();
+    }
+
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results")
     public List<List<JobResult>> retrieveJobResults(

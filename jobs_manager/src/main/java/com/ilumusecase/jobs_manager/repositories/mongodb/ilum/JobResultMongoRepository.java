@@ -1,5 +1,6 @@
 package com.ilumusecase.jobs_manager.repositories.mongodb.ilum;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,11 @@ public class JobResultMongoRepository  implements JobResultRepository{
     @Override
     public Optional<JobResult> retrieveByIlumId(String ilumId) {
         return retrieveByIlumId(ilumId);
+    }
+
+    @Override
+    public List<JobResult> retrieveAll() {
+        return mongoJobResult.findAll();
     }
     
 }

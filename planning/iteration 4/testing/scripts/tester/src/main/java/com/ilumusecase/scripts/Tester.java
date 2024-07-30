@@ -98,6 +98,7 @@ public final class Tester implements Job{
         Double res = (Double)(result.collectAsList().get(0).get(0));
         System.out.println(res);
 
-        return Some.apply(Double.toString(res));
+        return Some.apply("{result: \"" + res.toString() + "\"}");
+
     }
 }

@@ -29,8 +29,7 @@ public class MinioChannelProcessor implements ChannelProcessor{
     @Override
     public Dataset<Row> retrieveInputDataSet(ChannelDTO channelData, SparkSession session, Map<String, Object> config) {
 
-        // String bucketName = (String)config.get("minio_bucket");
-        String bucketName = "ilum-files";
+        String bucketName = (String)config.getOrDefault("minio-bucket", "ilum-files");
 
         Dataset<Row> dataset = session.read()
             .option("header", "true")
@@ -48,12 +47,11 @@ public class MinioChannelProcessor implements ChannelProcessor{
         Map<String, Object> config
     ) throws Exception {
 
-        
-        // String bucketName = (String)config.get("minio_bucket");
-        String bucketName = "ilum-files";
-        String filePath = "s3a://" + bucketName + "/jobs-manager/internal_" + channelDTO.id;
+        String bucketName = (String)config.getOrDefault("minio-bucket", "ilum-files");
 
-        dataset.coalesce(1).write()
+        String filePath = "s3a://" + bucketName + "/jobs-manager/internal_" + channelDTO.id;
+ 
+        dataset.write()
             .option("header", "true")
             .mode(SaveMode.Overwrite)
             .csv(filePath);
@@ -63,12 +61,11 @@ public class MinioChannelProcessor implements ChannelProcessor{
     public Dataset<Row> retrieveOutputDatasetFull(ChannelDTO channelData, SparkSession session,
         Map<String, Object> config
     ) {
-        // String bucketName = (String)config.get("minio_bucket");
-        String bucketName = "ilum-files";
+        String bucketName = (String)config.getOrDefault("minio-url", "ilum-files");
 
         Dataset<Row> dataset = session.read()
             .option("header", "true")
-            .csv("s3a://" + bucketName + "/jobs-manager/internal_" + channelData.id + "/");
+            .csv("s3a://" +  bucketName + "/jobs-manager/internal_" + channelData.id + "/");
 
         if(!isHeaderValid(channelData.channelDetails.headers, dataset)){
             throw new RuntimeException("Invalid headers");
