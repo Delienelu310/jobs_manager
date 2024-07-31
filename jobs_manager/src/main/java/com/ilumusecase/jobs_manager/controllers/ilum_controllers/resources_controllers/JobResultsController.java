@@ -53,7 +53,7 @@ public class JobResultsController {
         @RequestParam(name = "from", defaultValue = "0", required = false) Long from,
         @RequestParam(name = "to", required = false) Long to,
         
-        @RequestParam(name = "sort_metric", required = false) String metric,
+        @RequestParam(name = "sort_metric", defaultValue = "", required = false) String metric,
         @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
         @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber  
     ){
@@ -101,11 +101,13 @@ public class JobResultsController {
 
  
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/{job_result_id}")
-    public void retrieveJobResultById(
+    @JsonMapperRequest(type="simple", resource = "JobResult")
+    public Object retrieveJobResultById(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("job_result_id") String jobResultId
     ){
+        return repositoryFactory.getJobResultRepository().retrieveById(jobResultId).orElseThrow();
     }
 
 
