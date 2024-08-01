@@ -29,6 +29,11 @@ public class JobResultsController {
         return repositoryFactory.getJobResultRepository().retrieveAll();
     }
 
+    @DeleteMapping("/job_results")
+    public void clear(){
+        repositoryFactory.getJobResultRepository().clear();
+    }
+
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results")
     @JsonMapperRequest(type="simple", resource = "JobResult")
     public Object retrieveJobResults(

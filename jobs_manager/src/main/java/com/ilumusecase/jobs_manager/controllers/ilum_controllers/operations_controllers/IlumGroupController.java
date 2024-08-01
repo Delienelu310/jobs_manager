@@ -128,12 +128,19 @@ public class IlumGroupController {
         }
 
         //step 2: stop current job
-        manager.stopJob(ilumGroup.getCurrentJob());
+        try{
+            manager.stopJob(ilumGroup.getCurrentJob());
+
+            //step 3: delete ilum group in ilum-core
+            manager.stopGroup(ilumGroup);
+            manager.deleteGroup(ilumGroup);
+        }catch(Exception e){
+            logger.info(e.getMessage());
+        }
+        
 
         
-        //step 3: delete ilum group in ilum-core
-        manager.stopGroup(ilumGroup);
-        manager.deleteGroup(ilumGroup);
+        
 
         //step 4: delete ilum group metadata
         jobNode.setIlumGroup(null);

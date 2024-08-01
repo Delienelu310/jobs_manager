@@ -8,8 +8,10 @@ import com.ilumusecase.jobs_manager.resources.ilum.JobResult;
 public interface JobResultRepository {
 
     public List<JobResult> retrieveAll();
+    public void clear();
 
     public Optional<JobResult> retrieveById(String id);
+    public Optional<JobResult> retrieveByIlumId(String ilumId);
 
     public void deleteJobResultById(String id);
     public String updateJobResultFull(JobResult jobResult );

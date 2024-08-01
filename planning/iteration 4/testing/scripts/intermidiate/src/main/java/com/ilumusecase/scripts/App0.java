@@ -12,7 +12,9 @@ public class App0 implements Job {
     @Override
     public Option<String> run(SparkSession sparkSession, Map<String, Object> config) {
 
-        return Some.apply(sparkSession.version());
+
+        throw new RuntimeException("The test exception");
+
     }
     
 }

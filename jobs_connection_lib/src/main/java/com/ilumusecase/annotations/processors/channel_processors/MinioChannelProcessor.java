@@ -34,6 +34,7 @@ public class MinioChannelProcessor implements ChannelProcessor{
         Dataset<Row> dataset = session.read()
             .option("header", "true")
             .csv("s3a://" + bucketName + "/jobs-manager/internal_" + channelData.id + "/");
+        
 
         if(!isHeaderValid(channelData.channelDetails.headers, dataset)){
             throw new RuntimeException("Invalid headers");

@@ -94,12 +94,19 @@ public class TestJobProcessor {
             }
 
             Dataset<Row> finalDataset = datasets.stream().reduce( (ds1, ds2) -> ds1.union(ds2) ).get();
+            
+            Dataset<Row> finalDatasetCopy = finalDataset.select("*");
+
+            //clear cache: 
+            datasets.stream().forEach(df -> df.unpersist());
+            finalDataset.unpersist();
+
 
             System.out.println("Prepared dataset " + outputChannel.label());
 
             field.setAccessible(true);
             try{
-                field.set(this.clazz, finalDataset);
+                field.set(this.clazz, finalDatasetCopy);
             }catch(IllegalAccessException e){
                 //do nothing
             }

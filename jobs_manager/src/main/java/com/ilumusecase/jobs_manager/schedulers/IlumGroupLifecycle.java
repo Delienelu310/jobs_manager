@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -15,10 +16,14 @@ import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.UnableToInterruptJobException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
@@ -37,15 +42,33 @@ public class IlumGroupLifecycle implements Job{
     private Scheduler scheduler;
 
 
-    private Map<String, String> resultToMetrics(JsonNode jsonNode){
+    Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
+
+    private Map<String, String> resultToMetrics(String resultStr ){
+
         Map<String, String> result = new HashMap<>();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = null;
+        try {
+            jsonNode = objectMapper.readTree(resultStr);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        } 
+
+
         
 
+        logger.info(jsonNode.toString());
+
         Iterator<Entry<String, JsonNode>> iterator = jsonNode.fields();
+        
+        
         while(iterator.hasNext()){
             Entry<String, JsonNode> field = iterator.next();
             
-            if(!field.getValue().isNumber()) throw new RuntimeException();
+
+            //check validation later...
 
             result.put(field.getKey(), field.getValue().asText());
         }
@@ -57,9 +80,14 @@ public class IlumGroupLifecycle implements Job{
     private void createJobResult(IlumGroup ilumGroup, JsonNode jobResultInfo){
         
         //create only if:
+        //0. if the job result does not exist already
         //1. the job result info is of test 
         //2. if the job result if of regular job which failed
-        
+
+        if(repositoryFactory.getJobResultRepository().retrieveByIlumId(
+            jobResultInfo.get("jobInstanceId").asText()
+        ).isPresent()) return;
+
         if(ilumGroup.getMod().equals("NORMAL") && jobResultInfo.get("error").isNull()) return;
 
         JobResult jobResult = new JobResult();
@@ -113,7 +141,8 @@ public class IlumGroupLifecycle implements Job{
                 
                 jobResultDetails.setResultStr(jobInfo.get("result").asText());
 
-                jobResultDetails.setMetrics(resultToMetrics(jobResultInfo.get("result")));
+                logger.info("Test result: " + jobResultInfo.get("result").asText());
+                jobResultDetails.setMetrics(resultToMetrics(jobResultInfo.get("result").asText()));
             }else{
                 jobResultDetails.setErrorMessage(jobResultInfo.get("error").get("message").asText() );
                 jobResultDetails.setErrorStackTrace(jobResultInfo.get("error").get("stackTrace").asText());
@@ -172,7 +201,7 @@ public class IlumGroupLifecycle implements Job{
             
         if(
             ilumGroup.getMod().equals("TEST") &&
-            ilumGroup.getCurrentTestingIndex() < testingJobsCount
+            ilumGroup.getCurrentTestingIndex() < testingJobsCount -1 
         ){
             ilumGroup.setCurrentTestingIndex(ilumGroup.getCurrentTestingIndex() + 1);
 
@@ -195,7 +224,7 @@ public class IlumGroupLifecycle implements Job{
             ilumGroup.getCurrentIndex() < jobsQueueCount - 1
             ||
             ilumGroup.getMod().equals("TEST") &&
-            ilumGroup.getCurrentTestingIndex() >= testingJobsCount  &&
+            ilumGroup.getCurrentTestingIndex() >= testingJobsCount - 1  &&
             ilumGroup.getCurrentIndex() < jobsQueueCount - 1
 
         ){
@@ -220,7 +249,9 @@ public class IlumGroupLifecycle implements Job{
             isError &&
             ilumGroup.getCurrentIndex() >= jobsQueueCount - 1
             ||
-            ilumGroup.getCurrentTestingIndex() >= testingJobsCount &&
+            ilumGroup.getMod().equals("TEST") &&
+            (isFinished || isError) &&
+            ilumGroup.getCurrentTestingIndex() >= testingJobsCount - 1 &&
             ilumGroup.getCurrentIndex() >=jobsQueueCount - 1
         ){
             try {

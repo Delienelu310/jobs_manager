@@ -176,6 +176,11 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                     {jobNodeData.ilumGroup ? 
                         <div>
                             <h5>Job is running</h5>
+                            <strong>Mod {jobNodeData.ilumGroup.mod}</strong>
+                            <br/>
+                            <strong>Current Job Entity</strong>
+                            <br/>
+                            <i>{jobNodeData.ilumGroup.currentJob.jobScript.classFullName}</i>
 
                             <button className="btn btn-danger m-2" onClick={stop}>Stop</button>
                             

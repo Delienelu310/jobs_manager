@@ -85,8 +85,8 @@ public final class Tester implements Job{
 
 
         try {
-            Tester.output.createTempView("Tester_evaluation");
-        } catch (AnalysisException e) {
+            Tester.output.createOrReplaceTempView("Tester_evaluation");
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -94,11 +94,12 @@ public final class Tester implements Job{
         sparkSession.udf().register("checkEvaluation", new Tester.Evaluator(), DataTypes.BooleanType);
 
         Dataset<Row> result = sparkSession.sql("SELECT (SELECT COUNT(*) FROM Tester_evaluation WHERE checkEvaluation(number, somedata)) / (SELECT COUNT(*) FROM Tester_evaluation) FROM (SELECT COUNT(*) FROM Tester_evaluation) ");
+        
 
         Double res = (Double)(result.collectAsList().get(0).get(0));
         System.out.println(res);
 
-        return Some.apply("{result: \"" + res.toString() + "\"}");
+        return Some.apply("{\"result\": \"" + res.toString() + "\"}");
 
     }
 }

@@ -34,6 +34,11 @@ public class JobResultMongoRepository  implements JobResultRepository{
     private MongoTemplate mongoTemplate;
 
     @Override
+    public void clear(){
+        mongoJobResult.deleteAll();
+    }
+
+    @Override
     public void deleteJobResultById(String id) {
         mongoJobResult.deleteById(id);
     }
@@ -182,6 +187,11 @@ public class JobResultMongoRepository  implements JobResultRepository{
     @Override
     public Optional<JobResult> retrieveById(String id) {
         return mongoJobResult.findById(id);
+    }
+
+    @Override
+    public Optional<JobResult> retrieveByIlumId(String ilumId) {
+        return mongoJobResult.findByIlumId(ilumId);
     }
     
 

@@ -100,6 +100,12 @@ public class JobProcessor {
 
             Dataset<Row> finalDataset = inputDatasets.stream().reduce( (ds1, ds2) -> ds1.union(ds2) ).get();
 
+            Dataset<Row> finalDatasetCopy = finalDataset.select("*");
+
+            //clear cache: 
+            inputDatasets.stream().forEach(df -> df.unpersist());
+            finalDataset.unpersist();
+
             System.out.println("Prepared dataset " + inputChannel.label());
 
             field.setAccessible(true);
