@@ -92,6 +92,7 @@ public class IlumGroupLifecycle implements Job{
 
         JobResult jobResult = new JobResult();
         jobResult.setIlumGroupId(ilumGroup.getIlumId());
+        jobResult.setIlumGroupDetails(ilumGroup.getIlumGroupDetails());
         jobResult.setIlumId(jobResultInfo.get("jobInstanceId").asText());
 
         jobResult.setJobNode(ilumGroup.getJobNode());

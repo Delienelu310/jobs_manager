@@ -1,6 +1,7 @@
 package com.ilumusecase.jobs_manager.controllers.ilum_controllers.operations_controllers;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroupConfiguraion;
+import com.ilumusecase.jobs_manager.resources.ilum.IlumGroupDetails;
 import com.ilumusecase.jobs_manager.schedulers.JobEntityScheduler;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
@@ -38,11 +40,15 @@ public class IlumGroupController {
     private JobEntityScheduler jobEntityScheduler;
 
 
+    record IlumGroupDTO(IlumGroupConfiguraion ilumGroupConfiguration, IlumGroupDetails ilumGroupDetails){
+
+    }
+
     @PostMapping("/projects/{project_id}/job_nodes/{job_node_id}/start")
     public void startJobNode(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @RequestBody IlumGroupConfiguraion ilumGroupConfiguraion
+        @RequestBody IlumGroupDTO ilumGroupDTO
     ){
         //step 0 : validation
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
@@ -60,7 +66,10 @@ public class IlumGroupController {
         IlumGroup ilumGroup = new IlumGroup();
         ilumGroup.setJobNode(jobNode);
         ilumGroup.setProject(project);
-        ilumGroup.setIlumGroupConfiguraion(ilumGroupConfiguraion);     
+        
+        ilumGroup.setIlumGroupConfiguraion(ilumGroupDTO.ilumGroupConfiguration);  
+        ilumGroupDTO.ilumGroupDetails.setStartTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        ilumGroup.setIlumGroupDetails(ilumGroupDTO.ilumGroupDetails);   
         
         String groupId = manager.createGroup(ilumGroup);
 

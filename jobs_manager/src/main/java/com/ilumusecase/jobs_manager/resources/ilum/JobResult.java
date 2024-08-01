@@ -23,6 +23,7 @@ public class JobResult {
     private String ilumId;
 
     private String ilumGroupId;
+    private IlumGroupDetails ilumGroupDetails;
 
     private String targetConfiguration;
     @DBRef(lazy = true)

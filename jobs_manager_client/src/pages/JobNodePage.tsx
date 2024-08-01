@@ -16,11 +16,8 @@ import AppUserElement, { AppUserElementContext } from "../components/lists/listE
 import { JobNodePrivilege } from "../api/authorization/privilegesApi";
 import AppUserAdditionComponent from "../components/AppUserAdditionComponent";
 import { JobNodeWithIlumGroup, retrieveJobNodeWithIlumGroup } from "../api/abstraction/jobNodeApi";
-import { IlumGroupConfiguration, startJobNode, stopJobNode } from "../api/ilum_resources/ilumGroupApi";
-import JobResultElement, { JobResultElementContext } from "../components/lists/listElements/JobResultElement";
-import List, { SourceArg, SourceCountArg } from "../components/lists/List";
-import { JobResultSimple, retrieveJobResults, retrieveJobResultsCount } from "../api/ilum_resources/jobResultApi";
-import apiClient from "../api/ApiClient";
+import { IlumGroupConfiguration, IlumGroupDetails, IlumGroupOfJobResultData, startJobNode, stopJobNode } from "../api/ilum_resources/ilumGroupApi";
+import IlumGroupErrorsList, {  IlumGroupErrorsContext } from "../components/lists/listElements/IlumGroupErrorsList";
 
 
 interface JobNodePageDependenciesSetters{
@@ -70,6 +67,7 @@ const JobNodePage = ({} : JobNodePageInterface) => {
     const [showJobResultsFailed, setShowJobResultsFailed] = useState<boolean>(false);
     const [showTesterResultsFailed, setShowTesterResultsFailed] = useState<boolean>(false);
 
+
     const [jobNodePageRefresh, setJobNodePageRefresh] = useState<JobNodePageRefresh>({
         projectId : projectId ?? "",
         jobNodeId : jobNodeId ?? "",
@@ -96,6 +94,11 @@ const JobNodePage = ({} : JobNodePageInterface) => {
     const [ilumGroupConfig, setIlumGroupConfig] = useState<IlumGroupConfiguration>({
         maxJobDuration : 60
     });
+    const [ilumGroupDetails, setIlumGroupDetails] = useState<IlumGroupDetails>({
+        name : "",
+        description : "",
+        startTime: null
+    });
 
     function getJobNodeData(){
         if(!(projectId && jobNodeId)) return;
@@ -109,7 +112,7 @@ const JobNodePage = ({} : JobNodePageInterface) => {
 
     function start(){
         if(!(projectId && jobNodeId)) return;
-        startJobNode(projectId, jobNodeId, ilumGroupConfig)
+        startJobNode(projectId, jobNodeId, {ilumGroupConfiguration:  ilumGroupConfig, ilumGroupDetails : ilumGroupDetails})
             .then(response => {
                 getJobNodeData();
             }).catch(e => console.log(e));
@@ -123,38 +126,6 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                 getJobNodeData();
             }).catch(e => console.log(e));
 
-    }
-
-    function getCurrentQueueErrors(arg : SourceArg) : Promise<JobResultSimple[]>{
-
-        
-
-        return retrieveJobResults(projectId ?? "", jobNodeId ?? "", [
-            ["query", arg.search],
-            ["pageSize", String(arg.pager.pageSize)],
-            ["pageNumber", String(arg.pager.pageChosen)],
-            ...(Array.from(arg.filter.values.entries())
-                    .filter( ([key, value]) => key == "error_types")
-                    .map(([key, value]) => [key, value.join(",")] as [string, string]) 
-                ),
-            ...(arg.filter.values.get("error_types") ?? []).map(type => ["include_" + type, "true"] as [string, string]),
-            ...(["job_errors", "tester_errors", "successfull"]
-                .filter(type => !(arg.filter.values.get("error_types") ?? []).includes(type) )
-                .map(type => ["include_" + type, "false"] as [string, string])
-            )
-        ]).then(r => r.data);
-    }
-
-    function getCurrentQueueErrorsCount(arg : SourceCountArg) : Promise<number>{
-        return retrieveJobResultsCount(projectId ?? "", jobNodeId ??  "", [
-            ["query", arg.search],
-            ...( Array.from(arg.filter.values.entries()).map(([key, value]) => [key, value.join(",")] as [string, string]) ),
-            ...(arg.filter.values.get("error_types") ?? []).map(type => ["include_" + type, "true"] as [string, string]),
-            ...(["job_errors", "tester_errors", "successfull"]
-                .filter(type => !(arg.filter.values.get("error_types") ?? []).includes(type) )
-                .map(type => ["include_" + type, "false"] as [string, string])
-            )
-        ]).then(r => r.data);
     }
 
     useEffect(() => {
@@ -183,11 +154,28 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                             <i>{jobNodeData.ilumGroup.currentJob.jobScript.classFullName}</i>
 
                             <button className="btn btn-danger m-2" onClick={stop}>Stop</button>
+
+                            <h3>Current errors:</h3>
+                            <IlumGroupErrorsList context={{jobNodePageRefresh: jobNodePageRefresh}} data={{
+                                ilumGroupDetails: jobNodeData.ilumGroup.ilumGroupDetails,
+                                ilumGroupId: jobNodeData.ilumGroup.ilumId
+                            }}/>
                             
                         </div>
                         :
                         <div>
                             <h5>Job is not runnning</h5>
+                            <strong>Details:</strong>
+                            <br/>
+                            <label>Name: <input value={ilumGroupDetails.name} 
+                                onChange={e => setIlumGroupDetails({...ilumGroupDetails, name : e.target.value})}/>
+                            </label>
+                            <br/>
+                            <label>Description: <input value={ilumGroupDetails.description} 
+                                onChange={e => setIlumGroupDetails({...ilumGroupDetails, description : e.target.value})}/>
+                            </label>
+                            <br/>
+
                             <strong>Configuration: </strong>
                             <br/>
                             <label>
@@ -381,8 +369,28 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                 </>
             }
 
+            <button className="m-3 btn btn-primary" onClick={e => setShowJobResultsFailed(!showJobResultsFailed)}>
+                {showJobResultsFailed ? "Close" : "Show"} Job Errors
+            </button>
 
-            {jobNodeData && jobNodeData.ilumGroup && <>
+            {showJobResultsFailed && <>
+                <ServerBoundList<IlumGroupOfJobResultData, IlumGroupErrorsContext>
+                    Wrapper={IlumGroupErrorsList}
+                    context={{jobNodePageRefresh : jobNodePageRefresh}}
+                    pager={{defaultPageSize : 10}}
+                    dependencies={[]}
+                    filter={{parameters : [
+                        {label: "from", additionalData: [], fieldType: FieldType.SingleInput},
+                        {label : "to", additionalData: [], fieldType : FieldType.SingleInput}
+                    ]}}
+                    endpoint={{
+                        count : `/projects/${projectId}/job_nodes/${jobNodeId}/job_results/ilum_groups/count`,
+                        resourse : `/projects/${projectId}/job_nodes/${jobNodeId}/job_results/ilum_groups`
+                    }}
+                />
+            </>}
+
+            {/* {jobNodeData && jobNodeData.ilumGroup && <>
                 <button className="btn btn-primary" onClick={e => setShowJobResultsFailed(!showJobResultsFailed)}>
                     {showJobResultsFailed ? "Close Current Failed Jobs" : "Open Current Failed Jobs"}
                 </button>
@@ -416,7 +424,7 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                     />
                 </>}
 
-            </>}
+            </>} */}
             
         </div>
     );

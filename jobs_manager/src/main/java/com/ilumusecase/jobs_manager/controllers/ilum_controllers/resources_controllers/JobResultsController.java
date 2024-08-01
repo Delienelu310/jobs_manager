@@ -10,11 +10,18 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 // import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
+import com.ilumusecase.jobs_manager.resources.ilum.IlumGroupDetails;
 
+import java.util.List;
 import jakarta.validation.constraints.Min;
 
 @RestController
 public class JobResultsController {
+
+
+    public record IlumGroupData(String ilumGroupId, IlumGroupDetails ilumGroupDetails){
+
+    }
     
     // @Autowired
     // private Manager manager;
@@ -44,7 +51,7 @@ public class JobResultsController {
         
         @RequestParam(name = "include_successfull", required = false, defaultValue = "true") boolean includeSuccessfull,
         @RequestParam(name = "include_job_errors", required = false, defaultValue = "false") boolean includeJobErrors,
-        @RequestParam(name = "include_tester_errros", required = false, defaultValue = "false") boolean includeTesterErrors,
+        @RequestParam(name = "include_tester_errors", required = false, defaultValue = "false") boolean includeTesterErrors,
 
         @RequestParam(name = "tester_name" , defaultValue = "", required = false) String testerNameQuery,
         @RequestParam(name = "tester_author", defaultValue = "", required = false) String testerAuthor,
@@ -80,7 +87,7 @@ public class JobResultsController {
         
         @RequestParam(name = "include_successfull", required = false, defaultValue = "true") boolean includeSuccessfull,
         @RequestParam(name = "include_job_errors", required = false, defaultValue = "false") boolean includeJobErrors,
-        @RequestParam(name = "include_tester_errros", required = false, defaultValue = "false") boolean includeTesterErrors,
+        @RequestParam(name = "include_tester_errors", required = false, defaultValue = "false") boolean includeTesterErrors,
 
         @RequestParam(name = "tester_name" , defaultValue = "", required = false) String testerNameQuery,
         @RequestParam(name = "tester_author", defaultValue = "", required = false) String testerAuthor,
@@ -103,6 +110,32 @@ public class JobResultsController {
         );
     }
 
+
+
+    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/ilum_groups")
+    public List<IlumGroupData> retrieveIlumGroupsOfJobResults(
+        @PathVariable("project_id") String projectId,
+        @PathVariable("job_node_id") String jobNodeId,
+        @RequestParam(name = "query", defaultValue = "", required = false) String query,
+        @RequestParam(name = "from", defaultValue = "0", required = false) Long from,
+        @RequestParam(name = "to", required = false) Long to,
+        @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
+        @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber  
+    ){
+        return repositoryFactory.getJobResultRepository().retrieveIlumGroupsOfJobResults(jobNodeId, query, from, to, pageSize, pageNumber);
+    }
+
+    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/ilum_groups/count")
+    public Long retrieveIlumGroupsOfJobResultsCount(
+        @PathVariable("project_id") String projectId,
+        @PathVariable("job_node_id") String jobNodeId,
+        @RequestParam(name = "query", defaultValue = "", required = false) String query,
+        @RequestParam(name = "from", defaultValue = "0", required = false) Long from,
+        @RequestParam(name = "to", required = false) Long to
+    ){
+        return repositoryFactory.getJobResultRepository().retrieveIlumGroupsOfJobResultsCount(jobNodeId, query, from, to);
+
+    }
 
  
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/{job_result_id}")

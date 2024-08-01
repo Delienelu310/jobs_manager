@@ -44,7 +44,10 @@ export interface JobResultSimple{
 export function retrieveJobResults(projectId : string, jobNodeId : string, requestParams : [string, string][]
 
 ) : Promise<AxiosResponse<JobResultSimple[]>>{
-    return apiClient.get(`/projects/${projectId}/job_nodes/${jobNodeId}/job_results?${requestParams.map(p => p.join("=")).join("&")}`);
+
+    const url = `/projects/${projectId}/job_nodes/${jobNodeId}/job_results?${requestParams.map(p => p.join("=")).join("&")}`;
+    console.log(url);
+    return apiClient.get(url);
 }
 
 export function retrieveJobResultsCount(projectId : string, jobNodeId : string, requestParams : [string, string][]

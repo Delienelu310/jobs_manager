@@ -2,10 +2,14 @@ package com.ilumusecase.jobs_manager.repositories.interfaces.ilum;
 
 import java.util.List;
 import java.util.Optional;
-
 import com.ilumusecase.jobs_manager.resources.ilum.JobResult;
 
+import com.ilumusecase.jobs_manager.controllers.ilum_controllers.resources_controllers.JobResultsController.IlumGroupData;
+
+
 public interface JobResultRepository {
+
+
 
     public List<JobResult> retrieveAll();
     public void clear();
@@ -60,6 +64,22 @@ public interface JobResultRepository {
         String testerClass,
         String testerId,
 
+        Long from,
+        Long to
+    );
+
+    public List<IlumGroupData> retrieveIlumGroupsOfJobResults(
+        String jobNodeId,
+        String query,
+        Long from,
+        Long to,
+        Integer pageSize,
+        Integer pageNumber
+    );
+
+    public Long retrieveIlumGroupsOfJobResultsCount(
+        String jobNodeId,
+        String query,
         Long from,
         Long to
     );

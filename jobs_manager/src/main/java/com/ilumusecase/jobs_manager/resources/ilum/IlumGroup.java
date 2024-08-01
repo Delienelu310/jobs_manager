@@ -24,6 +24,8 @@ public class IlumGroup {
     private String ilumId;
 
     private IlumGroupConfiguraion ilumGroupConfiguraion;
+    private IlumGroupDetails ilumGroupDetails;
+
 
     private int currentIndex = 0;
     private int currentTestingIndex = 0;
