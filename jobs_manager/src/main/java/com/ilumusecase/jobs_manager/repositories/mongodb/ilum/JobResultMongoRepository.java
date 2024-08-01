@@ -1,13 +1,11 @@
 package com.ilumusecase.jobs_manager.repositories.mongodb.ilum;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -19,7 +17,6 @@ import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Repository;
 
-import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.JobResultRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.ilum.MongoJobResult;
 import com.ilumusecase.jobs_manager.resources.ilum.JobResult;
@@ -66,36 +63,36 @@ public class JobResultMongoRepository  implements JobResultRepository{
         List<AggregationOperation> operations = new LinkedList<>();
 
         //1. match by jobNodeId, from, to, includes
-        Criteria directMatchCriteria = Criteria.where("jobNode.$id").is(jobNodeId)
-            // .and("startTime").gte(from == null ? 0 : from)
-            // .and("endTime").lte(to == null ? Long.MAX_VALUE : to)
+        Criteria directMatchCriteria = Criteria.where("jobNode.$id").is(new ObjectId(jobNodeId))
+            .and("startTime").gte(from == null ? 0 : from)
+            .and("endTime").lte(to == null ? Long.MAX_VALUE : to)
         ;
 
-        // if(!includeSuccessfull) directMatchCriteria = directMatchCriteria.and("jobResultDetails.errorMessage").ne("null");
-        // if(!includeJobErrors) directMatchCriteria = directMatchCriteria.and("tester").ne("null");
-        // if(!includeTesterErrors) directMatchCriteria = directMatchCriteria.orOperator(
-        //     Criteria.where("jobResultDetails.errorMessage").is("null"), 
-        //     Criteria.where("tester").is("null")
-        // );
+        if(!includeSuccessfull) directMatchCriteria = directMatchCriteria.and("jobResultDetails.errorMessage").ne(null);
+        if(!includeJobErrors) directMatchCriteria = directMatchCriteria.and("tester").ne(null);
+        if(!includeTesterErrors) directMatchCriteria = directMatchCriteria.orOperator(
+            Criteria.where("jobResultDetails.errorMessage").is(null), 
+            Criteria.where("tester").is(null)
+        );
 
 
 
         //2. match by ilumGropuId, testerId and targetId
 
-        // if(!ilumGroupId.equals("")) directMatchCriteria = directMatchCriteria.and("ilumGroupId").is(ilumGroupId);
-        // if(!targetId.equals("")) directMatchCriteria = directMatchCriteria.and("target.$id").is(targetId);
-        // if(!testerId.equals("")) directMatchCriteria = directMatchCriteria.and("tester.$id").is(testerId);
+        if(!ilumGroupId.equals("")) directMatchCriteria = directMatchCriteria.and("ilumGroupId").is(new ObjectId(ilumGroupId));
+        if(!targetId.equals("")) directMatchCriteria = directMatchCriteria.and("target.$id").is(new ObjectId(targetId));
+        if(!testerId.equals("")) directMatchCriteria = directMatchCriteria.and("tester.$id").is(new ObjectId(testerId));
 
         MatchOperation mainMatch = Aggregation.match(directMatchCriteria);
 
-        // operations.add(mainMatch);
+        operations.add(mainMatch);
 
         //3. lookup tester, if required
         //4. match tester details
         if(testerId.equals("")){
-            LookupOperation lookupTester = Aggregation.lookup("JobScript", "tester.$id", "_id", "testerDocument");
+            LookupOperation lookupTester = Aggregation.lookup("jobScript", "tester.$id", "_id", "testerDocument");
 
-            // operations.add(lookupTester);
+            operations.add(lookupTester);
             
 
             Criteria matchTesterCriteria = Criteria.where("testerDocument.jobScriptDetails.name").regex("^" + testerNameQuery);
@@ -104,16 +101,16 @@ public class JobResultMongoRepository  implements JobResultRepository{
 
             MatchOperation matchTester = Aggregation.match(matchTesterCriteria);
 
-            // operations.add(matchTester);
+            operations.add(matchTester);
         }
        
 
         //5. lookup target, if required
         //6. match target details
         if(targetId.equals("")){
-            LookupOperation lookupTarget = Aggregation.lookup("JobScript", "target.$id", "_id", "targetDocument");
+            LookupOperation lookupTarget = Aggregation.lookup("jobScript", "target.$id", "_id", "targetDocument");
 
-            // operations.add(lookupTarget);
+            operations.add(lookupTarget);
 
             Criteria matchTargetCriteria = Criteria.where("targetDocument.jobScriptDetails.name").regex("^" + targetNameQuery);
             if(!targetAuthor.equals("")) matchTargetCriteria = matchTargetCriteria.and("targetDocument.author.$id").is(targetAuthor);
@@ -121,14 +118,12 @@ public class JobResultMongoRepository  implements JobResultRepository{
 
             MatchOperation matchTarget = Aggregation.match(matchTargetCriteria);
 
-            // operations.add(matchTarget);
+            operations.add(matchTarget);
         }
 
 
         return operations;
     }
-
-    private Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
 
     @Override
     public List<JobResult> retrieveJobResults(String jobNodeId, String ilumGroupId, String targetNameQuery,
@@ -150,8 +145,6 @@ public class JobResultMongoRepository  implements JobResultRepository{
         Aggregation aggregation = Aggregation.newAggregation(operations );
 
         AggregationResults<JobResult> results = mongoTemplate.aggregate(aggregation, "jobResult", JobResult.class);
-
-        logger.info(results.getRawResults().toString());
 
         return results.getMappedResults();  
 
