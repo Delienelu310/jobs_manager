@@ -16,6 +16,7 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.GroupOperation;
+import org.springframework.data.mongodb.core.aggregation.LimitOperation;
 import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
@@ -339,6 +340,85 @@ public class JobResultMongoRepository  implements JobResultRepository{
         List<AggregationOperation> operations = getTesterRetrievementOperations(
             jobNodeId,  testerQuery,  testerAuthor,
             testerClass,  ilumGroupId,  from,  to
+        );
+        
+        operations.add(Aggregation.count().as("count"));
+
+        Aggregation aggregation = Aggregation.newAggregation(operations );
+
+        AggregationResults<Map> countResults = mongoTemplate.aggregate(aggregation, "jobResult", Map.class);
+
+        long totalCount = 0;
+        if (countResults.getUniqueMappedResult() != null) {
+            totalCount = ((Number) countResults.getUniqueMappedResult().get("count")).intValue();
+        }
+
+        return totalCount;
+    }
+
+
+    private record MetricsDoc(String metric){}
+
+    private List<AggregationOperation> getMetricsRetrievementOperations(
+        String jobNodeId, String testerId, String query, String ilumGroupId
+    ){
+        List<AggregationOperation> operations = new LinkedList<>();
+
+        Criteria mainMatchCriteria = Criteria.where("jobNode.$id").is(new ObjectId(jobNodeId))
+            .and("tester.$id").is(new ObjectId(testerId))
+            .and("jobResultDetails.metrics").ne(null);
+        if(!ilumGroupId.equals("")) mainMatchCriteria = mainMatchCriteria.and("ilumGroupId").is(ilumGroupId);
+        
+
+
+        MatchOperation mainMatch = Aggregation.match(mainMatchCriteria);
+        LimitOperation onlyOne = Aggregation.limit(1);
+
+        AggregationOperation projectMetricsArray = Aggregation.project()
+                .andExpression("objectToArray(jobResultDetails.metrics)").as("metricsArray");
+        UnwindOperation unwindMetrics = Aggregation.unwind("metricsArray");
+        ProjectionOperation projectMetric = Aggregation.project().and("metricsArray.k").as("metric");
+        
+        MatchOperation matchQuery = Aggregation.match(Criteria.where("metric").regex("^" + query));
+
+
+        Collections.addAll(operations, 
+            mainMatch,
+            onlyOne,
+            projectMetricsArray,
+            unwindMetrics,
+            projectMetric,
+            matchQuery
+        );
+
+        return operations;
+    }
+
+    @Override
+    public List<String> retrieveTesterMetrics(String jobNodeId, String testerId, String query, String ilumGroupId,
+        Integer pageSize, Integer pageNumber
+    ){
+        List<AggregationOperation> operations = getMetricsRetrievementOperations(
+            jobNodeId, testerId, query, ilumGroupId
+        );
+
+        operations.add(Aggregation.skip(pageSize * pageNumber));
+        operations.add(Aggregation.limit(pageSize));
+
+        Aggregation aggregation = Aggregation.newAggregation(operations );
+
+        AggregationResults<MetricsDoc> results = mongoTemplate.aggregate(aggregation, "jobResult", MetricsDoc.class);
+
+        Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
+        logger.info(results.getRawResults().toString());
+
+        return results.getMappedResults().stream().map(metricDoc -> metricDoc.metric).toList(); 
+    }
+
+    @Override
+    public Long retrieveTesterMetricsCount(String jobNodeId, String testerId, String query, String ilumGroupId) {
+        List<AggregationOperation> operations = getMetricsRetrievementOperations(
+            jobNodeId, testerId, query, ilumGroupId
         );
         
         operations.add(Aggregation.count().as("count"));

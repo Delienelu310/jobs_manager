@@ -17,7 +17,8 @@ public class JobResultMapper implements ResourceJsonMapper{
     private final FilterProvider simpleFilter = new SimpleFilterProvider()
         .addFilter("ilum_resource_job_node_reference", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
         .addFilter("ilum_resource_project_reference", SimpleBeanPropertyFilter.filterOutAllExcept("id", "projectDetails"))
-        .addFilter("job_result_job_script", SimpleBeanPropertyFilter.filterOutAllExcept("id", "classFullName"))
+        .addFilter("job_result_job_script", SimpleBeanPropertyFilter.filterOutAllExcept("id", "classFullName", "jobScriptDetails", "author"))
+        .addFilter("ilum_resource_publisher", SimpleBeanPropertyFilter.filterOutAllExcept("username"))
     ;
 
     private final Map<String, FilterProvider> filters = new HashMap<>();

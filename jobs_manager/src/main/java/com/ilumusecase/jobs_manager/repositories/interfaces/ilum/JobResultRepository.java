@@ -112,4 +112,20 @@ public interface JobResultRepository {
         Long to
     );
 
+    public List<String> retrieveTesterMetrics(
+        String jobNodeId,
+        String testerId,
+        String query,
+        String ilumGroupId,
+        Integer pageSize,
+        Integer pageNumber
+    );
+
+    public Long retrieveTesterMetricsCount(
+        String jobNodeId,
+        String testerId,
+        String query,
+        String ilumGroupId
+    );
+
 }

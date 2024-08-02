@@ -61,8 +61,8 @@ const ProjectListPage = () => {
                 filter={{parameters: [{label: "admin", additionalData: [], fieldType: FieldType.SingleInput}]}} 
                 Wrapper={ProjectElement}
                 endpoint={{
-                    resourse: "/projects",
-                    count: "/projects/count"
+                    resourse: "/projects?",
+                    count: "/projects/count?"
                 }}
                 context={{}}
                 dependencies={[]}

@@ -18,6 +18,7 @@ import AppUserAdditionComponent from "../components/AppUserAdditionComponent";
 import { JobNodeWithIlumGroup, retrieveJobNodeWithIlumGroup } from "../api/abstraction/jobNodeApi";
 import { IlumGroupConfiguration, IlumGroupDetails, IlumGroupOfJobResultData, startJobNode, stopJobNode } from "../api/ilum_resources/ilumGroupApi";
 import IlumGroupErrorsList, {  IlumGroupErrorsContext } from "../components/lists/listElements/IlumGroupErrorsList";
+import IlumGroupTestersList, { IlumGroupTestersListContext } from "../components/lists/listElements/IlumGroupTestersList";
 
 
 interface JobNodePageDependenciesSetters{
@@ -65,7 +66,7 @@ const JobNodePage = ({} : JobNodePageInterface) => {
     const [showJobNodePrivileges, setShowJobNodePrivileges] = useState<boolean>(false);
     
     const [showJobResultsFailed, setShowJobResultsFailed] = useState<boolean>(false);
-    const [showTesterResultsFailed, setShowTesterResultsFailed] = useState<boolean>(false);
+    const [showSuccessfulJobResults, setShowSuccessfulJobResults] = useState<boolean>(false);
 
 
     const [jobNodePageRefresh, setJobNodePageRefresh] = useState<JobNodePageRefresh>({
@@ -228,8 +229,8 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                     ]}} 
                     Wrapper={JobsFileElement}
                     endpoint={{
-                        resourse : `/projects/${projectId}/job_nodes/${jobNodeId}/jobs_files`,
-                        count : `/projects/${projectId}/job_nodes/${jobNodeId}/jobs_files/count`
+                        resourse : `/projects/${projectId}/job_nodes/${jobNodeId}/jobs_files?`,
+                        count : `/projects/${projectId}/job_nodes/${jobNodeId}/jobs_files/count?`
                     }}
                     context={{jobNodePageRefresh: jobNodePageRefresh}}
                     dependencies={[jobsFilesListDependency]}
@@ -256,8 +257,8 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                 <ServerBoundList<JobScriptSimple, JobScriptListContext>
                     pager={{defaultPageSize: 10}}
                     endpoint={{
-                        resourse: `/projects/${projectId}/job_nodes/${jobNodeId}/job_scripts`,
-                        count: `/projects/${projectId}/job_nodes/${jobNodeId}/job_scripts/count`
+                        resourse: `/projects/${projectId}/job_nodes/${jobNodeId}/job_scripts?`,
+                        count: `/projects/${projectId}/job_nodes/${jobNodeId}/job_scripts/count?`
                     }}
                     dependencies={[jobScriptsListDependency]}
                     context={{
@@ -285,8 +286,8 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                 
                 <ServerBoundList<JobEntitySimple, JobEntityElementContext>
                     endpoint={{
-                        resourse: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/${QueueTypes.JOBS_QUEUE}`,
-                    count: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/${QueueTypes.JOBS_QUEUE}/count`
+                        resourse: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/${QueueTypes.JOBS_QUEUE}?`,
+                    count: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/${QueueTypes.JOBS_QUEUE}/count?`
                     }}
                     filter={{parameters: [
                         {label: "author", additionalData: [], fieldType: FieldType.SingleInput}
@@ -315,8 +316,8 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                 
                 <ServerBoundList<JobEntitySimple, JobEntityElementContext>
                     endpoint={{
-                        resourse: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/${QueueTypes.TESTING_JOBS}`,
-                        count: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/${QueueTypes.TESTING_JOBS}/count`
+                        resourse: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/${QueueTypes.TESTING_JOBS}?`,
+                        count: `/projects/${projectId}/job_nodes/${jobNodeId}/queue/${QueueTypes.TESTING_JOBS}/count?`
                     }}
                     filter={{parameters: [
                         {label: "author", additionalData: [], fieldType: FieldType.SingleInput}
@@ -360,14 +361,15 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                         ]}}
                         pager={{defaultPageSize:10}}
                         endpoint={{
-                            resourse: `/projects/${projectId}/job_nodes/${jobNodeId}/privileges`,
-                            count: `/projects/${projectId}/job_nodes/${jobNodeId}/privileges/count`
+                            resourse: `/projects/${projectId}/job_nodes/${jobNodeId}/privileges?`,
+                            count: `/projects/${projectId}/job_nodes/${jobNodeId}/privileges/count?`
                         }}
                     />
 
                     <hr/>
                 </>
             }
+            <br/>
 
             <button className="m-3 btn btn-primary" onClick={e => setShowJobResultsFailed(!showJobResultsFailed)}>
                 {showJobResultsFailed ? "Close" : "Show"} Job Errors
@@ -384,9 +386,31 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                         {label : "to", additionalData: [], fieldType : FieldType.SingleInput}
                     ]}}
                     endpoint={{
-                        count : `/projects/${projectId}/job_nodes/${jobNodeId}/job_results/ilum_groups/count`,
-                        resourse : `/projects/${projectId}/job_nodes/${jobNodeId}/job_results/ilum_groups`
+                        count : `/projects/${projectId}/job_nodes/${jobNodeId}/job_results/ilum_groups/count?`,
+                        resourse : `/projects/${projectId}/job_nodes/${jobNodeId}/job_results/ilum_groups?`
                     }}
+                />
+            </>}
+
+            <br/>
+            <button className="m-3 btn btn-primary" onClick={e => setShowSuccessfulJobResults(!showSuccessfulJobResults)}>
+                {showSuccessfulJobResults ? "Close" : "Open"} Successful Job Results
+            </button>
+
+            {showSuccessfulJobResults && <>
+                <ServerBoundList<IlumGroupOfJobResultData, IlumGroupTestersListContext>
+                    context={{jobNodePageRefresh : jobNodePageRefresh}}
+                    Wrapper={IlumGroupTestersList}
+                    dependencies={[]}
+                    endpoint={{
+                        count : `/projects/${projectId}/job_nodes/${jobNodeId}/job_results/ilum_groups/count?`,
+                        resourse : `/projects/${projectId}/job_nodes/${jobNodeId}/job_results/ilum_groups?`
+                    }}
+                    filter={{parameters : [
+                        {label: "from", additionalData: [], fieldType: FieldType.SingleInput},
+                        {label : "to", additionalData: [], fieldType : FieldType.SingleInput}
+                    ]}}
+                    pager={{defaultPageSize : 10}}
                 />
             </>}
 

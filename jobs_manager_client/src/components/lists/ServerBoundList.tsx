@@ -26,11 +26,11 @@ const ServerBoundList = <Data,Context>(
 ) => {
 
     async function sourceData(arg : SourceArg) : Promise<Data[]>{
-        return apiClient.get(props.endpoint.resourse + "?" + convertSourceArgsToRequestParams(arg)).then( response=> response.data);
+        return apiClient.get(props.endpoint.resourse + convertSourceArgsToRequestParams(arg)).then( response=> response.data);
     }
 
     async function sourceCount(arg: SourceCountArg) : Promise<number>{
-        return apiClient.get(props.endpoint.count + "?" + convertSourceCountArgsToRequestParams(arg)).then(response => response.data)
+        return apiClient.get(props.endpoint.count + convertSourceCountArgsToRequestParams(arg)).then(response => response.data)
     }
 
     return (

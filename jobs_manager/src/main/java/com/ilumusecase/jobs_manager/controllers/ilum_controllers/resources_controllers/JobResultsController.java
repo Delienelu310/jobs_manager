@@ -180,6 +180,35 @@ public class JobResultsController {
         );
     }
 
+
+    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/job_scripts/{job_script_id}/metrics")
+    public List<String> retrieveMetricsOfTester(
+        @PathVariable("project_id") String projectId,
+        @PathVariable("job_node_id") String jobNodeId,
+        @PathVariable("job_script_id") String testerId,
+
+
+        @RequestParam(name = "query", defaultValue = "", required = false) String query,
+        @RequestParam(name = "ilum_group_id", defaultValue = "", required = false) String ilumGroupId,
+
+        @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
+        @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber  
+    ){
+        return repositoryFactory.getJobResultRepository().retrieveTesterMetrics(jobNodeId, testerId, query, ilumGroupId, pageSize, pageNumber);
+    }
+
+    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/job_scripts/{job_script_id}/metrics/count")
+    public Long retrieveMetricsOfTesterCount(
+        @PathVariable("project_id") String projectId,
+        @PathVariable("job_node_id") String jobNodeId,
+        @PathVariable("job_script_id") String testerId,
+
+        @RequestParam(name = "query", defaultValue = "", required = false) String query,
+        @RequestParam(name = "ilum_group_id", defaultValue = "", required = false) String ilumGroupId
+    ){
+        return repositoryFactory.getJobResultRepository().retrieveTesterMetricsCount(jobNodeId, testerId, query, ilumGroupId);
+    }
+
  
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/{job_result_id}")
     @JsonMapperRequest(type="simple", resource = "JobResult")
