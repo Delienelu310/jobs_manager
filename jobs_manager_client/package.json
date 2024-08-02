@@ -17,6 +17,7 @@
     "react-router-dom": "^6.24.1",
     "react-scripts": "5.0.1",
     "typescript": "^4.9.5",
+    "victory": "^37.0.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

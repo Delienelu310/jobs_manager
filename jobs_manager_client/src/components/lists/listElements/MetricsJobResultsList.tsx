@@ -4,6 +4,7 @@ import { JobNodePageRefresh } from "../../../pages/JobNodePage";
 import List, { SourceArg, SourceCountArg } from "../List";
 import JobResultSuccessElement, { JobResultSuccessElementContext } from "./JobResultSuccessElement";
 import { FieldType } from "../Filter";
+import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme } from "victory";
 
 
 export interface MetricsJobResultListContext{
@@ -68,6 +69,37 @@ const MetricsJobResultList = ({data, context } : MetricsJobResultListArgs) => {
         <div>
             <h5>{data}</h5>
             <button className="btn btn-primary m-2" onClick={e => setIsListOpened(!isListOpened)}>{isListOpened ? "Close" : "Open"}</button>
+
+            <div style={{width: "40%", marginLeft: "30%"}}>
+                <VictoryChart
+                    theme={VictoryTheme.material}
+                    domainPadding={20}
+                >
+                    <VictoryAxis
+                    tickValues={[1, 2, 3, 4]}
+                    tickFormat={["Q1", "Q2", "Q3", "Q4"]}
+                    />
+                    <VictoryAxis
+                    dependentAxis
+                    tickFormat={(x) => `$${x / 1000}k`}
+                    />
+                    <VictoryBar
+                    data={jobResults.map(jobResult => {
+                        return {
+                            x: jobResult.target.jobScriptDetails.name , 
+                            y : new Number(jobResult.jobResultDetails.metrics[data])
+                        }
+                    
+                    })}
+                    // x="quarter"
+                    // y="earnings"
+                    // labels={({ datum }) => `$${datum.earnings}`}
+                    style={{ data: { fill: "#c43a31" }, labels: { fill: "white" } }}
+                    labelComponent={<VictoryLabel dy={30}/>}
+                    />
+                </VictoryChart>
+            </div>
+           
 
             {isListOpened && 
                 <List<JobResultSimple, JobResultSuccessElementContext>
