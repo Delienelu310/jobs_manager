@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
-// import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroupDetails;
 
@@ -23,8 +22,6 @@ public class JobResultsController {
 
     }
     
-    // @Autowired
-    // private Manager manager;
     @Autowired
     private RepositoryFactory repositoryFactory;
 
@@ -135,6 +132,52 @@ public class JobResultsController {
     ){
         return repositoryFactory.getJobResultRepository().retrieveIlumGroupsOfJobResultsCount(jobNodeId, query, from, to);
 
+    }
+
+
+    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/job_scripts")
+    @JsonMapperRequest(type="simple", resource = "JobScript")
+    public Object retrieveJobScriptOfJobResults(
+        @PathVariable("project_id") String projectId,
+        @PathVariable("job_node_id") String jobNodeId,
+
+        @RequestParam(name = "query", defaultValue = "", required = false) String testerNameQuery,
+        @RequestParam(name = "tester_author", defaultValue = "", required = false) String testerAuthor,
+        @RequestParam(name = "tester_classname", defaultValue = "", required = false) String testerClass,
+
+        @RequestParam(name = "ilum_group_id", defaultValue = "", required = false) String ilumGroupId,
+
+        @RequestParam(name = "from", defaultValue = "0", required = false) Long from,
+        @RequestParam(name = "to", required = false) Long to,
+
+        @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
+        @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber  
+    ){
+        return repositoryFactory.getJobResultRepository().retrieveTestersOfJobResults(
+            jobNodeId, testerNameQuery, testerAuthor, testerClass, 
+            ilumGroupId, from, to, pageSize, pageNumber
+        );
+    }
+
+    @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/job_scripts/count")
+    @JsonMapperRequest(type="simple", resource = "JobScript")
+    public Long retrieveJobScriptOfJobResultsCount(
+        @PathVariable("project_id") String projectId,
+        @PathVariable("job_node_id") String jobNodeId,
+
+        @RequestParam(name = "query", defaultValue = "", required = false) String testerNameQuery,
+        @RequestParam(name = "tester_author", defaultValue = "", required = false) String testerAuthor,
+        @RequestParam(name = "tester_classname", defaultValue = "", required = false) String testerClass,
+
+        @RequestParam(name = "ilum_group_id", defaultValue = "", required = false) String ilumGroupId,
+
+        @RequestParam(name = "from", defaultValue = "0", required = false) Long from,
+        @RequestParam(name = "to", required = false) Long to
+    ){
+        return repositoryFactory.getJobResultRepository().retrieveTesterOfJobResultsCount(
+            jobNodeId, testerNameQuery, testerAuthor, testerClass, 
+            ilumGroupId, from, to
+        );
     }
 
  

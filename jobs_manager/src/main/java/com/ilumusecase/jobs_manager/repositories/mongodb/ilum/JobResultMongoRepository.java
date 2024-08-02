@@ -19,6 +19,8 @@ import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
+import org.springframework.data.mongodb.core.aggregation.ReplaceRootOperation;
+import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Repository;
 
@@ -27,6 +29,7 @@ import com.ilumusecase.jobs_manager.controllers.ilum_controllers.resources_contr
 import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.JobResultRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.ilum.MongoJobResult;
 import com.ilumusecase.jobs_manager.resources.ilum.JobResult;
+import com.ilumusecase.jobs_manager.resources.ilum.JobScript;
 
 @Repository
 public class JobResultMongoRepository  implements JobResultRepository{
@@ -259,6 +262,100 @@ public class JobResultMongoRepository  implements JobResultRepository{
 
         return totalCount;
     }
+
+
+
+    private List<AggregationOperation> getTesterRetrievementOperations(
+        String jobNodeId, String testerQuery, String testerAuthor,
+        String testerClass, String ilumGroupId, Long from, Long to
+    ){
+        List<AggregationOperation> operations = new LinkedList<>();
+
+        //1. match job results with jobnodeid, ilumgroupid, from and to
+
+        Criteria matchDirectFieldsCriteria = Criteria.where("jobNode.$id").is(new ObjectId(jobNodeId))
+            .and("startTime").gte(from == null ? 0 : from)
+            .and("endTime").lte(to == null ? Long.MAX_VALUE : to)
+        ;
+        if(!ilumGroupId.equals("")) matchDirectFieldsCriteria = matchDirectFieldsCriteria.and("ilumGroupId").is(ilumGroupId);
+        MatchOperation matchDirectFields = Aggregation.match(matchDirectFieldsCriteria);
+        
+        // 2. group by tester to avoid duplicates
+        GroupOperation groupOperation = Aggregation.group("tester.$id")
+            .last("tester.$id").as("testerId");
+
+        // 3. lookup tester and unwind it
+        LookupOperation lookupTester = Aggregation.lookup("jobScript", "testerId", "_id", "tester");
+        UnwindOperation unwindOperation = Aggregation.unwind("tester");
+        // 4. match tester
+        Criteria matchTesterCriteria = Criteria.where("tester.jobScriptDetails.name").regex("^" + testerQuery);
+        if(!testerAuthor.equals("")) matchTesterCriteria = matchTesterCriteria.and("tester.author.$id").is(testerAuthor);
+        if(!testerClass.equals("")) matchTesterCriteria = matchTesterCriteria.and("tester.fullClassName").is(testerClass);
+        MatchOperation matchTester = Aggregation.match(matchTesterCriteria);
+
+
+        // 5. change root to tester
+    
+        ReplaceRootOperation replaceRootOperation = Aggregation.replaceRoot("tester");
+
+
+        Collections.addAll(operations, 
+            matchDirectFields,
+            groupOperation,
+            lookupTester,
+            unwindOperation,
+            matchTester,
+            replaceRootOperation
+        );
+
+        return operations;
+    }
+
+    @Override
+    public List<JobScript> retrieveTestersOfJobResults(String jobNodeId, String testerQuery, String testerAuthor,
+        String testerClass, String ilumGroupId, Long from, Long to, Integer pageSize, Integer pageNumber
+    ) {
+        List<AggregationOperation> operations = getTesterRetrievementOperations(
+            jobNodeId,  testerQuery,  testerAuthor,
+            testerClass,  ilumGroupId,  from,  to
+        );
+
+        operations.add(Aggregation.skip(pageSize * pageNumber));
+        operations.add(Aggregation.limit(pageSize));
+
+        Aggregation aggregation = Aggregation.newAggregation(operations );
+
+        AggregationResults<JobScript> results = mongoTemplate.aggregate(aggregation, "jobResult", JobScript.class);
+
+        return results.getMappedResults();  
+        
+
+    }
+
+    @Override
+    public Long retrieveTesterOfJobResultsCount(String jobNodeId, String testerQuery, String testerAuthor,
+        String testerClass, String ilumGroupId, Long from, Long to
+    ) {
+        List<AggregationOperation> operations = getTesterRetrievementOperations(
+            jobNodeId,  testerQuery,  testerAuthor,
+            testerClass,  ilumGroupId,  from,  to
+        );
+        
+        operations.add(Aggregation.count().as("count"));
+
+        Aggregation aggregation = Aggregation.newAggregation(operations );
+
+        AggregationResults<Map> countResults = mongoTemplate.aggregate(aggregation, "jobResult", Map.class);
+
+        long totalCount = 0;
+        if (countResults.getUniqueMappedResult() != null) {
+            totalCount = ((Number) countResults.getUniqueMappedResult().get("count")).intValue();
+        }
+
+        return totalCount;
+    }
+    
+
     
 
 
