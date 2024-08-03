@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { JobEntitySimple, retrieveJobEntityById } from "../api/ilum_resources/jobEntityApi";
 import JobScriptMenu from "./JobScriptMenu";
 import { QueueTypes, removeJobEntityFromQueue } from "../api/ilum_resources/queueOperationsApi";
-import { JobNodePageRefresh } from "../pages/JobNodePage";
+import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../pages/JobNodePage";
 
 
 export interface JobEntityMenuContext{
@@ -32,10 +32,19 @@ const JobEntityMenu = ({context, jobEntityId} : JobEntityMenuArgs) => {
 
         removeJobEntityFromQueue(context.jobNodePageRefresh.projectId, context.jobNodePageRefresh.jobNodeId, context.queueType, jobEntityId)
             .then(r => {
-                
-                const setter = context.jobNodePageRefresh.dependenciesSetters.queueSetters.get(context.queueType);
-                if(!setter) throw Error();
-                setter(Math.random());
+
+                if(
+                    context.jobNodePageRefresh.chosenResourceList && 
+                    (
+                        context.jobNodePageRefresh.chosenResourceList.label == JobNodeResourceListsMembers.JOBS_QUEUE &&
+                        context.queueType == QueueTypes.JOBS_QUEUE
+                        ||
+                        context.jobNodePageRefresh.chosenResourceList.label == JobNodeResourceListsMembers.TESTING_QUEUE &&
+                        context.queueType == QueueTypes.TESTING_JOBS
+                    )
+                ){
+                    context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random());
+                }
 
                 context.jobNodePageRefresh.setMenu(null);
                 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createJobScript, JobScriptDTO } from "../api/ilum_resources/jobScriptsApi";
 import { JobsFileExtension } from "../api/ilum_resources/jobsFilesApi";
-import { JobNodePageRefresh } from "../pages/JobNodePage";
+import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../pages/JobNodePage";
 
 
 export interface JobScriptCreatorContext{
@@ -26,8 +26,12 @@ const JobScriptCreator = ({context} : JobScriptCreatorArgs) => {
     function create(){
         createJobScript(context.jobNodePageRefresh.projectId, context.jobNodePageRefresh.jobNodeId, jobScriptDTO)
             .then(response => {
-                context.jobNodePageRefresh.dependenciesSetters.setJobSciptsListDependency(Math.random());
-                console.log(response.data);
+                if(
+                    context.jobNodePageRefresh.chosenResourceList &&
+                    context.jobNodePageRefresh.chosenResourceList.label == JobNodeResourceListsMembers.JOBS_SCRIPTS
+                ){
+                    context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random);
+                }
             })
             .catch(e => console.log(e));
     }

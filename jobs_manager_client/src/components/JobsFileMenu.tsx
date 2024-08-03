@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { checkJobsFileState, deleteJobsFile, JobsFileDetails, JobsFileExtension, JobsFileSimple, JobsFileState, retrieveJobsFile, updateJobsFileDetails, updateJobsFileFile } from "../api/ilum_resources/jobsFilesApi";
-import { JobNodePageRefresh } from "../pages/JobNodePage";
+import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../pages/JobNodePage";
 
 
 
@@ -46,7 +46,13 @@ const JobsFileMenu = ({data, context} : JobsFileMenuArgs) => {
         deleteJobsFile(data.project.id, data.jobNode.id, data.id)
             .then(r => {
                 context.jobNodePageRefresh.setMenu(null);
-                context.jobNodePageRefresh.dependenciesSetters.setJobsFileListDependency(Math.random());
+                if(
+                    context.jobNodePageRefresh.chosenResourceList &&
+                    context.jobNodePageRefresh.chosenResourceList.label == JobNodeResourceListsMembers.JOBS_FILES
+                ){
+                    context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random());
+                }
+                
             })
             .catch(e => console.log(e));
     }
@@ -55,8 +61,13 @@ const JobsFileMenu = ({data, context} : JobsFileMenuArgs) => {
         updateJobsFileDetails(data.project.id, data.jobNode.id, data.id, newJobsFileDetails)
             .then(response => {
                 refresh();
-                context.jobNodePageRefresh.dependenciesSetters.setJobsFileListDependency(Math.random());
-            }).catch(e => console.log(e));
+                if(
+                    context.jobNodePageRefresh.chosenResourceList &&
+                    context.jobNodePageRefresh.chosenResourceList.label == JobNodeResourceListsMembers.JOBS_FILES
+                ){
+                    context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random());
+                }
+                            }).catch(e => console.log(e));
     }
 
     function updateFile(){
@@ -65,7 +76,12 @@ const JobsFileMenu = ({data, context} : JobsFileMenuArgs) => {
         updateJobsFileFile(data.project.id, data.jobNode.id, data.id, newExtension, newFile)
             .then(r => {
                 refresh();
-                context.jobNodePageRefresh.dependenciesSetters.setJobsFileListDependency(Math.random())
+                if(
+                    context.jobNodePageRefresh.chosenResourceList &&
+                    context.jobNodePageRefresh.chosenResourceList.label == JobNodeResourceListsMembers.JOBS_FILES
+                ){
+                    context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random());
+                }
             }).catch(e => console.log(e));
     }
 

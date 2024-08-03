@@ -8,7 +8,7 @@ import ServerBoundList from "./lists/ServerBoundList";
 import JobsFileAddElement, { JobsFileAddElementContext } from "./lists/listElements/JobsFileAddElement";
 import JobEntityCreator from "./JobEntityCreator";
 import { QueueTypes } from "../api/ilum_resources/queueOperationsApi";
-import { JobNodePageRefresh } from "../pages/JobNodePage";
+import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../pages/JobNodePage";
 
 
 export interface JobScriptMenuContext{
@@ -46,16 +46,26 @@ const JobScriptMenu = ({
         deleteJobScript(data.project.id, data.jobNode.id, data.id)
             .then(r => {
                 context.jobNodePageRefresh.setMenu(null);
-                context.jobNodePageRefresh.dependenciesSetters.setJobSciptsListDependency(Math.random);
-            })
-            .catch(e => console.log(e));   
+                if(
+                    context.jobNodePageRefresh.chosenResourceList &&
+                    context.jobNodePageRefresh.chosenResourceList.label == JobNodeResourceListsMembers.JOBS_SCRIPTS
+                ){
+                    context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random);
+                }
+                
+            }).catch(e => console.log(e));   
     }
 
     function updateDetails(){
         updateJobScriptDetails(data.project.id, data.jobNode.id, data.id, newDetails)
             .then(r => {
                 refresh();
-                context.jobNodePageRefresh.dependenciesSetters.setJobSciptsListDependency(Math.random());
+                if(
+                    context.jobNodePageRefresh.chosenResourceList &&
+                    context.jobNodePageRefresh.chosenResourceList.label == JobNodeResourceListsMembers.JOBS_SCRIPTS
+                ){
+                    context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random);
+                }
             })
             .catch(e => console.log(e));
 
@@ -178,7 +188,7 @@ const JobScriptMenu = ({
                             refreshJobScript: refresh,
                             jobScript : actualData
                         }}
-                        dependencies={[context.jobNodePageRefresh.dependencies.jobsFilesListDependency]}
+                        dependencies={[]}
                         filter={{parameters: [
                             {label: "publisher", additionalData: [], fieldType: FieldType.SingleInput},
                             {label: "classname", additionalData: [], fieldType: FieldType.SingleInput},

@@ -3,7 +3,7 @@ import { addJobEntityToQueue, QueueTypes } from "../api/ilum_resources/queueOper
 import { JobEntityDetails } from "../api/ilum_resources/jobEntityApi";
 import { JobScriptSimple, retreiveJobScript } from "../api/ilum_resources/jobScriptsApi";
 import JobScriptMenu from "./JobScriptMenu";
-import { JobNodePageRefresh } from "../pages/JobNodePage";
+import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../pages/JobNodePage";
 import JobEntityMenu from "./JobEntityMenu";
 
 
@@ -52,9 +52,18 @@ const JobEntityCreator = ({
         addJobEntityToQueue(projectId, jobNodeId, queueType, jobScriptId, {configuration : configuration, details : jobEntityDetails})
             .then(response => {
                 
-                const setter = context.jobNodePageRefresh.dependenciesSetters.queueSetters.get(queueType);
-                if(!setter) throw Error();
-                setter(Math.random());
+                if(
+                    context.jobNodePageRefresh.chosenResourceList && 
+                    (
+                        context.jobNodePageRefresh.chosenResourceList.label == JobNodeResourceListsMembers.JOBS_QUEUE &&
+                        queueType == QueueTypes.JOBS_QUEUE
+                        ||
+                        context.jobNodePageRefresh.chosenResourceList.label == JobNodeResourceListsMembers.TESTING_QUEUE &&
+                        queueType == QueueTypes.TESTING_JOBS
+                    )
+                ){
+                    context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random());
+                }
                 
                 context.jobNodePageRefresh.setMenu(<JobEntityMenu
                     jobEntityId={response.data}
