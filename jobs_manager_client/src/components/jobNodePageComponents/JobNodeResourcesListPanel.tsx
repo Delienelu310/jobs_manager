@@ -29,17 +29,17 @@ const JobNodeResourceListPanel = ({
             <div style={{
                 textAlign: "left",
                 border: "1px solid black",
-                background: "#ddd"
+                background: "#ccc"
             }}>
                 {choices.map(choice => (
-                    <div style={{cursor: "pointer",display: "inline-block", width: "12%", border: "1px solid black ", textAlign: "center", lineHeight: "50px",
+                    <div style={{cursor: "pointer",display: "inline-block", width: "14.2%", borderLeft: "1px solid black ", textAlign: "center", lineHeight: "50px",
                         height: "50px", backgroundColor: "#ccc"
                     }} onClick={e => {context.setChosenResourceList(choice); console.log(context.chosenResourceList)}}><h4>{choice.label}</h4></div>
                 ))}
             </div>
 
             
-            {context.chosenResourceList && <div>
+            {context.chosenResourceList && <div style={{marginTop: "50px"}}>
                 <context.chosenResourceList.Component
                     context={context}
                     dependency={context.chosenResourceList.dependency}

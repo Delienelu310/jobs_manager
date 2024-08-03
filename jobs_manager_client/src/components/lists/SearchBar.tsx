@@ -7,8 +7,9 @@ export interface SearchBarParameters{
 
 const SearchBar = ({queue, setQueue} : SearchBarParameters) => {
     return (
-        <div>
-            <input value={queue} onChange={e => setQueue(e.target.value)}/>
+        <div style={{margin: "30px 15%"}}>
+            <h3>Search</h3>
+            <input className="form-control" placeholder="search..." value={queue} onChange={e => setQueue(e.target.value)}/>
         </div>
     );
 };

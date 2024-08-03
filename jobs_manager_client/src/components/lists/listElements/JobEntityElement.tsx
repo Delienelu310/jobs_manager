@@ -2,7 +2,7 @@ import { JobEntitySimple } from "../../../api/ilum_resources/jobEntityApi";
 import { QueueTypes } from "../../../api/ilum_resources/queueOperationsApi";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
 import JobEntityMenu from "../../JobEntityMenu";
-import JobScriptElement from "./JobScriptElement";
+import JobScriptElement from "../../jobNodePageComponents/jobScriptList/JobScriptElement";
 
 
 export interface JobEntityElementContext{

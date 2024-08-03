@@ -1,14 +1,14 @@
 import {  useEffect, useState } from "react";
-import { deleteJobScript, JobScriptDetails, JobScriptSimple, retreiveJobScript, updateJobScriptDetails } from "../api/ilum_resources/jobScriptsApi";
-import List, { SourceArg, SourceCountArg } from "./lists/List";
-import JobsFileRemoveElement, { JobsFileRemoveElementContext } from "./lists/listElements/JobsFileRemoveElement";
-import { JobsFileSimple } from "../api/ilum_resources/jobsFilesApi";
-import { FieldType } from "./lists/Filter";
-import ServerBoundList from "./lists/ServerBoundList";
-import JobsFileAddElement, { JobsFileAddElementContext } from "./lists/listElements/JobsFileAddElement";
-import JobEntityCreator from "./JobEntityCreator";
-import { QueueTypes } from "../api/ilum_resources/queueOperationsApi";
-import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../pages/JobNodePage";
+import { deleteJobScript, JobScriptDetails, JobScriptSimple, retreiveJobScript, updateJobScriptDetails } from "../../../api/ilum_resources/jobScriptsApi";
+import List, { SourceArg, SourceCountArg } from "../../lists/List";
+import JobsFileRemoveElement, { JobsFileRemoveElementContext } from "./JobsFileRemoveElement";
+import { JobsFileSimple } from "../../../api/ilum_resources/jobsFilesApi";
+import { FieldType } from "../../lists/Filter";
+import ServerBoundList from "../../lists/ServerBoundList";
+import JobsFileAddElement, { JobsFileAddElementContext } from "./JobsFileAddElement";
+import JobEntityCreator from "../../JobEntityCreator";
+import { QueueTypes } from "../../../api/ilum_resources/queueOperationsApi";
+import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../../../pages/JobNodePage";
 
 
 export interface JobScriptMenuContext{

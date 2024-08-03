@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { checkJobsFileState, deleteJobsFile, JobsFileDetails, JobsFileExtension, JobsFileSimple, JobsFileState, retrieveJobsFile, updateJobsFileDetails, updateJobsFileFile } from "../api/ilum_resources/jobsFilesApi";
-import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../pages/JobNodePage";
+import { checkJobsFileState, deleteJobsFile, JobsFileDetails, JobsFileExtension, JobsFileSimple, JobsFileState, retrieveJobsFile, updateJobsFileDetails, updateJobsFileFile } from "../../../api/ilum_resources/jobsFilesApi";
+import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../../../pages/JobNodePage";
 
 
 

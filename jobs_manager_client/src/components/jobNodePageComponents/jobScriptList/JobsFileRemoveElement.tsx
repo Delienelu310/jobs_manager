@@ -1,7 +1,7 @@
 import { JobScriptSimple, removeJobsFileFromJobScript } from "../../../api/ilum_resources/jobScriptsApi";
 import { JobsFileSimple } from "../../../api/ilum_resources/jobsFilesApi";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
-import JobsFileMenu from "../../JobsFileMenu";
+import JobsFileMenu from "../jobsFileList/JobsFileMenu";
 
 
 export interface JobsFileRemoveElementContext{

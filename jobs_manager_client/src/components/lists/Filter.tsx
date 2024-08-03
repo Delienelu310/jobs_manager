@@ -5,11 +5,10 @@ export enum FieldType{
     SingleInput, MultipleInput, SingleSelection, MultipleSelection
 }
 
-export interface FieldValue{
-    // setter: React.Dispatch<React.SetStateAction<string[]>>,    
+export interface FieldValue{   
     setter : (val : string[]) => void   
     fieldType: FieldType,                                      
-    additionalData: string[]                                        
+    additionalData: string[] ,                                       
 }
 
 
@@ -25,20 +24,19 @@ const Filter = ({parameters, values} : FilterProperties) => {
 
     return (
         <div>
-            <h5>Filter</h5>
             {Array.from(parameters.entries()).map( ([label, fieldValue]) => (
                 <div>
                     {fieldValue.fieldType == FieldType.SingleInput ?
                         <div>
-                            <label>{label}</label>
-                            <input value={values.get(label)} onChange={(e) => fieldValue.setter([e.target.value])}/>
+                            <strong>{label}</strong>
+                            <input className="form-control m-2" value={values.get(label)} onChange={(e) => fieldValue.setter([e.target.value])}/>
                         </div>
                         :
                         fieldValue.fieldType == FieldType.MultipleInput ?
                         <div>
-                            <label>{label}</label>
-                            <input value={multipleInput} onChange={(e) => setMultipleInput(e.target.value)}/>
-                            <button onClick={(e) => {
+                            <strong>{label}</strong>
+                            <input className="form-control m-2" value={multipleInput} onChange={(e) => setMultipleInput(e.target.value)}/>
+                            <button className="btn btn-success" onClick={(e) => {
                                 fieldValue.setter([...multipleInputList, multipleInput]);
                                 setMultipleInputList([...multipleInputList, multipleInput]);
                                 
@@ -58,8 +56,9 @@ const Filter = ({parameters, values} : FilterProperties) => {
                         :
                         fieldValue.fieldType == FieldType.SingleSelection ?
                         <div>
-                            <label>{label}</label>
+                            <strong>{label}</strong>
                             <select 
+                                className="form-control m-2"
                                 value={values.get(label)}
                                 onChange={(e) => fieldValue.setter([e.target.value])}
                             >
@@ -71,9 +70,9 @@ const Filter = ({parameters, values} : FilterProperties) => {
                         :
                         fieldValue.fieldType == FieldType.MultipleSelection ? 
                         <div>
-                            <h6>{label}</h6>
+                            <strong>{label}</strong>
 
-                            <select multiple value={values.get(label)} onChange={e => {
+                            <select className="form-control m-2" multiple value={values.get(label)} onChange={e => {
                                 const currentValue = values.get(label) ?? [];
                                 console.log(currentValue);
                                 if(currentValue.includes(e.target.value)){

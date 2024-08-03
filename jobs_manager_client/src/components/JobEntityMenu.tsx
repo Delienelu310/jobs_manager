@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { JobEntitySimple, retrieveJobEntityById } from "../api/ilum_resources/jobEntityApi";
-import JobScriptMenu from "./JobScriptMenu";
+import JobScriptMenu from "./jobNodePageComponents/jobScriptList/JobScriptMenu";
 import { QueueTypes, removeJobEntityFromQueue } from "../api/ilum_resources/queueOperationsApi";
 import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../pages/JobNodePage";
 

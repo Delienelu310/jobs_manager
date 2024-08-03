@@ -1,0 +1,18 @@
+
+
+.jobs_file_element{
+    margin: 30px 10%;
+    border-bottom: 3px solid black;
+    cursor: pointer;
+}
+
+.jobs_file_element_cell{
+    display: inline-block;
+    overflow: hidden;
+
+    height: 30px;
+    line-height: 30px;
+    width: 16%;
+    border-right: 1px solid black;
+    border-left: 1px solid black;
+}

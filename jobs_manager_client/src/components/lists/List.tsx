@@ -4,6 +4,7 @@ import SearchBar from "./SearchBar";
 
 import { FieldValue } from "./Filter";
 import React, { useEffect, useState } from "react";
+import OpenerComponent from "../OpenerComponent";
 
 
 export interface Field{
@@ -161,15 +162,13 @@ const List = <Data, Context>({
     return (
         <div>
             <SearchBar queue={queue} setQueue={setQueue}/>
-            <button className="btn btn-success" onClick={() => { count(); search(); }}>Apply</button>
-            <Filter parameters={fields} values={values}/>
-
-            <div>
-                {data.map(d => (
-                    <Wrapper data={d} context={context}/>
-                ))}
-            </div>
-
+            <OpenerComponent
+                closedLabel="Open Filter"
+                openedElement={
+                    <Filter parameters={fields} values={values}/>
+                }
+            />
+            
             <Pager
                 elementsCount={elementsCount}
                 pageSize={pageSize}
@@ -177,6 +176,15 @@ const List = <Data, Context>({
                 pageChosen={pageChosen}
                 setPageChosen={setPageChosen}
             />
+            
+            <button style={{width: "200px", fontSize: "20px", height: "50px", fontWeight: "bold"}} className="btn btn-success m-3" onClick={() => { count(); search(); }}>Apply</button>
+            <div>
+                {data.map(d => (
+                    <Wrapper data={d} context={context}/>
+                ))}
+            </div>
+
+            
 
         </div>
     );
