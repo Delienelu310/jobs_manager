@@ -1,0 +1,19 @@
+.job_entity_element{
+    border-bottom: 3px solid black;
+    margin: 30px 10%;
+    cursor: pointer;
+}
+
+.job_entity_element_cell{
+    overflow: hidden;
+    width: 20%;
+    display: inline-block;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    height: 30px;
+    line-height: 30px;
+}
+
+.job_entity_element_cell_special:hover{
+    background-color: #ddd;
+}

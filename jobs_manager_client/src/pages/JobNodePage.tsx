@@ -5,8 +5,8 @@ import { IlumGroupConfiguration, IlumGroupDetails, startJobNode, stopJobNode } f
 import JobNodeResourceListPanel, { JobNodeResourceListData } from "../components/jobNodePageComponents/JobNodeResourcesListPanel";
 import JobsFilesList from "../components/jobNodePageComponents/jobsFileList/JobsFilesList";
 import JobScriptsList from "../components/jobNodePageComponents/jobScriptList/JobScriptsList";
-import JobsQueue from "../components/jobNodePageComponents/JobsQueue";
-import TestingJobsQueue from "../components/jobNodePageComponents/TestingJobsQueue";
+import JobsQueue from "../components/jobNodePageComponents/queueList/JobsQueue";
+import TestingJobsQueue from "../components/jobNodePageComponents/queueList/TestingJobsQueue";
 import PrivilegesList from "../components/jobNodePageComponents/PrivilegesList";
 import JobResultsFailedList from "../components/jobNodePageComponents/JobResultsFailedList";
 import JobResultsSuccessList from "../components/jobNodePageComponents/JobResultsSuccessList";

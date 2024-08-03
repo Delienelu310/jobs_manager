@@ -1,9 +1,9 @@
-import { JobEntitySimple } from "../../api/ilum_resources/jobEntityApi";
-import { QueueTypes } from "../../api/ilum_resources/queueOperationsApi";
-import { FieldType } from "../lists/Filter";
-import JobEntityElement, { JobEntityElementContext } from "../lists/listElements/JobEntityElement";
-import ServerBoundList from "../lists/ServerBoundList";
-import { JobNodeResourceListArgs } from "./JobNodeResourcesListPanel";
+import { JobEntitySimple } from "../../../api/ilum_resources/jobEntityApi";
+import { QueueTypes } from "../../../api/ilum_resources/queueOperationsApi";
+import { FieldType } from "../../lists/Filter";
+import JobEntityElement, { JobEntityElementContext } from "./JobEntityElement";
+import ServerBoundList from "../../lists/ServerBoundList";
+import { JobNodeResourceListArgs } from "../JobNodeResourcesListPanel";
 
 
 
