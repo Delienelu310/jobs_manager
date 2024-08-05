@@ -162,12 +162,15 @@ const List = <Data, Context>({
     return (
         <div>
             <SearchBar queue={queue} setQueue={setQueue}/>
-            <OpenerComponent
-                closedLabel={<h4>Open Filter</h4>}
-                openedElement={
-                    <Filter parameters={fields} values={values}/>
-                }
-            />
+            {Array.from(fields.entries()).length != 0 && 
+                <OpenerComponent
+                    closedLabel={<h4>Open Filter</h4>}
+                    openedElement={
+                        <Filter parameters={fields} values={values}/>
+                    }
+                />
+            }
+           
             
             <Pager
                 elementsCount={elementsCount}

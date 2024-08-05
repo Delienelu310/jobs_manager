@@ -68,7 +68,7 @@ public class IlumGroupController {
         ilumGroup.setProject(project);
         
         ilumGroup.setIlumGroupConfiguraion(ilumGroupDTO.ilumGroupConfiguration);  
-        ilumGroupDTO.ilumGroupDetails.setStartTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        ilumGroupDTO.ilumGroupDetails.setStartTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) * 1000);
         ilumGroup.setIlumGroupDetails(ilumGroupDTO.ilumGroupDetails);   
         
         String groupId = manager.createGroup(ilumGroup);

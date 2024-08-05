@@ -5,6 +5,7 @@ import List, { SourceArg, SourceCountArg } from "../../lists/List";
 import JobResultSuccessElement, { JobResultSuccessElementContext } from "./JobResultSuccessElement";
 import { FieldType } from "../../lists/Filter";
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme } from "victory";
+import OpenerComponent from "../../OpenerComponent";
 
 
 export interface MetricsJobResultListContext{
@@ -21,7 +22,6 @@ export interface MetricsJobResultListArgs{
 const MetricsJobResultList = ({data, context } : MetricsJobResultListArgs) => {
     
 
-    const [isListOpened, setIsListOpened] = useState<boolean>(false);
 
     const [jobResults, setJobResutls] = useState<JobResultSimple[]>([]);
 
@@ -66,61 +66,65 @@ const MetricsJobResultList = ({data, context } : MetricsJobResultListArgs) => {
     }
     
     return (
-        <div>
-            <h5>{data}</h5>
-            <button className="btn btn-primary m-2" onClick={e => setIsListOpened(!isListOpened)}>{isListOpened ? "Close" : "Open"}</button>
+        <div className="m-2">
 
-            <div style={{width: "40%", marginLeft: "30%"}}>
-                <VictoryChart
-                    theme={VictoryTheme.material}
-                    domainPadding={20}
-                >
-                    <VictoryAxis
-                    tickValues={[1, 2, 3, 4]}
-                    tickFormat={["Q1", "Q2", "Q3", "Q4"]}
-                    />
-                    <VictoryAxis
-                    dependentAxis
-                    tickFormat={(x) => `$${x / 1000}k`}
-                    />
-                    <VictoryBar
-                    data={jobResults.map(jobResult => {
-                        return {
-                            x: jobResult.target.jobScriptDetails.name , 
-                            y : new Number(jobResult.jobResultDetails.metrics[data])
-                        }
-                    
-                    })}
-                    // x="quarter"
-                    // y="earnings"
-                    // labels={({ datum }) => `$${datum.earnings}`}
-                    style={{ data: { fill: "#c43a31" }, labels: { fill: "white" } }}
-                    labelComponent={<VictoryLabel dy={30}/>}
-                    />
-                </VictoryChart>
-            </div>
-           
+            <OpenerComponent
+                closedLabel={<h5>{data}</h5>}
+                openedElement={
+                    <div>
+                        <h5>{data}</h5>
 
-            {isListOpened && 
-                <List<JobResultSimple, JobResultSuccessElementContext>
-                    Wrapper={JobResultSuccessElement}
-                    context={{jobNodePageRefresh : context.jobNodePageRefresh}}
-                    dependencies={[]}
-                    filter={{parameters : [
-                        {label: "target_id", additionalData: [], fieldType: FieldType.SingleInput},
-                        {label: "target_author", additionalData: [], fieldType: FieldType.SingleInput},
-                        {label: "target_classname", additionalData: [], fieldType: FieldType.SingleInput},
-                        {label: "from", additionalData: [], fieldType: FieldType.SingleInput},
-                        {label : "to", additionalData: [], fieldType : FieldType.SingleInput}
-                    ]}} 
-                    pager={{defaultPageSize : 10}}
-                    source={{
-                        sourceData: sourceData,
-                        sourceCount: sourceCount
-                    }}   
-                />
-            }
-        
+                        <div style={{width: "40%", marginLeft: "30%"}}>
+                            <VictoryChart
+                                theme={VictoryTheme.material}
+                                domainPadding={20}
+                            >
+                                <VictoryAxis
+                                tickValues={[1, 2, 3, 4]}
+                                tickFormat={["Q1", "Q2", "Q3", "Q4"]}
+                                />
+                                <VictoryAxis
+                                dependentAxis
+                                tickFormat={(x) => `$${x / 1000}k`}
+                                />
+                                <VictoryBar
+                                data={jobResults.map(jobResult => {
+                                    return {
+                                        x: jobResult.target.jobScriptDetails.name , 
+                                        y : new Number(jobResult.jobResultDetails.metrics[data])
+                                    }
+                                
+                                })}
+                                // x="quarter"
+                                // y="earnings"
+                                // labels={({ datum }) => `$${datum.earnings}`}
+                                style={{ data: { fill: "#c43a31" }, labels: { fill: "white" } }}
+                                labelComponent={<VictoryLabel dy={30}/>}
+                                />
+                            </VictoryChart>
+                        </div>
+
+                        <List<JobResultSimple, JobResultSuccessElementContext>
+                            Wrapper={JobResultSuccessElement}
+                            context={{jobNodePageRefresh : context.jobNodePageRefresh, metric: data}}
+                            dependencies={[]}
+                            filter={{parameters : [
+                                {label: "target_id", additionalData: [], fieldType: FieldType.SingleInput},
+                                {label: "target_author", additionalData: [], fieldType: FieldType.SingleInput},
+                                {label: "target_classname", additionalData: [], fieldType: FieldType.SingleInput},
+                                {label: "from", additionalData: [], fieldType: FieldType.SingleDate},
+                                {label : "to", additionalData: [], fieldType : FieldType.SingleDate}
+                            ]}} 
+                            pager={{defaultPageSize : 10}}
+                            source={{
+                                sourceData: sourceData,
+                                sourceCount: sourceCount
+                            }}   
+                        />
+
+                    </div>
+                }
+            />
         </div>
     );
 }

@@ -3,6 +3,7 @@ import { JobNodePageRefresh } from "../../../pages/JobNodePage";
 
 export interface JobResultSuccessElementContext{
     jobNodePageRefresh : JobNodePageRefresh
+    metric : string
 }
 
 export interface JobResultSuccessElementArgs{
@@ -12,30 +13,29 @@ export interface JobResultSuccessElementArgs{
 
 const JobResultSuccessElement = ({data, context} : JobResultSuccessElementArgs) => {
     return (
-        <div>
-            <h3>Result:</h3>
-            <div>
-                <h5>Success!</h5>
-                {Object.keys(data.jobResultDetails.metrics).map(key => <div>{key} : {data.jobResultDetails.metrics[key]}</div>)}    
+        <div className="list_table_element list_table_row_6">
+
+            <div className="list_table_cell list_table_cell_special">
+                Target:{data.target.jobScriptDetails.name}
             </div>
-            <h3>Target:</h3>
-            <div>
-                <h5>{data.target.jobScriptDetails.name}</h5>
+            <div className="list_table_cell">
                 <i>{data.target.classFullName}</i>
-                <br/>
-                Author : {data.target.author.username} 
             </div>
-            {data.tester && <>
-              <h3>Tester:</h3>
-                <div>
-                    <h5>{data.tester.jobScriptDetails.name}</h5>
-                    <i>{data.tester.classFullName}</i>
-                    <br/>
-                    Author : {data.tester.author.username}
-                </div>
-            </>}
 
+            <div className="list_table_cell">
+                {data.target.author.username}
+            </div>
 
+            <div className="list_table_cell">
+                {data.jobResultDetails.metrics[context.metric] || "null"}
+            </div>
+            <div className="list_table_cell">
+                {new Date(Number(data.startTime)).toUTCString()}
+            </div>
+            <div className="list_table_cell">
+                {new Date(Number(data.endTime)).toUTCString()}
+            </div>
+    
         </div>
     );
 }

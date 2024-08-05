@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { addPrivilegeToJobNodeUser, JobNodePrivilege } from "../api/authorization/privilegesApi";
-import { AppUserSimple } from "../api/authorization/usersApi";
-import { JobNodePageRefresh } from "../pages/JobNodePage"
+
+import { addPrivilegeToJobNodeUser, JobNodePrivilege } from "../../../api/authorization/privilegesApi";
+import { AppUserSimple } from "../../../api/authorization/usersApi";
+import { JobNodePageRefresh } from "../../../pages/JobNodePage"
 import AppUserJobNodeMenu from "./AppUserJobNodeMenu";
-import { FieldType } from "./lists/Filter";
-import AppUserAddElement, { AppUserAddElementContext } from "./lists/listElements/AppUserAddElement";
-import ServerBoundList from "./lists/ServerBoundList";
+import { FieldType } from "../../lists/Filter";
+import AppUserAddElement, { AppUserAddElementContext } from "./AppUserAddElement";
+import ServerBoundList from "../../lists/ServerBoundList";
 
 
 export interface AppUserAdditionComponentContext{
@@ -18,16 +18,10 @@ export interface AppUserAdditionComponentArgs{
 
 const AppUserAdditionComponent = ({context} : AppUserAdditionComponentArgs) => {
 
-    const [openSearch, setOpenSearch] = useState<boolean>(false);
-
     return (
         <div>
             
-            <button className="btn btn-primary m-2" onClick={e => setOpenSearch(!openSearch)}>
-                {openSearch ? "Close" : "Add user"}
-            </button>
-
-            {openSearch && <ServerBoundList<AppUserSimple, AppUserAddElementContext>
+           <ServerBoundList<AppUserSimple, AppUserAddElementContext>
                 Wrapper={AppUserAddElement}
                 context={{ 
                     action : (username : string) => {
@@ -49,15 +43,15 @@ const AppUserAdditionComponent = ({context} : AppUserAdditionComponentArgs) => {
                 }}
                 dependencies={[]}
                 endpoint={{
-                    count : `/users/count`,
-                    resourse: `/users`
+                    count : `/users/count?`,
+                    resourse: `/users?`
                 }}
                 filter={{parameters : [
                     {additionalData : [], fieldType : FieldType.SingleInput, label : "fullname"}
                 ]}}
                 pager={{defaultPageSize: 10}}
 
-            />}
+            />
         </div>
     );
     

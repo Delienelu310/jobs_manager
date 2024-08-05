@@ -18,8 +18,8 @@ const JobResultsSuccessList = ({context, dependency} : JobNodeResourceListArgs) 
                     resourse : `/projects/${context.projectId}/job_nodes/${context.jobNodeId}/job_results/ilum_groups?`
                 }}
                 filter={{parameters : [
-                    {label: "from", additionalData: [], fieldType: FieldType.SingleInput},
-                    {label : "to", additionalData: [], fieldType : FieldType.SingleInput}
+                    {label: "from", additionalData: [], fieldType: FieldType.SingleDate},
+                    {label : "to", additionalData: [], fieldType : FieldType.SingleDate}
                 ]}}
                 pager={{defaultPageSize : 10}}
             />

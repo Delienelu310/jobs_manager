@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 
 
 export enum FieldType{
-    SingleInput, MultipleInput, SingleSelection, MultipleSelection
+    SingleInput, MultipleInput, SingleSelection, MultipleSelection, SingleDate
 }
 
 export interface FieldValue{   
@@ -21,6 +21,18 @@ const Filter = ({parameters, values} : FilterProperties) => {
 
     const [multipleInput, setMultipleInput] = useState<string>("");
     const [multipleInputList, setMultipleInputList] = useState<string[]>([]);
+
+
+    function getDate(dateParameter : string){
+        if(!dateParameter) return "";
+
+        const date = new Date(Number(dateParameter));
+        return date.toISOString().split("T")[0];
+    }
+
+    function dateFormattedToStr(dateParameter : string) : string{
+        return new Date(dateParameter).getTime().toString();
+    }
 
     return (
         <div>
@@ -88,6 +100,99 @@ const Filter = ({parameters, values} : FilterProperties) => {
                             <br/>
                             <button className="btn btn-primary" onClick={e => fieldValue.setter([])}>Deselect</button>
 
+                        </div>
+                        :
+                        fieldValue.fieldType == FieldType.SingleDate ? 
+                        <div>
+                            <strong>{label}</strong>
+                            <br/>
+                            <strong>{ (values.get(label) || [""])[0] 
+                                && new Date(Number( (values.get(label) || ["0"])[0] )).toUTCString() }
+                            </strong>
+                            <br/>
+                            Date:
+                            <input type="date" className="form-control m-2" 
+                                value={getDate((values.get(label) || [""])[0])}
+                                onChange={e => {
+                                    fieldValue.setter([dateFormattedToStr(e.target.value)]);
+                                }}
+                                style={{
+                                    display: "inline-block",
+                                    width: "20%",
+                                    margin: "30px"
+                                }}
+                            />
+                            Hours:
+                            <input disabled={!((values.get(label) || [""])[0])} type="number" min="0" max="23" className="form-control m-2"
+                                value={new Date( Number((values.get(label) || ["0"])[0]) ).getUTCHours()}
+                                onChange={e => {
+                                    const previousValue = (values.get(label) || [""])[0];
+                                    if(previousValue == "") return;
+                                    const date = new Date(Number(previousValue));
+
+                                    
+                                    date.setUTCHours(Number(e.target.value));
+                         
+                                    fieldValue.setter([date.getTime().toString()]);
+                                }}
+                                style={{
+                                    display: "inline-block",
+                                    width: "20%",
+                                    margin: "30px"
+                                }}
+                            />
+                            Minutes:
+                            <input disabled={!((values.get(label) || [""])[0])} type="number" min="0" max="60" className="form-control m-2"
+                                value={new Date( Number((values.get(label) || ["0"])[0]) ).getMinutes()}
+                                onChange={e => {
+                                    const previousValue = (values.get(label) || [""])[0];
+                                    if(previousValue == "") return;
+                                    const date = new Date(Number(previousValue));
+                                    date.setMinutes(Number(e.target.value));
+                         
+                                    fieldValue.setter([date.getTime().toString()]);
+                                }}
+                                style={{
+                                    display: "inline-block",
+                                    width: "20%",
+                                    margin: "30px"
+                                }}
+                            />
+                            Seconds:
+                            <input disabled={!((values.get(label) || [""])[0])} type="number" min="0" max="60" className="form-control m-2"
+                                value={new Date( Number((values.get(label) || ["0"])[0]) ).getSeconds()}
+                                onChange={e => {
+                                    const previousValue = (values.get(label) || [""])[0];
+                                    if(previousValue == "") return;
+                                    const date = new Date(Number(previousValue));
+                                    date.setSeconds(Number(e.target.value));
+                         
+                                    fieldValue.setter([date.getTime().toString()]);
+                                }}
+                                style={{
+                                    display: "inline-block",
+                                    width: "20%",
+                                    margin: "30px"
+                                }}
+                            />
+                            Milliseconds:
+                            <input disabled={!((values.get(label) || [""])[0])} type="number" min="0" max="999" className="form-control m-2"
+                                value={new Date( Number((values.get(label) || ["0"])[0]) ).getMilliseconds()}
+                                onChange={e => {
+                                    const previousValue = (values.get(label) || [""])[0];
+                                    if(previousValue == "") return;
+                                    const date = new Date(Number(previousValue));
+                                    date.setMilliseconds(Number(e.target.value));
+                         
+                                    fieldValue.setter([date.getTime().toString()]);
+                                }}
+                                style={{
+                                    display: "inline-block",
+                                    width: "20%",
+                                    margin: "30px"
+                                }}
+                            />
+                           
                         </div>
                         :
                         <div>

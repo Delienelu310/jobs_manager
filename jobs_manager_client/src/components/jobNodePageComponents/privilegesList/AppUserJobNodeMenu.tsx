@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { JobNodePageRefresh } from "../pages/JobNodePage";
-import { AppUserSimple, retrieveUser } from "../api/authorization/usersApi";
-import { addPrivilegeToJobNodeUser, JobNodePrivilege, removePrivilegeFromJobNodeUser, retrieveJobNodeUserPrivileges } from "../api/authorization/privilegesApi";
+import { JobNodePageRefresh } from "../../../pages/JobNodePage";
+import { AppUserSimple, retrieveUser } from "../../../api/authorization/usersApi";
+import { addPrivilegeToJobNodeUser, JobNodePrivilege, removePrivilegeFromJobNodeUser, retrieveJobNodeUserPrivileges } from "../../../api/authorization/privilegesApi";
 
 
 export interface AppUserJobNodeMenuContext{

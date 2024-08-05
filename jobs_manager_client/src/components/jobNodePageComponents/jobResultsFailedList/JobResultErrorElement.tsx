@@ -48,7 +48,7 @@ const JobResultErrorElement = ({data, context} : JobResultErrorElementArgs) => {
             </div>
 
             <div className="list_table_cell">
-                End Time : {String(data.endTime)}
+                End Time : {new Date(Number(data.endTime)).toUTCString()}
             </div>
         </div>
     );

@@ -7,7 +7,6 @@ import { JobNodePageRefresh } from "../../../pages/JobNodePage";
 import { FieldType } from "../../lists/Filter";
 import OpenerComponent from "../../OpenerComponent";
 
-
 export interface IlumGroupErrorsContext{
     jobNodePageRefresh : JobNodePageRefresh
 }
@@ -64,7 +63,10 @@ const IlumGroupErrorsList = ({data, context} : IlumGroupErrorsArgs) => {
                         <h3 className="m-2">{data.ilumGroupDetails.name || "No name specified"}</h3>
                         <strong>Ilum Group ID: </strong> {data.ilumGroupId}
                         <br/>
-                        <strong>When created: </strong> <i>{data.ilumGroupDetails.startTime ?? "undefined"}</i>
+                        <strong>When created: </strong> <i>{data.ilumGroupDetails.startTime ? 
+                            new Date(Number(data.ilumGroupDetails.startTime)).toUTCString()
+                            : "undefined"
+                        }</i>
                     </div>
                 }
                 openedElement={
@@ -74,7 +76,10 @@ const IlumGroupErrorsList = ({data, context} : IlumGroupErrorsArgs) => {
                         <h3 className="m-2">{data.ilumGroupDetails.name || "No name specified"}</h3>
                         <strong>Ilum Group ID: </strong> {data.ilumGroupId}
                         <br/>
-                        <strong>When created: </strong> <i>{data.ilumGroupDetails.startTime ?? "undefined"}</i>
+                        <strong>When created: </strong> <i>{data.ilumGroupDetails.startTime ? 
+                            new Date(Number(data.ilumGroupDetails.startTime)).toUTCString()
+                            : "undefined"
+                        }</i>
                         <br/>
                         <strong>Description: </strong>
                         <p>
