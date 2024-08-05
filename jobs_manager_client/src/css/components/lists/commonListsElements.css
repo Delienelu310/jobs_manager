@@ -1,0 +1,33 @@
+
+
+.list_table_element{
+    border-bottom: 3px solid black;
+    margin: 30px 10%;
+    cursor: pointer;
+}
+
+.list_table_cell{
+    overflow: hidden;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    display: inline-block;
+    height: 30px;
+    line-height: 30px;
+}
+
+.list_table_cell_special:hover{
+    background-color: #bbb;
+}
+
+.list_table_row_6 .list_table_cell{
+    width: 16%;
+}
+
+.list_table_row_5 .list_table_cell{
+    width: 20%;
+}
+
+
+.list_table_row_4 .list_table_cell{
+    width: 25%;
+}

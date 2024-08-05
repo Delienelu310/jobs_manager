@@ -1,4 +1,5 @@
-import "../../../css/components/jobNodePageComponent/jobsFileList/jobsFileElement.css"
+import "../../../css/components/lists/commonListsElements.css"
+
 
 
 import { JobsFileSimple } from "../../../api/ilum_resources/jobsFilesApi";
@@ -16,7 +17,7 @@ export interface JobsFileElementArgs{
 
 const JobsFileElement = ({data, context} : JobsFileElementArgs) => {
     return (
-        <div className="jobs_file_element" onClick={e => context.jobNodePageRefresh.setMenu((
+        <div className="list_table_element list_table_row_6" onClick={e => context.jobNodePageRefresh.setMenu((
             <JobsFileMenu
                 data={data}
                 context={{
@@ -24,23 +25,23 @@ const JobsFileElement = ({data, context} : JobsFileElementArgs) => {
                 }}
             />
         ))}>
-            <div className="jobs_file_element_cell">
+            <div className="list_table_cell">
                 <h4>{data.jobDetails.name}</h4>
             </div>
 
-            <div className="jobs_file_element_cell">
+            <div className="list_table_cell">
                 <strong>{data.extension}</strong>
             </div>
-            <div className="jobs_file_element_cell">
+            <div className="list_table_cell">
                <span> {data.id}</span>
             </div>
-            <div className="jobs_file_element_cell">
+            <div className="list_table_cell">
                 {data.jobDetails.description || "no description"}
             </div>
-            <div className="jobs_file_element_cell">
+            <div className="list_table_cell">
                  {data.allClasses.map(cl => <><i>{cl}</i> </>)}
             </div>
-            <div className="jobs_file_element_cell">
+            <div className="list_table_cell">
                 <strong>{data.publisher.username}</strong>
             </div>
         

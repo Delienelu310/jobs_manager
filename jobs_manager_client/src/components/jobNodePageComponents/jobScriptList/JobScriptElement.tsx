@@ -1,4 +1,5 @@
-import "../../../css/components/jobNodePageComponent/jobScriptList/jobScriptElement.css"
+import "../../../css/components/lists/commonListsElements.css"
+
 
 import { JobScriptSimple } from "../../../api/ilum_resources/jobScriptsApi";
 import JobScriptMenu from "./JobScriptMenu";
@@ -15,7 +16,7 @@ export interface JobScriptElementArgs{
 
 const JobScriptElement = ({data, context} : JobScriptElementArgs) => {
     return (
-        <div  className="job_script_element" onClick={e => {
+        <div className="list_table_element list_table_row_5" onClick={e => {
             context.jobNodePageRefresh.setMenu((
                 <JobScriptMenu
                     data={data}
@@ -23,22 +24,22 @@ const JobScriptElement = ({data, context} : JobScriptElementArgs) => {
                 />
             ));
         }}>
-            <div className="job_script_element_cell">
+            <div className="list_table_cell">
                 <h3>{data.jobScriptDetails.name}</h3>
             </div>
             
-            <div className="job_script_element_cell">
+            <div className="list_table_cell">
                 <strong>{data.classFullName}</strong>
             </div>
-            <div className="job_script_element_cell">
+            <div className="list_table_cell">
                 <span>{data.id}</span>
             </div>
            
-            <div className="job_script_element_cell">
+            <div className="list_table_cell">
                 <strong>{data.extension}</strong>
             </div>
 
-            <div className="job_script_element_cell">
+            <div className="list_table_cell">
                 <span>{data.author.username}</span>
             </div>
 

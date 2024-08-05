@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { JobResultSimple, retrieveJobResults, retrieveJobResultsCount } from "../../../api/ilum_resources/jobResultApi";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
-import List, { SourceArg, SourceCountArg } from "../List";
+import List, { SourceArg, SourceCountArg } from "../../lists/List";
 import JobResultSuccessElement, { JobResultSuccessElementContext } from "./JobResultSuccessElement";
-import { FieldType } from "../Filter";
+import { FieldType } from "../../lists/Filter";
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme } from "victory";
 
 

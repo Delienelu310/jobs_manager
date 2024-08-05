@@ -8,8 +8,8 @@ import JobScriptsList from "../components/jobNodePageComponents/jobScriptList/Jo
 import JobsQueue from "../components/jobNodePageComponents/queueList/JobsQueue";
 import TestingJobsQueue from "../components/jobNodePageComponents/queueList/TestingJobsQueue";
 import PrivilegesList from "../components/jobNodePageComponents/PrivilegesList";
-import JobResultsFailedList from "../components/jobNodePageComponents/JobResultsFailedList";
-import JobResultsSuccessList from "../components/jobNodePageComponents/JobResultsSuccessList";
+import JobResultsFailedList from "../components/jobNodePageComponents/jobResultsFailedList/JobResultsFailedList";
+import JobResultsSuccessList from "../components/jobNodePageComponents/jobResultsSuccessList/JobResultsSuccessList";
 
 
 

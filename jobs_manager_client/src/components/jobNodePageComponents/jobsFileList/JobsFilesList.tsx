@@ -17,7 +17,7 @@ const JobsFilesList = ({context, dependency} : JobNodeResourceListArgs) => {
 
             
             <OpenerComponent
-                closedLabel="Upload file"
+                closedLabel={<h4>Upload file</h4>}
                 openedElement={
                      <JobsFileUploader
                         projectId={context.projectId}

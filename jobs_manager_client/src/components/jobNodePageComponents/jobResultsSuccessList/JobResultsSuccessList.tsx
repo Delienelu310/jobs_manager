@@ -1,8 +1,8 @@
-import { IlumGroupOfJobResultData } from "../../api/ilum_resources/ilumGroupApi";
-import { FieldType } from "../lists/Filter";
-import IlumGroupTestersList, { IlumGroupTestersListContext } from "../lists/listElements/IlumGroupTestersList";
-import ServerBoundList from "../lists/ServerBoundList";
-import { JobNodeResourceListArgs } from "./JobNodeResourcesListPanel";
+import { IlumGroupOfJobResultData } from "../../../api/ilum_resources/ilumGroupApi";
+import { FieldType } from "../../lists/Filter";
+import IlumGroupTestersList, { IlumGroupTestersListContext } from "./IlumGroupTestersList";
+import ServerBoundList from "../../lists/ServerBoundList";
+import { JobNodeResourceListArgs } from "../JobNodeResourcesListPanel";
 
 
 

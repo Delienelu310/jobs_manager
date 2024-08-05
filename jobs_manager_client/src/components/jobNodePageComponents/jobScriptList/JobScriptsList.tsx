@@ -12,7 +12,7 @@ const JobScriptsList = ({context, dependency} : JobNodeResourceListArgs) => {
     return (
         <div>
             <OpenerComponent
-                closedLabel="Create Job Script"
+                closedLabel={<h4>Create Job Script</h4>}
                 openedElement={
                 <JobScriptCreator
                     context={{

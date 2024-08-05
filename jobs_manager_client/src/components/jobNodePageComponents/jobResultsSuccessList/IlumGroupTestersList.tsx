@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { IlumGroupOfJobResultData } from "../../../api/ilum_resources/ilumGroupApi";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
-import ServerBoundList from "../ServerBoundList";
+import ServerBoundList from "../../lists/ServerBoundList";
 import TesterMetricsList, { TesterMetricsListContext } from "./TesterMetricsList";
 import { JobScriptSimple } from "../../../api/ilum_resources/jobScriptsApi";
-import { FieldType } from "../Filter";
+import { FieldType } from "../../lists/Filter";
 
 
 

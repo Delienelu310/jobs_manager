@@ -163,7 +163,7 @@ const List = <Data, Context>({
         <div>
             <SearchBar queue={queue} setQueue={setQueue}/>
             <OpenerComponent
-                closedLabel="Open Filter"
+                closedLabel={<h4>Open Filter</h4>}
                 openedElement={
                     <Filter parameters={fields} values={values}/>
                 }

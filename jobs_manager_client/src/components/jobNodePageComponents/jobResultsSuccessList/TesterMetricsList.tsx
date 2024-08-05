@@ -2,10 +2,10 @@ import { useState } from "react";
 import { JobScriptSimple } from "../../../api/ilum_resources/jobScriptsApi";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
 import { JobResultSimple } from "../../../api/ilum_resources/jobResultApi";
-import List, { SourceArg, SourceCountArg } from "../List";
+import List, { SourceArg, SourceCountArg } from "../../lists/List";
 import JobResultSuccessElement, { JobResultSuccessElementContext } from "./JobResultSuccessElement";
 import MetricsJobResultList, { MetricsJobResultListContext } from "./MetricsJobResultsList";
-import ServerBoundList from "../ServerBoundList";
+import ServerBoundList from "../../lists/ServerBoundList";
 
 
 export interface TesterMetricsListContext{

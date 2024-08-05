@@ -3,7 +3,7 @@ import "../css/components/opener.css"
 
 
 interface OpenerComponentArgs{
-    closedLabel : string,
+    closedLabel : JSX.Element,
     openedElement : JSX.Element
 }
 
@@ -22,7 +22,7 @@ const OpenerComponent = ({
             }}>{isOpened ? "-" : "+"}</button>
 
             <div className="opener_container">
-                {isOpened ? openedElement : <h3>{closedLabel}</h3>}
+                {isOpened ? openedElement :closedLabel}
             </div>
            
         </div>
