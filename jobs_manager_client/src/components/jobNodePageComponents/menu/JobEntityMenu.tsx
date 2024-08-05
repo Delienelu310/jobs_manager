@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { JobEntitySimple, retrieveJobEntityById } from "../api/ilum_resources/jobEntityApi";
-import JobScriptMenu from "./jobNodePageComponents/jobScriptList/JobScriptMenu";
-import { QueueTypes, removeJobEntityFromQueue } from "../api/ilum_resources/queueOperationsApi";
-import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../pages/JobNodePage";
+import { JobEntitySimple, retrieveJobEntityById } from "../../../api/ilum_resources/jobEntityApi";
+import JobScriptMenu from "./JobScriptMenu";
+import { QueueTypes, removeJobEntityFromQueue } from "../../../api/ilum_resources/queueOperationsApi";
+import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../../../pages/JobNodePage";
 
 
 export interface JobEntityMenuContext{
@@ -60,29 +60,40 @@ const JobEntityMenu = ({context, jobEntityId} : JobEntityMenuArgs) => {
 
     return (
         <>
-            {actualData && <div>
-                
-                <h3>{actualData.jobEntityDetails.name}</h3>
-                <strong>Author: {actualData.author.username}</strong>
-                <br/>
-                <h6>Description:</h6>
-                <span>{actualData.jobEntityDetails.description}</span>
-                <br/>
+            {actualData ? 
+                <div>
+                    <h3>Job Entity Menu</h3>
+                    
+                    <hr/>
 
-                
-                <h5>Job Script: {actualData.jobScript.jobScriptDetails.name}</h5>
-                <strong>Class name:</strong>
-                <i>{actualData.jobScript.classFullName}</i>
+                    <h5>About:</h5>
+                    <strong>Name : </strong> {actualData.jobEntityDetails.name}
+                    <br/>
+                    <strong>Author: </strong>{actualData.author.username}
+                    <br/>
+                    <strong>Description:</strong>
+                    <p>{actualData.jobEntityDetails.description || "no description"}</p>
+                    <hr/>
 
-                <button className="btn btn-success m-2" onClick={e => context.jobNodePageRefresh.setMenu(<JobScriptMenu
-                    context={context}
-                    data={actualData.jobScript}
-                />)}>Job scribt</button>
-                <br/>
+                    
+                    <h5>Job Script: {actualData.jobScript.jobScriptDetails.name}</h5>
+                    <strong>Class name:</strong>
+                    <i>{actualData.jobScript.classFullName}</i>
 
-                <button className="btn btn-danger m-2" onClick={deleteJob}>Remove</button>
+                    <button className="btn btn-success m-2" onClick={e => context.jobNodePageRefresh.setMenu(<JobScriptMenu
+                        context={context}
+                        data={actualData.jobScript}
+                    />)}>Job scribt</button>
+                    <br/>
 
-            </div>}
+                    <hr/>
+
+                    <button className="btn btn-danger m-2" onClick={deleteJob}>Remove</button>
+
+                </div>
+                :
+                <h3>Data is Loading...</h3>    
+            }
         </>
     );
 }

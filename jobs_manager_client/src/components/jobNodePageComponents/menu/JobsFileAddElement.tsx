@@ -1,7 +1,7 @@
 import { addJobsFileToJobScript, JobScriptSimple, removeJobsFileFromJobScript } from "../../../api/ilum_resources/jobScriptsApi";
 import { JobsFileSimple } from "../../../api/ilum_resources/jobsFilesApi";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
-import JobsFileMenu from "../jobsFileList/JobsFileMenu";
+import JobsFileMenu from "./JobsFileMenu";
 
 
 export interface JobsFileAddElementContext{
@@ -46,6 +46,9 @@ const JobsFileAddElement = ({data, context} : JobsFileAddElementArgs) => {
             <p>
                 {data.jobDetails.description}
             </p>
+
+            <strong>Author: </strong> {data.publisher.username}
+
             <h5>Classes used:</h5>
             {data.allClasses.map(cl => <><i>{cl}</i> <br/></>)}
             
@@ -58,7 +61,7 @@ const JobsFileAddElement = ({data, context} : JobsFileAddElementArgs) => {
             
 
             <br/>
-            <button className="btn btn-primary" onClick={e => context.jobNodePageRefresh.setMenu((
+            <button className="btn btn-primary m-2" onClick={e => context.jobNodePageRefresh.setMenu((
                 <JobsFileMenu
                     data={data}
                     context={{

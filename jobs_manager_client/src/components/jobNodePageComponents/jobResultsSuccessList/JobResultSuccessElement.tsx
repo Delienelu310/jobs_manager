@@ -1,5 +1,6 @@
 import { JobResultSimple } from "../../../api/ilum_resources/jobResultApi";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
+import JobErrorResultMenu from "../menu/JobResultMenu";
 
 export interface JobResultSuccessElementContext{
     jobNodePageRefresh : JobNodePageRefresh
@@ -13,7 +14,12 @@ export interface JobResultSuccessElementArgs{
 
 const JobResultSuccessElement = ({data, context} : JobResultSuccessElementArgs) => {
     return (
-        <div className="list_table_element list_table_row_6">
+        <div className="list_table_element list_table_row_6" onClick={() => context.jobNodePageRefresh.setMenu(
+            <JobErrorResultMenu
+                data={data}
+                context={context}  
+            />
+        )}>
 
             <div className="list_table_cell list_table_cell_special">
                 Target:{data.target.jobScriptDetails.name}

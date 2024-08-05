@@ -1,0 +1,33 @@
+
+
+.job_node_menu{
+    
+    position: fixed;
+    border-left: 3px solid black;
+    padding: 40px;
+    width: 35%;
+    background-color: rgba(255, 255,255, 1);
+    height: 100%;
+    overflow-y: scroll;
+
+    right: 0;
+    top: 0;
+
+}
+
+.job_node_menu_closer{
+    position: absolute;
+    left : 0;
+    top : 0;
+    background-color: red;
+    height : 50px;
+    width : 50px;
+    line-height: 50px;
+    font-size: 30px;
+    font-weight: bolder;
+    color:white;
+}
+
+.job_node_menu_closer:hover{
+    background-color: brown;
+}

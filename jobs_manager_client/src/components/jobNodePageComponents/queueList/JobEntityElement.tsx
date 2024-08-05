@@ -3,8 +3,8 @@ import "../../../css/components/lists/commonListsElements.css"
 import { JobEntitySimple } from "../../../api/ilum_resources/jobEntityApi";
 import { QueueTypes } from "../../../api/ilum_resources/queueOperationsApi";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
-import JobEntityMenu from "../../JobEntityMenu";
-import JobScriptMenu from "../jobScriptList/JobScriptMenu";
+import JobEntityMenu from "../menu/JobEntityMenu";
+import JobScriptMenu from "../menu/JobScriptMenu";
 
 
 export interface JobEntityElementContext{

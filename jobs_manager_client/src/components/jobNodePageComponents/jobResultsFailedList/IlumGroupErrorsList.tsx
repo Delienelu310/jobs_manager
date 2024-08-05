@@ -72,20 +72,22 @@ const IlumGroupErrorsList = ({data, context} : IlumGroupErrorsArgs) => {
                 openedElement={
                     <div>
 
-                    <div>
-                        <h3 className="m-2">{data.ilumGroupDetails.name || "No name specified"}</h3>
-                        <strong>Ilum Group ID: </strong> {data.ilumGroupId}
-                        <br/>
-                        <strong>When created: </strong> <i>{data.ilumGroupDetails.startTime ? 
-                            new Date(Number(data.ilumGroupDetails.startTime)).toUTCString()
-                            : "undefined"
-                        }</i>
-                        <br/>
-                        <strong>Description: </strong>
-                        <p>
-                            {data.ilumGroupDetails.description || "No description"}
-                        </p>
-                    </div>
+                        <div>
+                            <h3 className="m-2">{data.ilumGroupDetails.name || "No name specified"}</h3>
+                            <strong>Ilum Group ID: </strong> {data.ilumGroupId}
+                            <br/>
+                            <strong>When created: </strong> <i>{data.ilumGroupDetails.startTime ? 
+                                new Date(Number(data.ilumGroupDetails.startTime)).toUTCString()
+                                : "undefined"
+                            }</i>
+                            <br/>
+                            <strong>Description: </strong>
+                            <p>
+                                {data.ilumGroupDetails.description || "No description"}
+                            </p>
+                            {/* TODO */}
+                            <button className="btn btn-danger">Clear group</button>
+                        </div>
 
                         <List<JobResultSimple, JobResultErrorElementContext>
                             context={{jobNodePageRefresh : context.jobNodePageRefresh}}

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { addJobEntityToQueue, QueueTypes } from "../api/ilum_resources/queueOperationsApi";
-import { JobEntityDetails } from "../api/ilum_resources/jobEntityApi";
-import { JobScriptSimple, retreiveJobScript } from "../api/ilum_resources/jobScriptsApi";
-import JobScriptMenu from "./jobNodePageComponents/jobScriptList/JobScriptMenu";
-import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../pages/JobNodePage";
+import { addJobEntityToQueue, QueueTypes } from "../../../api/ilum_resources/queueOperationsApi";
+import { JobEntityDetails } from "../../../api/ilum_resources/jobEntityApi";
+import { JobScriptSimple, retreiveJobScript } from "../../../api/ilum_resources/jobScriptsApi";
+import JobScriptMenu from "./JobScriptMenu";
+import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../../../pages/JobNodePage";
 import JobEntityMenu from "./JobEntityMenu";
 
 
@@ -83,44 +83,47 @@ const JobEntityCreator = ({
     
     return (
         <div>
+            <h3>Job Entity Menu</h3>
+
+            <hr/>
+
             {jobScriptData ? 
                 <>
-                    <h3>Chosen script data:</h3>
+                    <h5>Chosen script data:</h5>
                     <h5> {jobScriptData.jobScriptDetails.name}</h5>
                     <strong>Class name:</strong>
                     <i>{jobScriptData.classFullName}</i>
+                    <br/>
+                    <strong>Author: </strong> {jobScriptData.author.username}
+                    <br/>
                     <button className="btn btn-success m-2" onClick={e => context.jobNodePageRefresh.setMenu(<JobScriptMenu
                         context={context}
                         data={jobScriptData}
-                    />)}>Job scribt</button>
+                    />)}>More... </button>
 
                 </>
                 :
                 <span>Job Script data is loading...</span>
 
             }
-           
-            <h3>Job Entity Data:</h3>
-            <label>Queue type: 
-                <select value={chosenQueueType} onChange={e => setChosenQueueType(e.target.value)}>
-                    {Object.values(QueueTypes).map(type => <option value={type}>{type}</option>)}
-                </select>
 
-            </label>
-            <label>
-                <strong>Name:</strong>
-                <input value={jobEntityDetails.name} onChange={e => setJobEntityDetails({...jobEntityDetails, name : e.target.value})}/>
-            </label>
-            <br/>
-            <label>
-                <strong>Description:</strong>
-                <input value={jobEntityDetails.description} onChange={e => setJobEntityDetails({...jobEntityDetails, description : e.target.value})}/>
-            </label>
-            <br/>
-            <label>
-                <strong>Configuration</strong>
-                <input value={configuration} onChange={e => setConfiguration(e.target.value)}/>
-            </label>
+            <hr/>
+           
+            <h5>Job Entity Data:</h5>
+            <strong>Queue type: </strong>
+            <select className="form-control m-2" value={chosenQueueType} onChange={e => setChosenQueueType(e.target.value)}>
+                {Object.values(QueueTypes).map(type => <option value={type}>{type}</option>)}
+            </select>
+
+            <strong>Name:</strong>
+            <input className="form-control m-2" value={jobEntityDetails.name} onChange={e => setJobEntityDetails({...jobEntityDetails, name : e.target.value})}/>
+        
+            <strong>Description:</strong>
+            <textarea className="form-control m-2" value={jobEntityDetails.description} onChange={e => setJobEntityDetails({...jobEntityDetails, description : e.target.value})}/>
+       
+            <strong>Configuration</strong>
+            <textarea className="form-control m-2" value={configuration} onChange={e => setConfiguration(e.target.value)}/>
+          
 
 
             <button className="btn btn-success m-2" onClick={addJob}>Add</button>

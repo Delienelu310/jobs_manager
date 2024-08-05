@@ -10,7 +10,7 @@ import TestingJobsQueue from "../components/jobNodePageComponents/queueList/Test
 import PrivilegesList from "../components/jobNodePageComponents//privilegesList/PrivilegesList";
 import JobResultsFailedList from "../components/jobNodePageComponents/jobResultsFailedList/JobResultsFailedList";
 import JobResultsSuccessList from "../components/jobNodePageComponents/jobResultsSuccessList/JobResultsSuccessList";
-
+import JobNodeMenu from "../components/jobNodePageComponents/menu/JobNodeMenu";
 
 
 export enum JobNodeResourceListsMembers{
@@ -100,11 +100,17 @@ const JobNodePage = ({} : JobNodePageInterface) => {
 
     return (
         <div>
+            <JobNodeMenu
+                currentMenu={menu}
+                setCurrentMenu={setMenu}
+            />
 
+            <main style={{
+                width: menu == null ? "100%" : "65%"
+            }}>
+                {/* Main panel */}
 
-            {/* Main panel */}
-
-            {jobNodeData ? <div>
+                {jobNodeData ? <div>
                     <h3>Job Node : {jobNodeData?.jobNodeDetails.name}</h3>
 
                     <h4>State:</h4>
@@ -153,47 +159,41 @@ const JobNodePage = ({} : JobNodePageInterface) => {
 
                             <button className="btn btn-primary m-2" onClick={start}>Start</button>
                         </div>
-                    }
+                        }
 
-                </div>
-                :
-                <div>Loading...</div>            
-            }
+                    </div>
+                    :
+                    <div>Loading...</div>            
+                }
+                    
+                <JobNodeResourceListPanel
+                    choices={[
+                        {label: JobNodeResourceListsMembers.JOBS_FILES, Component: JobsFilesList, 
+                            dependency : jobsFilesListDependency, setDependency : setJobsFileListDependency},
+                        {label : JobNodeResourceListsMembers.JOBS_SCRIPTS, Component : JobScriptsList,
+                            dependency : jobScriptsListDependency, setDependency : setJobSciptsListDependency},
+                        {label : JobNodeResourceListsMembers.JOBS_QUEUE, Component : JobsQueue,
+                            dependency : jobQueueDependency, setDependency : setJobQueueDependency},
+                        {label : JobNodeResourceListsMembers.TESTING_QUEUE, Component : TestingJobsQueue,
+                            dependency : testJobsDependency, setDependency: setTestJobsDependnency},
+                        {label : JobNodeResourceListsMembers.PRIVILLEGES, Component : PrivilegesList,
+                            dependency : jobNodePrivilegesDependency, setDependency : setJobNodePrivilegesDependency},
+                        {label : JobNodeResourceListsMembers.JOB_RESULTS_ERRORS, Component : JobResultsFailedList,
+                            dependency : jobResultsFailedDependency, setDependency : setJobResultsFailedDependency},
+                        {label : JobNodeResourceListsMembers.JOB_RESULTS_SUCCESS, Component: JobResultsSuccessList, 
+                            dependency : jobResultsSuccessDependency, setDependency : setJobResultsSuccessDependency}
+                    ]}
+                    context={{
+                        projectId : projectId ?? "",
+                        jobNodeId : jobNodeId ?? "",
+                        setMenu : setMenu,
+                        setChosenResourceList : setCurrentList,
+                        chosenResourceList : currentList,
+                    }}
+                />
+            </main>
 
-            <div>
-                <h3>Current menu</h3>
-                {menu && <button className="btn btn-danger" onClick={e => setMenu(null)}>Close</button>}
-                {menu || <div>No menu</div>}
-            </div>
-
-            <hr/>
-
-                
-            <JobNodeResourceListPanel
-                choices={[
-                    {label: JobNodeResourceListsMembers.JOBS_FILES, Component: JobsFilesList, 
-                        dependency : jobsFilesListDependency, setDependency : setJobsFileListDependency},
-                    {label : JobNodeResourceListsMembers.JOBS_SCRIPTS, Component : JobScriptsList,
-                        dependency : jobScriptsListDependency, setDependency : setJobSciptsListDependency},
-                    {label : JobNodeResourceListsMembers.JOBS_QUEUE, Component : JobsQueue,
-                        dependency : jobQueueDependency, setDependency : setJobQueueDependency},
-                    {label : JobNodeResourceListsMembers.TESTING_QUEUE, Component : TestingJobsQueue,
-                        dependency : testJobsDependency, setDependency: setTestJobsDependnency},
-                    {label : JobNodeResourceListsMembers.PRIVILLEGES, Component : PrivilegesList,
-                        dependency : jobNodePrivilegesDependency, setDependency : setJobNodePrivilegesDependency},
-                    {label : JobNodeResourceListsMembers.JOB_RESULTS_ERRORS, Component : JobResultsFailedList,
-                        dependency : jobResultsFailedDependency, setDependency : setJobResultsFailedDependency},
-                    {label : JobNodeResourceListsMembers.JOB_RESULTS_SUCCESS, Component: JobResultsSuccessList, 
-                        dependency : jobResultsSuccessDependency, setDependency : setJobResultsSuccessDependency}
-                ]}
-                context={{
-                    projectId : projectId ?? "",
-                    jobNodeId : jobNodeId ?? "",
-                    setMenu : setMenu,
-                    setChosenResourceList : setCurrentList,
-                    chosenResourceList : currentList,
-                }}
-            />
+            
             
         </div>
     );

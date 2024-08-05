@@ -2,6 +2,7 @@ import { Axios, AxiosResponse } from "axios";
 import { JobNodeDetails, ProjectDetails } from "../abstraction/projectApi";
 import apiClient from "../ApiClient";
 import { JobScriptSimple } from "./jobScriptsApi";
+import { IlumGroupDetails } from "./ilumGroupApi";
 
 
 export interface JobResultDetails{
@@ -20,14 +21,15 @@ export interface JobResultSimple{
     ilumGroupId : string,
 
     jobResultDetails : JobResultDetails,
+    ilumGroupDetails : IlumGroupDetails,
 
 
     targetConfiguration : string
     target : JobScriptSimple
     tester : JobScriptSimple | null
 
-    startTime : Number,
-    endTime : Number,
+    startTime : number,
+    endTime : number,
 
 
     jobNode : {
@@ -39,6 +41,13 @@ export interface JobResultSimple{
         id : string,
         projectDetails : ProjectDetails
     }
+}
+
+
+export function retrieveJobResultById(projectId : string, jobNodeId : string, jobResultId : string
+
+) : Promise<AxiosResponse<JobResultSimple>>{
+    return apiClient.get(`/projects/${projectId}/job_nodes/${jobNodeId}/job_results/${jobResultId}`);
 }
 
 export function retrieveJobResults(projectId : string, jobNodeId : string, requestParams : [string, string][]

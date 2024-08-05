@@ -6,9 +6,10 @@ import { JobsFileSimple } from "../../../api/ilum_resources/jobsFilesApi";
 import { FieldType } from "../../lists/Filter";
 import ServerBoundList from "../../lists/ServerBoundList";
 import JobsFileAddElement, { JobsFileAddElementContext } from "./JobsFileAddElement";
-import JobEntityCreator from "../../JobEntityCreator";
+import JobEntityCreator from "./JobEntityCreator";
 import { QueueTypes } from "../../../api/ilum_resources/queueOperationsApi";
 import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../../../pages/JobNodePage";
+import OpenerComponent from "../../OpenerComponent";
 
 
 export interface JobScriptMenuContext{
@@ -131,19 +132,103 @@ const JobScriptMenu = ({
             {actualData ? 
                 <div>
 
-                    {/* current job script data: */}
-                    <h3>{actualData.jobScriptDetails.name}</h3>
-                    <span>ID: {actualData.id}</span>
-                    <br/>
-                    <span>Author : {actualData.author.username}</span>
-                    <br/>
-                    <strong>Extension: {actualData.extension}</strong>
-                    <br/>
-                    <h4>Class full name:</h4>
-                    <strong>{actualData.classFullName}</strong>
-                    <br/>
+                    <h3>Job Script Menu</h3>
 
-                    {/* create job entity */}
+                    <hr/>
+
+                    <div className="m-3">
+                        <h5 className="m-3">About:</h5>
+
+                        <strong>Name:</strong> {actualData.jobScriptDetails.name}
+                        <br/>
+                        <strong>ID: {actualData.id}</strong>
+                        <br/>
+                        <strong>Author : </strong>{actualData.author.username}
+                        <br/>
+                        <strong>Extension:</strong> {actualData.extension}
+                        <br/>
+                        <strong>Class full name:</strong>
+                         <i>{actualData.classFullName}</i>
+                    </div>
+
+                    <hr/>
+                    <div>
+                        <strong>New name:</strong>
+                        <input className="form-control m-2" value={newDetails.name} onChange={e => setNewDetails({...newDetails, name : e.target.value})}/>
+                        
+                        <button className="btn btn-success m-2" onClick={updateDetails}>Update details</button>
+                
+                    </div>
+
+                    <hr/>
+
+                    <div>
+                        <OpenerComponent
+                            closedLabel={ <h5>Show Dependencies</h5>}
+                            openedElement={
+                                <>            
+                                    <h5>Jobs Files used:</h5>
+                                    <List<JobsFileSimple, JobsFileRemoveElementContext>
+                                        Wrapper={JobsFileRemoveElement}
+                                        pager={{defaultPageSize : 10}}
+                                        source={{
+                                            sourceData: getJobsFilesUsedList,
+                                            sourceCount: getJobsFilesUsedCount
+                                            
+                                        }}
+                                        context={{
+                                            jobNodePageRefresh : context.jobNodePageRefresh,
+                                            refreshJobScript: refresh,
+                                            jobScript : actualData
+                                        }}
+                                        dependencies={[actualData]}
+                                        filter={{parameters: [
+                                            {label: "publisher", additionalData: [], fieldType: FieldType.SingleInput},
+                                            {label: "classname", additionalData: [], fieldType: FieldType.SingleInput},
+                                        ]}}
+                                    />
+                                </>
+                            }
+                        />
+                    </div>
+                   
+
+                    <hr/>
+
+                    <div>
+                        <OpenerComponent
+                            closedLabel={<h5>Add Dependencies</h5>}
+                            openedElement={
+                                <div>
+                                    <h5 className="m-2">Add Dependencies: </h5>
+                                    <ServerBoundList<JobsFileSimple, JobsFileAddElementContext>
+                                        endpoint={{
+                                            resourse: `/projects/${data.project.id}/job_nodes/${data.jobNode.id}/jobs_files?`,
+                                            count :  `/projects/${data.project.id}/job_nodes/${data.jobNode.id}/jobs_files/count?`
+                                        }}
+                                        Wrapper={JobsFileAddElement}
+                                        pager={{defaultPageSize: 10}}
+                                        context={{
+                                            jobNodePageRefresh : context.jobNodePageRefresh,
+                                            refreshJobScript: refresh,
+                                            jobScript : actualData
+                                        }}
+                                        dependencies={[]}
+                                        filter={{parameters: [
+                                            {label: "publisher", additionalData: [], fieldType: FieldType.SingleInput},
+                                            {label: "classname", additionalData: [], fieldType: FieldType.SingleInput},
+                                            {label: "extension", additionalData: ["py", "jar"], fieldType: FieldType.SingleSelection}
+                                        ]}}
+                                    />
+                                </div>
+                            }
+                        />
+
+                    </div>
+                    
+                    <hr/>
+
+                    <h5>Actions: </h5>
 
                     <button className="btn btn-success m-2" onClick={e => context.jobNodePageRefresh.setMenu(<JobEntityCreator
                         context={{
@@ -156,74 +241,10 @@ const JobScriptMenu = ({
 
                     <br/>
 
-                    {/* update job script details */}
-                    <label>
-                        New name:
-                        <input value={newDetails.name} onChange={e => setNewDetails({...newDetails, name : e.target.value})}/>
-                    </label>
-                    <br/>
-                    <button className="btn btn-success" onClick={updateDetails}>Update details</button>
-                    <br/>
-
-                    {/* delete job script */}
-
                     <button className="btn btn-danger m-2" onClick={deleteJobScriptElement}>Delete</button>
                     <br/>
-                    {/* browse the list of jobs files not used by job script and add it */}
-                   
-
-                    <button className="btn btn-primary m-2" onClick={e => setJobSearchListOpened(!jobSearchListOpened)}>
-                        {jobSearchListOpened ? "Close" : "Add jobs file"}
-                    </button>
-                    
-                    {jobSearchListOpened && <ServerBoundList<JobsFileSimple, JobsFileAddElementContext>
-                        endpoint={{
-                            resourse: `/projects/${data.project.id}/job_nodes/${data.jobNode.id}/jobs_files`,
-                            count :  `/projects/${data.project.id}/job_nodes/${data.jobNode.id}/jobs_files/count`
-                        }}
-                        Wrapper={JobsFileAddElement}
-                        pager={{defaultPageSize: 10}}
-                        context={{
-                            jobNodePageRefresh : context.jobNodePageRefresh,
-                            refreshJobScript: refresh,
-                            jobScript : actualData
-                        }}
-                        dependencies={[]}
-                        filter={{parameters: [
-                            {label: "publisher", additionalData: [], fieldType: FieldType.SingleInput},
-                            {label: "classname", additionalData: [], fieldType: FieldType.SingleInput},
-                            {label: "extension", additionalData: ["py", "jar"], fieldType: FieldType.SingleSelection}
-                        ]}}
-                    />}
-
-
-
-                    {/* browse the list of jobs files used */}
-
-                    <h4>Jobs Files used:</h4>
-                    <List<JobsFileSimple, JobsFileRemoveElementContext>
-                        Wrapper={JobsFileRemoveElement}
-                        pager={{defaultPageSize : 10}}
-                        source={{
-                            sourceData: getJobsFilesUsedList,
-                            sourceCount: getJobsFilesUsedCount
-                            
-                        }}
-                        context={{
-                            jobNodePageRefresh : context.jobNodePageRefresh,
-                            refreshJobScript: refresh,
-                            jobScript : actualData
-                        }}
-                        dependencies={[actualData]}
-                        filter={{parameters: [
-                            {label: "publisher", additionalData: [], fieldType: FieldType.SingleInput},
-                            {label: "classname", additionalData: [], fieldType: FieldType.SingleInput},
-                        ]}}
-                    />
-
-
-
-
+        
+          
 
                 </div>
                 :

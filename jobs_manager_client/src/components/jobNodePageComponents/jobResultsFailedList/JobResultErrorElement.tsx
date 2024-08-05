@@ -3,7 +3,8 @@ import "../../../css/components/lists/commonListsElements.css"
 
 import { JobResultSimple } from "../../../api/ilum_resources/jobResultApi";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
-import JobScriptMenu from "../jobScriptList/JobScriptMenu";
+import JobScriptMenu from "../menu/JobScriptMenu";
+import JobErrorResultMenu from "../menu/JobResultMenu";
 
 
 export interface JobResultErrorElementContext{
@@ -19,9 +20,10 @@ const JobResultErrorElement = ({data, context} : JobResultErrorElementArgs) => {
     return (
         <div className="list_table_element list_table_row_5" onClick={
             e => context.jobNodePageRefresh.setMenu((
-                <div>
-                    That`s a menu
-                </div>
+                <JobErrorResultMenu
+                    data={data}
+                    context={context}
+                />    
             ))
         }>
             <div className="list_table_cell list_table_cell_special"  onClick={e => {

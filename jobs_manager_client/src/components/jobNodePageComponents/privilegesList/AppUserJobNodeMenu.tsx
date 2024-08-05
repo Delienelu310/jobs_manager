@@ -70,9 +70,10 @@ const AppUserJobNodeMenu = ({username, context} :AppUserJobNodeMenuArgs ) => {
             {data ? 
                 <div>
                     <h3>{data.username}</h3>
-                    <strong>Full Name: </strong>
-                    <br/>
-
+                    <strong>Full Name: {data.appUserDetails.fullname} </strong>
+                    
+                    
+                    <hr/>
 
                     <h5>Absent privileges:</h5>
                     {Object.values(JobNodePrivilege).filter(p => !privileges.includes(p) && p != JobNodePrivilege.MANAGER).map(p => <>
@@ -88,6 +89,11 @@ const AppUserJobNodeMenu = ({username, context} :AppUserJobNodeMenuArgs ) => {
                         <button className="btn btn-danger m-2" onClick={e => removePrivilege(privilege)}>X</button>
                         <br/>
                     </>)}
+
+                    <hr/>
+
+                    {/* TODO: */}
+                    <button className="btn btn-danger m-2">Remove User</button>
                 </div>
                 :
                 <div>Loading...</div>

@@ -1,7 +1,7 @@
 import { JobScriptSimple, removeJobsFileFromJobScript } from "../../../api/ilum_resources/jobScriptsApi";
 import { JobsFileSimple } from "../../../api/ilum_resources/jobsFilesApi";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
-import JobsFileMenu from "../jobsFileList/JobsFileMenu";
+import JobsFileMenu from "./JobsFileMenu";
 
 
 export interface JobsFileRemoveElementContext{
@@ -32,11 +32,15 @@ const JobsFileRemoveElement = ({data, context} : JobsFileRemoveElementArgs) => {
             <hr/>
             <h3>{data.jobDetails.name}</h3>
             <span>ID: {data.id}</span>
+            <br/>
+            <strong>Author: </strong> {data.publisher.username}
             <h5>Classes used:</h5>
             {data.allClasses.map(cl => <><i>{cl}</i> <br/></>)}
             <br/>
+            
+            
 
-            <button className="btn btn-danger" onClick={removeJobsFile}>Remove</button>
+            <button className="btn btn-danger m-2" onClick={removeJobsFile}>Remove</button>
             <br/>
 
 

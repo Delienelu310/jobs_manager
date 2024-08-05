@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { checkJobsFileState, deleteJobsFile, JobsFileDetails, JobsFileExtension, JobsFileSimple, JobsFileState, retrieveJobsFile, updateJobsFileDetails, updateJobsFileFile } from "../../../api/ilum_resources/jobsFilesApi";
 import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../../../pages/JobNodePage";
+import OpenerComponent from "../../OpenerComponent";
 
 
 
@@ -92,49 +93,69 @@ const JobsFileMenu = ({data, context} : JobsFileMenuArgs) => {
 
     return (
         <div>
-            <h3>{fullData && fullData.jobDetails.name}</h3>
+            {fullData == null ?
+                <h3>Loading...</h3>
+                :
+                <div>
+                    <h3>Jobs File</h3>
+                    <hr/>
 
-            <button className="btn btn-danger" onClick={e => deleteJob()}>Delete</button>
-            <br/>
+                    <div>
+                        <h5>About:</h5>
 
-            <strong>{state}</strong>
-            <button className="btn btn-primary" onClick={e => checkState()}>Check state</button>
-            <br/>
-            
-            <label>
-                <strong>New File:</strong>
-                <input type="file" onChange={e => {
-                    if(e.target.files && e.target.files[0]){
-                        setNewFile(e.target.files[0]);
-                    }
-                }}/>
-            </label>
-            <br/>
-            <label>
-                Extension:
-                <select value={newExtension} onChange={e => setNewExtension(e.target.value)}>
-                    {Object.values(JobsFileExtension).map(type => <option value={type}>{type}</option>)}
-                </select>
-            </label>
-            <br/>
-            <button className="btn btn-success" onClick={e => updateFile()}>Update file</button>
-            <br/>
+                        <strong>Name: {fullData.jobDetails.name}</strong>
+                        <strong>Jobs File ID: {fullData.id}</strong>
+                        <br/>
+                        <strong>Author:</strong> {fullData.publisher.username}
+                        <br/>
+                        <OpenerComponent
+                            closedLabel={<strong>Classes Used:</strong>}
+                            openedElement={<>{fullData.allClasses.map(className => <><i>{className}</i> <br/> </>)}</>}
+                        />
+                        
+                        <br/>
+                       
+                    </div>
+                    
 
-            <label>
-                Name:
-                <input value={newJobsFileDetails.name} onChange={e => setNewJobsFileDetails({...newJobsFileDetails, name : e.target.value})}/>
-            </label>
-            
-            <label>
-                Description:
-                <input value={newJobsFileDetails.description} onChange={e => setNewJobsFileDetails({...newJobsFileDetails, description : e.target.value})}/>
-            </label>
+                    <hr/>
+
+                    <strong>Current State: {state}</strong>
+                    <br/>
+                    <button className="btn btn-primary m-3" onClick={e => checkState()}>Check state</button>
+
+                    <hr/>
+                    <strong>New File:</strong>
+                    <input className="form-control m-2" type="file" onChange={e => {
+                        if(e.target.files && e.target.files[0]){
+                            setNewFile(e.target.files[0]);
+                        }
+                    }}/>
+                    <strong>Extension:</strong>
+                    <select className="form-control m-2" value={newExtension} onChange={e => setNewExtension(e.target.value)}>
+                        {Object.values(JobsFileExtension).map(type => <option value={type}>{type}</option>)}
+                    </select>
+
+                    <button className="btn btn-success m-3" onClick={e => updateFile()}>Update file</button>
 
 
-            <button className="btn btn-success" onClick={e => updateDetails()}>Update details</button>
-    
-            <hr/>
+                    <hr/>
 
+                    <strong>Name:</strong>
+                    <input className="form-control m-2" value={newJobsFileDetails.name} onChange={e => setNewJobsFileDetails({...newJobsFileDetails, name : e.target.value})}/>
+
+
+                    <strong>Description:</strong>
+                    <input className="form-control m-2" value={newJobsFileDetails.description} onChange={e => setNewJobsFileDetails({...newJobsFileDetails, description : e.target.value})}/>
+
+
+                    <button className="btn btn-success m-3" onClick={e => updateDetails()}>Update details</button>
+                    <hr/>
+                    <button className="btn btn-danger m-3" onClick={e => deleteJob()}>Delete</button>
+                </div>
+
+            }
+                    
         </div>
     );
 

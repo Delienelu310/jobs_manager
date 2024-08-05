@@ -2,7 +2,7 @@ import "../../../css/components/lists/commonListsElements.css"
 
 
 import { JobScriptSimple } from "../../../api/ilum_resources/jobScriptsApi";
-import JobScriptMenu from "./JobScriptMenu";
+import JobScriptMenu from "../menu/JobScriptMenu";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
 
 export interface JobScriptListContext{

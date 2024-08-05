@@ -3,7 +3,7 @@ import "../../../css/components/lists/commonListsElements.css"
 
 
 import { JobsFileSimple } from "../../../api/ilum_resources/jobsFilesApi";
-import JobsFileMenu from "../../jobNodePageComponents/jobsFileList/JobsFileMenu";
+import JobsFileMenu from "../menu/JobsFileMenu";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
 
 export interface JobsFileListContext{
