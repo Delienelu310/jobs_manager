@@ -98,7 +98,7 @@ const JobEntityCreator = ({
                     <br/>
                     <button className="btn btn-success m-2" onClick={e => context.jobNodePageRefresh.setMenu(<JobScriptMenu
                         context={context}
-                        data={jobScriptData}
+                        data={jobScriptData.id}
                     />)}>More... </button>
 
                 </>

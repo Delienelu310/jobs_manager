@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { JobNodePageRefresh } from "../../../pages/JobNodePage";
+import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../../../pages/JobNodePage";
 import { AppUserSimple, retrieveUser } from "../../../api/authorization/usersApi";
-import { addPrivilegeToJobNodeUser, JobNodePrivilege, removePrivilegeFromJobNodeUser, retrieveJobNodeUserPrivileges } from "../../../api/authorization/privilegesApi";
+import { addPrivilegeToJobNodeUser, JobNodePrivilege, removePrivilegeFromJobNodeUser, removeUserFromJobNode, retrieveJobNodeUserPrivileges } from "../../../api/authorization/privilegesApi";
 
 
 export interface AppUserJobNodeMenuContext{
@@ -58,6 +58,17 @@ const AppUserJobNodeMenu = ({username, context} :AppUserJobNodeMenuArgs ) => {
         }).catch(e => console.log(e));
     }
 
+    function removeUser(){
+        removeUserFromJobNode(context.jobNodePageRefresh.projectId, context.jobNodePageRefresh.jobNodeId, username)
+            .then(r => {
+                context.jobNodePageRefresh.setMenu(null);
+                if(context.jobNodePageRefresh.chosenResourceList 
+                    && context.jobNodePageRefresh.chosenResourceList.label == JobNodeResourceListsMembers.PRIVILLEGES 
+                ) context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random());
+            }).catch(e => console.log(e));
+        ;
+    }
+
 
     useEffect(() => {
         getData();
@@ -92,8 +103,7 @@ const AppUserJobNodeMenu = ({username, context} :AppUserJobNodeMenuArgs ) => {
 
                     <hr/>
 
-                    {/* TODO: */}
-                    <button className="btn btn-danger m-2">Remove User</button>
+                    <button className="btn btn-danger m-2" onClick={removeUser}>Remove User</button>
                 </div>
                 :
                 <div>Loading...</div>

@@ -181,6 +181,24 @@ public class PrivilegeController {
 
         repositoryFactory.getJobNodePrivilegeList().update(jobNode.getPrivileges().get(appUser.getUsername()));
     }
+    @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/privileges/users/{user_id}")
+    public void removeUserFromJobNode(
+        @PathVariable("project_id") String projectId,
+        @PathVariable("job_node_id") String jobNodeId,
+        @PathVariable("user_id") String userId
+    ){
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        if( !project.getId().equals(jobNode.getProject().getId())) throw new RuntimeException();
+
+        AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(userId);
+
+        if( !jobNode.getPrivileges().containsKey(appUser.getUsername())) throw new RuntimeException();
+
+        repositoryFactory.getJobNodePrivilegeList().delete(jobNode.getPrivileges().get(userId).getId());
+        jobNode.getPrivileges().remove(userId);
+        repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+    }
 
     @PutMapping("/projects/{project_id}/privileges/users/{user_id}/{privilege}")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})

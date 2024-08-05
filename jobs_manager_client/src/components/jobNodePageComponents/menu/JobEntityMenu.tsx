@@ -82,7 +82,7 @@ const JobEntityMenu = ({context, jobEntityId} : JobEntityMenuArgs) => {
 
                     <button className="btn btn-success m-2" onClick={e => context.jobNodePageRefresh.setMenu(<JobScriptMenu
                         context={context}
-                        data={actualData.jobScript}
+                        data={actualData.jobScript.id}
                     />)}>Job scribt</button>
                     <br/>
 

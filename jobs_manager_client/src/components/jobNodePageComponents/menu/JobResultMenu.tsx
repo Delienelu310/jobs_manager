@@ -114,7 +114,7 @@ const JobErrorResultMenu = ({data, context} : JobErrorResultMenuAgs) => {
                                 <button className="btn btn-success m-2" onClick={() => context.jobNodePageRefresh.setMenu(
                                     <JobScriptMenu
                                         context={context}
-                                        data={actualData.target}
+                                        data={actualData.target.id}
                                     />
                                 )}>More...</button>
                                 <br/>
@@ -144,7 +144,7 @@ const JobErrorResultMenu = ({data, context} : JobErrorResultMenuAgs) => {
                                         <button className="btn btn-success m-2" onClick={() => actualData.tester && context.jobNodePageRefresh.setMenu(
                                             <JobScriptMenu
                                                 context={context}
-                                                data={actualData.tester}
+                                                data={actualData.tester.id}
                                             />
                                         )}>More...</button>
                                     </div>

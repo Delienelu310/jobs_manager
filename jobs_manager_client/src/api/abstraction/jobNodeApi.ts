@@ -4,6 +4,7 @@ import { JobNodeDetails } from "./projectApi";
 
 import { ChannelList } from "./projectApi";
 import { IlumGroup } from "../ilum_resources/ilumGroupApi";
+import { QueueTypes } from "../ilum_resources/queueOperationsApi";
 
 export interface JobNodeWithIlumGroup{
 
@@ -45,3 +46,6 @@ export async function addJobNodePlug(projectId : string, jobNodeId : string, rig
 }
 
 
+export async function retrieveQueueSize(projectId : string, jobNodeId : string, queueType : QueueTypes){
+    return apiClient.get(`/projects/${projectId}/job_nodes/${jobNodeId}/queue/${queueType}/count`);
+}

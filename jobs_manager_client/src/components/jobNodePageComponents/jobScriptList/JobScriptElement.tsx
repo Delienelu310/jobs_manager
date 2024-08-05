@@ -19,7 +19,7 @@ const JobScriptElement = ({data, context} : JobScriptElementArgs) => {
         <div className="list_table_element list_table_row_5" onClick={e => {
             context.jobNodePageRefresh.setMenu((
                 <JobScriptMenu
-                    data={data}
+                    data={data.id}
                     context={context}
                 />
             ));

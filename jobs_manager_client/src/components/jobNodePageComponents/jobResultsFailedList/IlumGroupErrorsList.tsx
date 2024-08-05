@@ -85,8 +85,6 @@ const IlumGroupErrorsList = ({data, context} : IlumGroupErrorsArgs) => {
                             <p>
                                 {data.ilumGroupDetails.description || "No description"}
                             </p>
-                            {/* TODO */}
-                            <button className="btn btn-danger">Clear group</button>
                         </div>
 
                         <List<JobResultSimple, JobResultErrorElementContext>

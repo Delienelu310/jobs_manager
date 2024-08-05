@@ -30,7 +30,7 @@ const JobResultErrorElement = ({data, context} : JobResultErrorElementArgs) => {
                 context.jobNodePageRefresh.setMenu(
                     <JobScriptMenu
                         context={context}
-                        data={data.target}
+                        data={data.target.id}
                     />
                 )
                 e.stopPropagation();

@@ -44,6 +44,12 @@ export function removePrivilegeFromJobNodeUser(projectId : string, jobNodeId : s
     return apiClient.delete(`/projects/${projectId}/job_nodes/${jobNodeId}/privileges/users/${username}/${privilege}`);
 }
 
+export function removeUserFromJobNode(projectId: string, jobNodeId : string, username : string
+
+) : Promise<AxiosResponse<void>>{
+    return apiClient.delete(`/projects/${projectId}/job_nodes/${jobNodeId}/privileges/users/${username}`);
+}
+
 export function addPrivilegeToProjectUser(projectId : string, username : string, privilege : string
 
 ) : Promise<AxiosResponse<void>>{

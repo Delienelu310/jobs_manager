@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { JobNodeWithIlumGroup, retrieveJobNodeWithIlumGroup } from "../api/abstraction/jobNodeApi";
+import { JobNodeWithIlumGroup, retrieveJobNodeWithIlumGroup, retrieveQueueSize } from "../api/abstraction/jobNodeApi";
 import { IlumGroupConfiguration, IlumGroupDetails, startJobNode, stopJobNode } from "../api/ilum_resources/ilumGroupApi";
 import JobNodeResourceListPanel, { JobNodeResourceListData } from "../components/jobNodePageComponents/JobNodeResourcesListPanel";
 import JobsFilesList from "../components/jobNodePageComponents/jobsFileList/JobsFilesList";
@@ -11,6 +11,9 @@ import PrivilegesList from "../components/jobNodePageComponents//privilegesList/
 import JobResultsFailedList from "../components/jobNodePageComponents/jobResultsFailedList/JobResultsFailedList";
 import JobResultsSuccessList from "../components/jobNodePageComponents/jobResultsSuccessList/JobResultsSuccessList";
 import JobNodeMenu from "../components/jobNodePageComponents/menu/JobNodeMenu";
+import { QueueTypes } from "../api/ilum_resources/queueOperationsApi";
+import JobScriptMenu from "../components/jobNodePageComponents/menu/JobScriptMenu";
+import JobEntityMenu from "../components/jobNodePageComponents/menu/JobEntityMenu";
 
 
 export enum JobNodeResourceListsMembers{
@@ -38,14 +41,13 @@ export interface JobNodePageInterface{
     
 }
 const JobNodePage = ({} : JobNodePageInterface) => {
-
-
+    
     const {jobNodeId, projectId} = useParams();
     
-    const [menu, setMenu] = useState<JSX.Element | null>(null);
-    const [currentList, setCurrentList] = useState<JobNodeResourceListData | null>(null);
 
-    
+    //context
+
+    //dependencies for all lists
     const [jobsFilesListDependency, setJobsFileListDependency] = useState<number>(0);
     const [jobScriptsListDependency, setJobSciptsListDependency] = useState<number>(0);
     const [jobQueueDependency, setJobQueueDependency] = useState<number>(0);
@@ -54,7 +56,17 @@ const JobNodePage = ({} : JobNodePageInterface) => {
     const [jobResultsFailedDependency, setJobResultsFailedDependency] = useState<number>(0);
     const [jobResultsSuccessDependency, setJobResultsSuccessDependency] = useState<number>(0);
 
+
+    const [menu, setMenu] = useState<JSX.Element | null>(null);
+    const [currentList, setCurrentList] = useState<JobNodeResourceListData | null>(null);
+
+   
+    //data form server
     const [jobNodeData, setJobNodeData] = useState<JobNodeWithIlumGroup | null>(null);
+    const [[jobsCount, testCount], setCount] = useState<[number, number]>([0, 0]);
+
+
+    //user input
     const [ilumGroupConfig, setIlumGroupConfig] = useState<IlumGroupConfiguration>({
         maxJobDuration : 60
     });
@@ -72,6 +84,15 @@ const JobNodePage = ({} : JobNodePageInterface) => {
             })
             .catch(e => console.log(e))
         ;
+
+        retrieveQueueSize(projectId, jobNodeId, QueueTypes.JOBS_QUEUE)
+            .then(r => {
+                setCount([r.data, testCount]);
+                retrieveQueueSize(projectId, jobNodeId, QueueTypes.TESTING_JOBS)
+                    .then(r2 => {
+                        setCount([r.data, r2.data])
+                    });
+            }).catch(e => console.log(e));
     }
 
     function start(){
@@ -110,52 +131,92 @@ const JobNodePage = ({} : JobNodePageInterface) => {
             }}>
                 {/* Main panel */}
 
-                {jobNodeData ? <div>
-                    <h3>Job Node : {jobNodeData?.jobNodeDetails.name}</h3>
+                {jobNodeData ? <div style={{margin: "30px 10%"}}>
+                    <h3>Job Node</h3>
+                    <hr/>
 
-                    <h4>State:</h4>
+                    <h5>Details:</h5>
+                    <strong>Name: </strong> {jobNodeData.jobNodeDetails.name}<br/>
+                    <strong>Id : {jobNodeData.id}</strong>
+                    <hr/>
+
+                    <h5>State:</h5>
                     {jobNodeData.ilumGroup ? 
                         <div>
                             <h5>Job is running</h5>
                             <strong>Mod {jobNodeData.ilumGroup.mod}</strong>
                             <br/>
-                            <strong>Current Job Entity</strong>
+                            <strong>Jobs Progress:</strong><i>{jobNodeData.ilumGroup.currentIndex + 1}/{jobsCount}</i><br/>
+                            <strong>Tests Progress:</strong><i>{jobNodeData.ilumGroup.currentTestingIndex + 1}/{testCount}</i><br/>
+                            
+                            <hr/>
+                            <h5>Current Job Entity</h5>
+                            <strong>Name: </strong>{jobNodeData.ilumGroup.currentJob.jobEntityDetails.name} <br/>
+                        
+                            <strong>Class Name: </strong><i>{jobNodeData.ilumGroup.currentJob.jobScript.classFullName}</i>
                             <br/>
-                            <i>{jobNodeData.ilumGroup.currentJob.jobScript.classFullName}</i>
+                            <button className="btn btn-success m-2" onClick={() => jobNodeData.ilumGroup && setMenu(<JobEntityMenu
+                                context={{
+                                    jobNodePageRefresh: {
+                                        projectId : projectId ?? "",
+                                        jobNodeId : jobNodeId ?? "",
+                                        setMenu : setMenu,
+                                        setChosenResourceList : setCurrentList,
+                                        chosenResourceList : currentList
+                                    },
+                                    queueType: jobNodeData.ilumGroup.mod == "NORMAL" ? QueueTypes.JOBS_QUEUE : QueueTypes.TESTING_JOBS
+                                }}
+                                jobEntityId={jobNodeData.ilumGroup.currentJob.id}
+                            />)}>More...</button>
 
+                            <hr/>
+
+                            <h5>Actions:</h5>
                             <button className="btn btn-danger m-2" onClick={stop}>Stop</button>
 
-                            {/* <h3>Current errors:</h3>
-                            <IlumGroupErrorsList context={{jobNodePageRefresh: jobNodePageRefresh}} data={{
-                                ilumGroupDetails: jobNodeData.ilumGroup.ilumGroupDetails,
-                                ilumGroupId: jobNodeData.ilumGroup.ilumId
-                            }}/> */}
-                            
+
+                            <hr/>
+
+                            <h5>Ilum Group Details:</h5>
+                            <strong>Name: </strong> {jobNodeData.ilumGroup.ilumGroupDetails.name} <br/>
+                            <strong>Ilum Group Id :{jobNodeData.ilumGroup.ilumId}  </strong> <br/>
+                            <strong>Start Time ms: </strong>{jobNodeData.ilumGroup.ilumGroupDetails.startTime || "not specified"} <br/>
+                            <strong>Start Time</strong>{jobNodeData.ilumGroup.ilumGroupDetails.startTime ? 
+                                new Date(jobNodeData.ilumGroup.ilumGroupDetails.startTime).toUTCString() : 
+                                "not specified"
+                            } <br/>
+                            <strong>Description: </strong>
+                            <p>{jobNodeData.ilumGroup.ilumGroupDetails.description || "no description"}</p>
+                            {jobNodeData.ilumGroup.ilumGroupConfiguration && <>
+                                <hr/>
+                                <h5>Configuration: </h5>
+
+                                <strong>Max Job Duration</strong>{jobNodeData.ilumGroup.ilumGroupConfiguration.maxJobDuration} <br/>
+                            </>}
+                          
                         </div>
                         :
                         <div>
                             <h5>Job is not runnning</h5>
-                            <strong>Details:</strong>
-                            <br/>
-                            <label>Name: <input value={ilumGroupDetails.name} 
-                                onChange={e => setIlumGroupDetails({...ilumGroupDetails, name : e.target.value})}/>
-                            </label>
-                            <br/>
-                            <label>Description: <input value={ilumGroupDetails.description} 
-                                onChange={e => setIlumGroupDetails({...ilumGroupDetails, description : e.target.value})}/>
-                            </label>
-                            <br/>
+                            <hr/>
 
-                            <strong>Configuration: </strong>
-                            <br/>
-                            <label>
-                                Max Job Duration: 
-                                <input type="number" value={ilumGroupConfig.maxJobDuration} onChange={e => 
-                                    setIlumGroupConfig({...ilumGroupConfig, maxJobDuration : Number(e.target.value)})
-                                }/>
-                            </label>
-                            <br/>
+                            <h5>Details:</h5>
+                            <strong>Name: </strong>
+                            <input className="form-control m-2" value={ilumGroupDetails.name} 
+                                onChange={e => setIlumGroupDetails({...ilumGroupDetails, name : e.target.value})}/>
                             
+                            <strong>Description: </strong>
+                            <textarea className="form-control m-2" value={ilumGroupDetails.description} 
+                                onChange={e => setIlumGroupDetails({...ilumGroupDetails, description : e.target.value})}/>
+                        
+                            <hr/>
+
+                            <h5>Configuration: </h5>
+                         
+                            <strong>Max Job Duration: </strong>
+                            <input className="form-control m-2" type="number" value={ilumGroupConfig.maxJobDuration} onChange={e => 
+                                setIlumGroupConfig({...ilumGroupConfig, maxJobDuration : Number(e.target.value)})
+                            }/>
 
                             <button className="btn btn-primary m-2" onClick={start}>Start</button>
                         </div>

@@ -35,7 +35,7 @@ const JobEntityElement = ({data, context} : JobEntityElementArgs) => {
                     context.jobNodePageRefresh.setMenu(
                         <JobScriptMenu
                             context={context}
-                            data={data.jobScript}
+                            data={data.jobScript.id}
                         />
                     )
                     e.stopPropagation();

@@ -17,7 +17,7 @@ export interface JobScriptMenuContext{
 }
 
 export interface JobScriptMenu{
-    data : JobScriptSimple,
+    data : string,
     context : JobScriptMenuContext,
 }
 
@@ -33,10 +33,8 @@ const JobScriptMenu = ({
         name : ""
     });
 
-    const [jobSearchListOpened, setJobSearchListOpened] = useState<boolean>(false);
-
     function refresh(){
-        retreiveJobScript(data.project.id, data.jobNode.id, data.id)
+        retreiveJobScript(context.jobNodePageRefresh.projectId, context.jobNodePageRefresh.jobNodeId, data)
             .then(response => {
                 setActualData(response.data);
             })
@@ -44,7 +42,7 @@ const JobScriptMenu = ({
     }
 
     function deleteJobScriptElement(){
-        deleteJobScript(data.project.id, data.jobNode.id, data.id)
+        deleteJobScript(context.jobNodePageRefresh.projectId, context.jobNodePageRefresh.jobNodeId, data)
             .then(r => {
                 context.jobNodePageRefresh.setMenu(null);
                 if(
@@ -58,7 +56,7 @@ const JobScriptMenu = ({
     }
 
     function updateDetails(){
-        updateJobScriptDetails(data.project.id, data.jobNode.id, data.id, newDetails)
+        updateJobScriptDetails(context.jobNodePageRefresh.projectId, context.jobNodePageRefresh.jobNodeId, data, newDetails)
             .then(r => {
                 refresh();
                 if(
@@ -203,8 +201,8 @@ const JobScriptMenu = ({
                                     <h5 className="m-2">Add Dependencies: </h5>
                                     <ServerBoundList<JobsFileSimple, JobsFileAddElementContext>
                                         endpoint={{
-                                            resourse: `/projects/${data.project.id}/job_nodes/${data.jobNode.id}/jobs_files?`,
-                                            count :  `/projects/${data.project.id}/job_nodes/${data.jobNode.id}/jobs_files/count?`
+                                            resourse: `/projects/${context.jobNodePageRefresh.projectId}/job_nodes/${context.jobNodePageRefresh.jobNodeId}/jobs_files?`,
+                                            count :  `/projects/${context.jobNodePageRefresh.projectId}/job_nodes/${context.jobNodePageRefresh.jobNodeId}/jobs_files/count?`
                                         }}
                                         Wrapper={JobsFileAddElement}
                                         pager={{defaultPageSize: 10}}
@@ -234,9 +232,9 @@ const JobScriptMenu = ({
                         context={{
                             jobNodePageRefresh : context.jobNodePageRefresh
                         }}
-                        projectId={data.project.id}
-                        jobNodeId={data.jobNode.id}
-                        jobScriptId={data.id}
+                        projectId={context.jobNodePageRefresh.projectId}
+                        jobNodeId={context.jobNodePageRefresh.jobNodeId}
+                        jobScriptId={data}
                     />)}>Add to Queue</button>
 
                     <br/>
