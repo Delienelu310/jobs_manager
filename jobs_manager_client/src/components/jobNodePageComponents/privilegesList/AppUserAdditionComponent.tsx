@@ -30,7 +30,7 @@ const AppUserAdditionComponent = ({context} : AppUserAdditionComponentArgs) => {
                             context.jobNodePageRefresh.projectId,
                             context.jobNodePageRefresh.jobNodeId,
                             username,
-                            JobNodePrivilege.VIEWWER
+                            JobNodePrivilege.VIEWER
                         ).then(r => {
                             context.jobNodePageRefresh.setMenu(
                                 <AppUserJobNodeMenu

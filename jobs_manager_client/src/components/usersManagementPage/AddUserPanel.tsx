@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AppUserDetails, createModerator, createUser, Roles } from "../../api/authorization/usersApi";
 import { AxiosResponse } from "axios";
 import { UsersManagementPageContext } from "../../pages/UsersManagementPage";
+import SecuredNode from "../../authentication/SecuredNode";
 
 
 export interface AddUserPanelArgs{
@@ -65,7 +66,16 @@ const AddUserPanel = ({context} : AddUserPanelArgs) => {
                 setAuthorities(newAuthorities);
 
             }}>
-                <option value={"MODERATOR"}>MODERATOR</option>
+                <SecuredNode
+                    jobNodePrivilegeConfig={null}
+                    projectPrivilegeConfig={null}
+                    moderator={false}
+                    roles={[]}
+                    alternative={null}
+                >
+                    <option value={"MODERATOR"}>MODERATOR</option>   
+                </SecuredNode>
+                
                 {Object.values(Roles).map(role => <option value={role}>{role}</option>)}
             </select>
 

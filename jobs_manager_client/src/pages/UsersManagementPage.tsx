@@ -5,6 +5,7 @@ import ServerBoundList from "../components/lists/ServerBoundList";
 import AppUserElement from "../components/usersManagementPage/AppUserElement";
 import AddUserPanel from "../components/usersManagementPage/AddUserPanel";
 import OpenerComponent from "../components/OpenerComponent";
+import SecuredNode from "../authentication/SecuredNode";
 
 
 export  interface UsersManagementPageContext{
@@ -28,17 +29,27 @@ const UsersManagementPage = () => {
                 {menu && <button className="btn btn-danger m-3" onClick={() => setMenu(null)}>Close Menu</button>}
             </div>
             
-            <div className="m-5">
-                <OpenerComponent
-                    closedLabel={<h5>Add User</h5>}
-                    openedElement={
-                        <AddUserPanel context={{
-                            setMenu : setMenu,
-                            setUsersListDependency : setUsersListDependency
-                        }}/>
-                    }
-                />
-            </div>
+            <SecuredNode
+                jobNodePrivilegeConfig={null}
+                projectPrivilegeConfig={null}
+                roles={[]}
+                moderator={true}
+                alternative={null}
+            >
+                <div className="m-5">
+
+                    <OpenerComponent
+                        closedLabel={<h5>Add User</h5>}
+                        openedElement={
+                            <AddUserPanel context={{
+                                setMenu : setMenu,
+                                setUsersListDependency : setUsersListDependency
+                            }}/>
+                        }
+                    />
+                </div>
+            </SecuredNode>
+            
             
 
             <ServerBoundList<AppUserSimple, UsersManagementPageContext>

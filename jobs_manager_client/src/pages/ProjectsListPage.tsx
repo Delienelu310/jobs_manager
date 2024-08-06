@@ -10,6 +10,7 @@ import { updateProjectGraph } from "../api/ui/projectGraphApi";
 import OpenerComponent from "../components/OpenerComponent";
 import { useAuth } from "../authentication/AuthContext";
 import { Roles } from "../api/authorization/usersApi";
+import SecuredNode from "../authentication/SecuredNode";
 
 
 export interface ProjectListPageContext{
@@ -40,13 +41,14 @@ const ProjectListPage = () => {
     
     return (
         <div>
-            {authentication && 
-                (
-                    authentication.roles.includes("ROLE_ADMIN") ||
-                    authentication.roles.includes("ROLE_MODERATOR") ||
-                    authentication.roles.includes("ROLE_" + Roles.MANAGER)
-                )
-                &&
+
+            <SecuredNode
+                jobNodePrivilegeConfig={null}
+                projectPrivilegeConfig={null}
+                moderator={true}
+                roles={[Roles.MANAGER]}
+                alternative={null}
+            >
                 <div className="m-5">
                     <OpenerComponent 
                         closedLabel={<h4>Create Project</h4>}
@@ -68,7 +70,10 @@ const ProjectListPage = () => {
                         }
                     />
                 </div>
-            }
+                
+            </SecuredNode>
+           
+            
            
            
           

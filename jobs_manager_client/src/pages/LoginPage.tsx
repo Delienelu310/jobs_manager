@@ -13,9 +13,9 @@ const LoginPage : React.FC = () => {
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
 
-    // if(token != null){
-    //     return <Navigate to="/"/>
-    // }
+    if(authentication != null){
+        return <Navigate to="/"/>
+    }
 
     return (
         <div style={{width: "50%", margin: "20px 25%"}}>

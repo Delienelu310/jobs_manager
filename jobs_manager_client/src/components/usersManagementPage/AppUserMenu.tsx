@@ -3,6 +3,7 @@ import { AppUserDetails, AppUserSimple, deleteModerator, deleteUser, retrieveUse
 import { UsersManagementPageContext } from "../../pages/UsersManagementPage";
 import OpenerComponent from "../OpenerComponent";
 import { AxiosResponse } from "axios";
+import SecuredNode from "../../authentication/SecuredNode";
 
 
 export interface AppUserMenuArgs{
@@ -99,67 +100,75 @@ const AppUserMenu = ({
 
                     <hr/>
 
+                    <SecuredNode
+                        jobNodePrivilegeConfig={null}
+                        projectPrivilegeConfig={null}
+                        moderator={data.authorities.map(auth => auth.authority).includes("ROLE_MODERATOR")}
+                        roles={[]}
+                        alternative={null}
+                    >
+                        <OpenerComponent
+                            closedLabel={  <h5>Update password:</h5>}
+                            openedElement={
+                                <div>
+                                    <h5>Update password:</h5>
+                                    <strong>New Password:</strong>
+                                    <input className="form-control m-2" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)}/>
+                                    <strong>Repeat new Password</strong>
+                                    <input className="form-control m-2" type="password" value={newRepeatPassword} onChange={e => setNewRepeatPassword(e.target.value)}/>
+                                    <button className="btn btn-success m-2" onClick={changePassword}>Change Password</button>
+                                </div>
+                            }
+                        />
+                        <hr/>   
 
-                    <OpenerComponent
-                        closedLabel={  <h5>Update password:</h5>}
-                        openedElement={
-                            <div>
-                                <h5>Update password:</h5>
-                                <strong>New Password:</strong>
-                                <input className="form-control m-2" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)}/>
-                                <strong>Repeat new Password</strong>
-                                <input className="form-control m-2" type="password" value={newRepeatPassword} onChange={e => setNewRepeatPassword(e.target.value)}/>
-                                <button className="btn btn-success m-2" onClick={changePassword}>Change Password</button>
-                            </div>
-                        }
-                    />
-                    <hr/>   
+                        <OpenerComponent
+                            closedLabel={<h5>Update Roles</h5>}
+                            openedElement={
+                                <div>
+                                    <h5>Update Roles</h5>
 
-                    <OpenerComponent
-                        closedLabel={<h5>Update Roles</h5>}
-                        openedElement={
-                            <div>
-                                <h5>Update Roles</h5>
+                                    <select className="form-control m-2" value={newRoles} multiple onChange={e => {
+                                        let newNewRoles = Array.from(newRoles);
 
-                                <select className="form-control m-2" value={newRoles} multiple onChange={e => {
-                                    let newNewRoles = Array.from(newRoles);
+                                        if(newNewRoles.includes(e.target.value)){
+                                            newNewRoles = newNewRoles.filter(val => val != e.target.value)
+                                        }else{
+                                            newNewRoles.push(e.target.value);
+                                        }
+                                        setNewRoles(newNewRoles);
+                                    }}>
+                                        {Object.values(Roles).map(role => <option value={role}>{role}</option>)}
+                                    </select>
+                                    <button className="btn btn-danger m-2">Deselect</button>
+                                    <br/>
 
-                                    if(newNewRoles.includes(e.target.value)){
-                                        newNewRoles = newNewRoles.filter(val => val != e.target.value)
-                                    }else{
-                                        newNewRoles.push(e.target.value);
-                                    }
-                                    setNewRoles(newNewRoles);
-                                }}>
-                                    {Object.values(Roles).map(role => <option value={role}>{role}</option>)}
-                                </select>
-                                <button className="btn btn-danger m-2">Deselect</button>
-                                <br/>
+                                    <button className="btn btn-success m-2" onClick={changeRoles}>Update Roles</button>
+                                </div>
+                            }
+                        />     
+                        <hr/>
 
-                                <button className="btn btn-success m-2" onClick={changeRoles}>Update Roles</button>
-                            </div>
-                        }
-                    />     
+                        <OpenerComponent
+                            closedLabel={<h5>Update details:</h5>}
+                            openedElement={
+                                <div>
+                                    <h5>Update details:</h5>
+
+
+                                    <strong>Full Name:</strong>
+                                    <input className="form-control m-2" value={newUserDetails.fullname} onChange={e => setNewUserDetails({...newUserDetails, fullname : e.target.value})}/>
+                                    <button className="btn btn-success m-2" onClick={changeDetails}>Update Details</button>
+                                </div>
+                            }
+                            
+                        />
+
                     <hr/>
 
-                    <OpenerComponent
-                        closedLabel={<h5>Update details:</h5>}
-                        openedElement={
-                            <div>
-                                <h5>Update details:</h5>
-
-
-                                <strong>Full Name:</strong>
-                                <input className="form-control m-2" value={newUserDetails.fullname} onChange={e => setNewUserDetails({...newUserDetails, fullname : e.target.value})}/>
-                                <button className="btn btn-success m-2" onClick={changeDetails}>Update Details</button>
-                            </div>
-                        }
-                        
-                    />
-
-                   <hr/>
-
-                    <button className="btn btn-danger m-2" onClick={delUser}>Delete</button>
+                        <button className="btn btn-danger m-2" onClick={delUser}>Delete</button>
+                    </SecuredNode>
+                    
 
                 </div>
             }
