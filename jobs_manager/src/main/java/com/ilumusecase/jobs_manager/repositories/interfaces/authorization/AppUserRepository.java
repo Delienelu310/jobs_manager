@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.provisioning.UserDetailsManager;
 
 import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
+import com.ilumusecase.jobs_manager.resources.authorities.AppUserDetails;
 import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
 import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 
@@ -50,5 +51,6 @@ public interface AppUserRepository extends UserDetailsManager{
 
     public AppUser saveAppUser(AppUser user);
 
+    public void updateAppUserDetails(String username, AppUserDetails appUserDetails);
 
 }

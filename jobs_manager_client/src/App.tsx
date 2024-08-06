@@ -8,6 +8,7 @@ import WelcomePage from './pages/WelcomePage';
 import ProjectListPage from './pages/ProjectsListPage';
 import ProjectPage from './pages/ProjectPage';
 import JobNodePage from './pages/JobNodePage';
+import UsersManagementPage from './pages/UsersManagementPage';
 
 
 function App() {
@@ -25,6 +26,8 @@ function App() {
             <Route path={"/projects/:projectId"} Component={ProjectPage}/>
 
             <Route path={"/projects/:projectId/job_nodes/:jobNodeId"} Component={JobNodePage}/>
+
+            <Route path={"/users"} Component={UsersManagementPage}/>
             
           </Routes>
         </BrowserRouter>

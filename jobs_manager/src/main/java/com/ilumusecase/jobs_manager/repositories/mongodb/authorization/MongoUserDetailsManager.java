@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -18,8 +19,11 @@ import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.data.mongodb.core.aggregation.ReplaceRootOperation;
 import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.ilumusecase.jobs_manager.repositories.interfaces.authorization.AppUserRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.authorization.MongoAppUser;
@@ -31,6 +35,8 @@ import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 
 public class MongoUserDetailsManager implements AppUserRepository{
 
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     private MongoTemplate mongoTemplate;
 
@@ -39,6 +45,10 @@ public class MongoUserDetailsManager implements AppUserRepository{
     public MongoUserDetailsManager(MongoAppUser mongoAppUser, MongoTemplate mongoTemplate){
         this.mongoAppUser = mongoAppUser;
         this.mongoTemplate = mongoTemplate;
+    }
+
+    public boolean doesUserExist(String username){
+        return mongoAppUser.existsById(username);
     }
 
     @Override
@@ -60,8 +70,14 @@ public class MongoUserDetailsManager implements AppUserRepository{
 
     @Override
     public void changePassword(String oldPassword, String newPassword) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'changePassword'");
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        AppUser user = findByUsername(authentication.getName());
+
+        if(!user.getPassword().equals(passwordEncoder.encode(oldPassword))) throw new RuntimeException("Wrong password");
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        mongoAppUser.save(user);
     }
 
     @Override
@@ -90,6 +106,13 @@ public class MongoUserDetailsManager implements AppUserRepository{
         appUser.setNewState(user);
         mongoAppUser.save(appUser);
 
+    }
+
+    public void updateAppUserDetails(String username, AppUserDetails appUserDetails){
+        AppUser appUser = mongoAppUser.findByUsername(username).orElseThrow(RuntimeException::new);
+
+        appUser.setAppUserDetails(appUserDetails);
+        mongoAppUser.save(appUser);
     }
 
     @Override

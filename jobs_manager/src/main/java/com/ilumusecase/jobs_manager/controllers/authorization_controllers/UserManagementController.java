@@ -1,5 +1,7 @@
 package com.ilumusecase.jobs_manager.controllers.authorization_controllers;
 
+import java.util.Base64;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
@@ -17,12 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
+import com.ilumusecase.jobs_manager.resources.authorities.AppUserDetails;
 import com.ilumusecase.jobs_manager.security.Roles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthAdminRoleOnly;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.DisableDefaultAuth;
 
 import jakarta.validation.constraints.Min;
-import jakarta.websocket.server.PathParam;
 
 @RestController
 public class UserManagementController {
@@ -63,20 +65,33 @@ public class UserManagementController {
         return  repositoryFactory.getUserDetailsManager().retrieveUserById(id);
     }
 
+
+    private record AppUserRequestBody(
+        String passwordEncoded,
+        String username,
+        Roles[] roles,
+        AppUserDetails appUserDetails
+    ){
+
+    }
+
    
     @PostMapping("/moderators")
     @AuthAdminRoleOnly
     @DisableDefaultAuth
-    public void createModerator(@RequestBody AppUser appUser){
+    public void createModerator(@RequestBody AppUserRequestBody appUserBody){
 
         UserDetails userDetails = User
-            .withUsername(appUser.getUsername())
-            .password(appUser.getPassword())
+            .withUsername(appUserBody.username)
+            .password(new String(Base64.getDecoder().decode(appUserBody.passwordEncoded)))
             .passwordEncoder(str -> passwordEncoder.encode(str))
             .roles("MODERATOR") 
             .build();
 
+        AppUser appUser = new AppUser();
         appUser.setNewState(userDetails);
+        appUser.setAppUserDetails(appUserBody.appUserDetails);
+
         repositoryFactory.getUserDetailsManager().saveAppUser(appUser);
     }
 
@@ -92,25 +107,32 @@ public class UserManagementController {
         repositoryFactory.getUserDetailsManager().deleteUserById(username);
     }
 
+
     @PostMapping("/users")
     @DisableDefaultAuth
-    public void createNewUser( @RequestBody AppUser appUser, @PathParam("roles") Roles[] roles){
+    public void createNewUser( @RequestBody AppUserRequestBody appUserBody){
 
-        String[] rolesFiltered = new String[roles.length];
+        if(repositoryFactory.getUserDetailsManager().userExists(appUserBody.username)){
+            throw new RuntimeException("User with username\""  + appUserBody.username + "\" exists already");
+        }
+
+        String[] rolesFiltered = new String[appUserBody.roles.length];
         int i = 0;
-        for(Roles role : roles){
+        for(Roles role : appUserBody.roles){
             rolesFiltered[i] = role.toString();   
             i++;        
         }
 
         UserDetails userDetails = User
-            .withUsername(appUser.getUsername())
-            .password(appUser.getPassword())
+            .withUsername(appUserBody.username)
+            .password(new String(Base64.getDecoder().decode(appUserBody.passwordEncoded)))
             .passwordEncoder(str -> passwordEncoder.encode(str))
             .roles(rolesFiltered) 
             .build();
 
+        AppUser appUser = new AppUser();
         appUser.setNewState(userDetails);
+        appUser.setAppUserDetails(appUserBody.appUserDetails);
 
         repositoryFactory.getUserDetailsManager().saveAppUser(appUser);
     }
@@ -125,24 +147,73 @@ public class UserManagementController {
         repositoryFactory.getUserDetailsManager().deleteUserById(id);
     }
 
-    @PutMapping("/users/{id}")
-    @DisableDefaultAuth
-    public void udpateUserDetails(Authentication authentication, @RequestBody AppUser appUser, @PathVariable("id") String id){
-          
-        AppUser dbAppUser = repositoryFactory.getUserDetailsManager().retrieveUserById(id);
-        if(dbAppUser.getAuthorities().stream().anyMatch(auth -> auth.toString().equals("ROLE_ADMIN") || auth.toString().equals("ROLE_MODERATOR"))){
-            throw new RuntimeException("Endpoint cannot be used to update moderator");
-        }
+    private record OldNewPassword(String oldBase64EncodedPassword, String newBase64EncodedPassword){
 
-        UserDetails userDetails = User.withUsername(appUser.getUsername())
-            .password(id)
-            .passwordEncoder(str -> passwordEncoder.encode(str))
-            .build();
+    }
 
-        appUser.setUsername(userDetails.getUsername());
-        appUser.setPassword(userDetails.getPassword());
+    @PutMapping("/users/password")
+    public void updateMyPassword( @RequestBody OldNewPassword oldNewPassword){
+
+        repositoryFactory.getUserDetailsManager().changePassword(
+            new String(Base64.getDecoder().decode(oldNewPassword.oldBase64EncodedPassword)),
+            new String(Base64.getDecoder().decode(oldNewPassword.newBase64EncodedPassword))    
+        );
+
+    }
+
+    @PutMapping("/users/{username}/password")
+    public void updatePassword(@PathVariable("username") String username, @RequestBody String base64EncodedPassword ){
+
+        AppUser user = repositoryFactory.getUserDetailsManager().findByUsername(username);
         
+        UserDetails userDetails = User.withUsername(username)
+            .password(new String(Base64.getDecoder().decode(base64EncodedPassword)))
+            .passwordEncoder(str -> passwordEncoder.encode(str))
+            .authorities(user.getAuthorities())
+            .build();
         repositoryFactory.getUserDetailsManager().updateUser(userDetails);
+
+    }
+
+    @PutMapping("/users/{username}/roles")
+    public void updateRoles(@RequestBody Roles[] newRoles, @PathVariable("username") String username){
+        AppUser user = repositoryFactory.getUserDetailsManager().findByUsername(username);
+        
+        String[] rolesStr = new String[newRoles.length];
+        for(int i = 0; i < newRoles.length; i++ ){
+            rolesStr[i] = newRoles[i].toString();
+        }
+        UserDetails userDetails = User.withUsername(username)
+            .password(user.getPassword())
+            .roles(rolesStr)
+            .build();
+        repositoryFactory.getUserDetailsManager().updateUser(userDetails);
+
+    }
+
+    @PutMapping("/users/{username}/details")
+    @DisableDefaultAuth
+    public void udpateAppUserDetails(Authentication authentication, @RequestBody AppUserDetails appUserDetails, @PathVariable("username") String username){
+          
+        AppUser user = repositoryFactory.getUserDetailsManager().retrieveUserById(username);
+
+        if(
+            !authentication.getAuthorities().stream().map(auth -> auth.getAuthority()).anyMatch(auth -> auth.equals("ROLE_ADMIN"))
+            &&
+            !authentication.getName().equals(username)
+            &&
+            !(
+                authentication.getAuthorities().stream().map(auth -> auth.getAuthority()).anyMatch(auth -> auth.equals("ROLE_MODERATOR"))
+                &&
+                !user.getAuthorities().stream().map(auth -> auth.getAuthority()).anyMatch(auth -> auth.equals("ROLE_MODERATOR") || auth.equals("ROLE_ADMIN"))
+            )
+
+        ){
+            throw new RuntimeException(" You are not authorized to change details of the user");
+        } 
+        
+
+        repositoryFactory.getUserDetailsManager().updateAppUserDetails(username, appUserDetails);
     }
 
 }

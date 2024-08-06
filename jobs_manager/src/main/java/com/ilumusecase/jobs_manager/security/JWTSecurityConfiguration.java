@@ -1,10 +1,5 @@
 package com.ilumusecase.jobs_manager.security;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.interfaces.RSAPublicKey;
-import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,20 +13,11 @@ import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
 import com.ilumusecase.jobs_manager.resources.authorities.AppUserDetails;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
-
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 
 @Configuration
@@ -39,6 +25,9 @@ public class JWTSecurityConfiguration {
 
     @Autowired
     private RepositoryFactory repositoryFactory;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     private Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
 
@@ -82,7 +71,7 @@ public class JWTSecurityConfiguration {
         UserDetails adminUser = User
             .withUsername("admin")
             .password("admin")
-            .passwordEncoder(str -> this.passwordEncoder().encode(str))
+            .passwordEncoder(str -> passwordEncoder.encode(str))
             .roles("ADMIN")
             .build()
         ;
@@ -96,52 +85,6 @@ public class JWTSecurityConfiguration {
         repositoryFactory.getUserDetailsManager().saveAppUser(user);
 
         return repositoryFactory.getUserDetailsManager();
-    }
-
-    // To hash the password in the database
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
-
-
-    // To make signature for jwt token and check it later:
-    @Bean
-    public KeyPair keyPair(){
-       try {
-         var keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-         keyPairGenerator.initialize(2048);
-         return keyPairGenerator.generateKeyPair();
-       } catch (Exception e) {
-            throw new RuntimeException(e);
-       }
-    }
-
-    @Bean
-    public RSAKey rsaKey(KeyPair keyPair){
-        return new RSAKey.Builder((RSAPublicKey)keyPair.getPublic())
-            .privateKey(keyPair.getPrivate())
-            .keyID(UUID.randomUUID().toString())
-            .build();
-    }
-
-    @Bean
-    public JWKSource<SecurityContext> jwkSource(RSAKey rsaKey){
-        var jwkSet = new JWKSet(rsaKey);
-
-        return (jwkSelector, context) -> jwkSelector.select(jwkSet);
-        
-    }
-
-    @Bean
-    public JwtDecoder jwtDecoder(RSAKey rsaKey) throws Exception{
-        return NimbusJwtDecoder.withPublicKey(rsaKey.toRSAPublicKey())
-            .build();
-    }
-
-    @Bean
-    public JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource){
-        return new NimbusJwtEncoder(jwkSource);
     }
 
 }
