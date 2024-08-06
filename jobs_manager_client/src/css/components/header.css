@@ -1,0 +1,36 @@
+.header{
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: darkslategray;
+    border-bottom: 3px solid black;
+    margin-bottom: 50px;
+
+    width : 100%;
+    padding: 10px 5%;
+    height: 70px;
+    
+}
+
+.header * {
+    line-height: 50px;
+    font-size : 30px;
+    font-weight: bolder;
+    color:bisque;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.header_element{
+    display: inline-block;
+    width: 15%;
+    text-align: center;
+}
+
+.header_element_right{
+    float: right;
+}
+
+.header_element_left{
+    float: left;
+}

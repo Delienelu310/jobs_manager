@@ -4,14 +4,20 @@ import { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import apiClient from "../api/ApiClient";
 
 
+export interface Authentication{
+    username : string,
+    roles : string[]
+}
+
+
 interface AuthContextType {
-    token :  string | null;
+    authentication :  Authentication | null;
     login ?: (clientData : ClientData) => Promise<AxiosResponse<string>>;
     logout: () => void;
 }
 
 const defaultAuthContext: AuthContextType = {
-    token: null,
+    authentication: null,
     logout: () => {
       console.warn('logout function is not implemented');
     }
@@ -23,7 +29,7 @@ export const useAuth = () => useContext(AuthContext);
 
 export default function AuthProvider({children} : {children : ReactNode})  {
 
-    const [token, setToken] = useState<string | null>(null);
+    const [authentication, setAuthentication] = useState<Authentication | null>(null);
     const [requestInjector, setRequestInjector] = useState<number | null>(null);
 
     useEffect(() => {
@@ -31,12 +37,12 @@ export default function AuthProvider({children} : {children : ReactNode})  {
             config.headers.Authorization="Basic YWRtaW46YWRtaW4="
             return config;
         }));
-        setToken("Basic YWRtaW46YWRtaW4=");
+        setAuthentication({username: "admin", roles: ["ROLE_ADMIN"]})
     }, []);
     
 
     function logout() : void{
-        setToken(null);
+        setAuthentication(null);
         if(requestInjector != null) apiClient.interceptors.request.eject(requestInjector);
         setRequestInjector(null);
 
@@ -45,8 +51,8 @@ export default function AuthProvider({children} : {children : ReactNode})  {
     
     return (
         <AuthContext.Provider value={{
-            token, 
-            login: (clientData : ClientData) => login(clientData, { setToken, setRequestInjector}), 
+            authentication, 
+            login: (clientData : ClientData) => login(clientData, { setAuthentication, setRequestInjector}), 
             logout
         }}>
             {children}

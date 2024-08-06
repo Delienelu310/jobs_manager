@@ -1,11 +1,11 @@
-import { Axios, AxiosResponse } from "axios";
+import {  AxiosResponse } from "axios";
 import apiClient from "../ApiClient";
 
 
 
 export enum JobNodePrivilege{
     MANAGER = "MANAGER",
-    VIEWWER = "VIEWER",
+    VIEWER = "VIEWER",
     TESTER = "TESTER",
     SCRIPTER = "SCRIPTER"
 }
@@ -14,7 +14,7 @@ export enum ProjectPrivilege{
     ADMIN = "ADMIN",
     MODERATOR = "MODERATOR",
     TESTER = "TESTER",
-    VIEWWER = "VIEWER",
+    VIEWER = "VIEWER",
     ARCHITECT = "ARCHITECT",
     SCRIPTER = "SCRIPTER"
 }

@@ -1,7 +1,13 @@
 import { AxiosResponse } from "axios";
 import  apiClient from "../api/ApiClient";
 import React from "react";
+import { jwtDecode } from "jwt-decode";
+import { Authentication } from "./AuthContext";
 
+interface JwtPayload{
+    scope : string,
+    sub : string
+}
 
 export interface ClientData{
     username: string,
@@ -10,8 +16,8 @@ export interface ClientData{
 
 export function login(
     {username, password} : ClientData, 
-    {setToken, setRequestInjector} : {
-        setToken : React.Dispatch<React.SetStateAction<string | null>>,
+    {setAuthentication, setRequestInjector} : {
+        setAuthentication : React.Dispatch<React.SetStateAction<Authentication | null>>,
         setRequestInjector : React.Dispatch<React.SetStateAction<number | null>>
     }
 ) : Promise<AxiosResponse<string>>{
@@ -23,9 +29,13 @@ export function login(
           'Authorization': `Basic ${base64Token}`,
         }
     }).then(response   => {
-        const token = `Bearer ${response.data}`;
-        setToken(token);
+        
+    
+  
+        const payload : JwtPayload = jwtDecode<JwtPayload>(response.data);
+        setAuthentication({username : payload.sub, roles: payload.scope.split(" ")});
 
+        const token = `Bearer ${response.data}`;
         setRequestInjector(apiClient.interceptors.request.use((config) => {
             config.headers.Authorization=token
             return config;

@@ -8,6 +8,8 @@ import { createProject, ProjectDetails } from "../api/abstraction/projectApi";
 import { useNavigate } from "react-router-dom";
 import { updateProjectGraph } from "../api/ui/projectGraphApi";
 import OpenerComponent from "../components/OpenerComponent";
+import { useAuth } from "../authentication/AuthContext";
+import { Roles } from "../api/authorization/usersApi";
 
 
 export interface ProjectListPageContext{
@@ -15,6 +17,8 @@ export interface ProjectListPageContext{
 }
 
 const ProjectListPage = () => {
+
+    const {authentication} = useAuth();
     
     const navigate = useNavigate();
 
@@ -36,27 +40,36 @@ const ProjectListPage = () => {
     
     return (
         <div>
-            <div className="m-5">
-                <OpenerComponent 
-                    closedLabel={<h4>Create Project</h4>}
-                    openedElement={
-                        <div style={{margin: "30px 10%"}}>
-                            <h4 className="m-2">Create project:</h4>
-                            <strong>Name :</strong> 
-                            <input className="form-control m-2" value={projectDetails.name} 
-                                onChange={e => setProjectDetails({...projectDetails, name : e.target.value})}/>
+            {authentication && 
+                (
+                    authentication.roles.includes("ROLE_ADMIN") ||
+                    authentication.roles.includes("ROLE_MODERATOR") ||
+                    authentication.roles.includes("ROLE_" + Roles.MANAGER)
+                )
+                &&
+                <div className="m-5">
+                    <OpenerComponent 
+                        closedLabel={<h4>Create Project</h4>}
+                        openedElement={
+                            <div style={{margin: "30px 10%"}}>
+                                <h4 className="m-2">Create project:</h4>
+                                <strong>Name :</strong> 
+                                <input className="form-control m-2" value={projectDetails.name} 
+                                    onChange={e => setProjectDetails({...projectDetails, name : e.target.value})}/>
 
-                            <strong>Description : </strong>
-                            <input className="form-control m-2" value={projectDetails.description} 
-                                onChange={e => setProjectDetails({...projectDetails, description : e.target.value})}/>
-                        
-
-                            <button onClick={create} className="btn btn-success m-2">Create</button>
+                                <strong>Description : </strong>
+                                <input className="form-control m-2" value={projectDetails.description} 
+                                    onChange={e => setProjectDetails({...projectDetails, description : e.target.value})}/>
                             
-                        </div>
-                    }
-                />
-            </div>
+
+                                <button onClick={create} className="btn btn-success m-2">Create</button>
+                                
+                            </div>
+                        }
+                    />
+                </div>
+            }
+           
            
           
             <h4 className="m">Project List:</h4>

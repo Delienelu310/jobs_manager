@@ -3,9 +3,9 @@ import { Navigate } from "react-router-dom";
 
 
 export default function WelcomePage() {
-    const {token} = useAuth();
+    const {authentication} = useAuth();
 
-    if(token == null){
+    if(authentication == null){
         return <Navigate to="/login"/>
     }
 

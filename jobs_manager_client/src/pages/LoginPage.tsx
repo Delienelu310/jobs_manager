@@ -6,16 +6,16 @@ import { Navigate } from "react-router-dom";
 const LoginPage : React.FC = () => {
 
 
-    const {login, token} = useAuth();
+    const {login, authentication} = useAuth();
 
     const [areCredentialsInvalid, setCredentialsInvalid] = useState<boolean>(false);
 
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
 
-    if(token != null){
-        return <Navigate to="/"/>
-    }
+    // if(token != null){
+    //     return <Navigate to="/"/>
+    // }
 
     return (
         <div style={{width: "50%", margin: "20px 25%"}}>

@@ -9,13 +9,16 @@ import ProjectListPage from './pages/ProjectsListPage';
 import ProjectPage from './pages/ProjectPage';
 import JobNodePage from './pages/JobNodePage';
 import UsersManagementPage from './pages/UsersManagementPage';
+import Header from './components/Header';
 
 
 function App() {
   return (
     <div className="App">
       <AuthProvider>
+      
         <BrowserRouter>
+          <Header/>
           <Routes>
             <Route path={"/login"} Component={LoginPage}/>
           
