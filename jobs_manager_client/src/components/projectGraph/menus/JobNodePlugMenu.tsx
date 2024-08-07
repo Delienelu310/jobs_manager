@@ -5,6 +5,8 @@ import { PlugBarElement } from "../gof/PlugBarElement";
 import { PlugElement } from "../gof/PlugElement";
 import { ChannelList, ChannelTypes } from "../../../api/abstraction/projectApi";
 import { removeJobNodePlug } from "../../../api/abstraction/jobNodeApi";
+import SecuredNode from "../../../authentication/SecuredNode";
+import { JobNodePrivilege, ProjectPrivilege } from "../../../api/authorization/privilegesApi";
 
 
 
@@ -26,38 +28,55 @@ const JobNodePlugMenu = ({
 
     return (
         <div>
-            <h3>{element.getLabel()}</h3>
-            <button className="btn btn-danger" onClick={e => {
-                removeJobNodePlug(element.getGof().getProjectData().id, 
-                    (element.getParent().getParent() as JobNodeElement).getData().id,
-                    (element.getParent() as PlugBarElement).getOrientation(), 
-                    element.getLabel()
-                ).then(response => element.getGof().getRefresh()());
-            }}>Delete</button>
+            <h3>Job Node {(element.getParent() as PlugBarElement).getOrientation() ? "Output" : "Input" }: {element.getLabel()}</h3>
 
-
-            <h3>Channel list:</h3>
+    
+            <h5>Channel list:</h5>
             {Object.entries(channels).map( ([key, channelList]) => (
                 <div>
-                    <h3>{key}</h3>
                     {channelList.channelList.map(channelData => (
-                        <div>
-                            <h5>Channel: {channelData.channelDetails.name}</h5>
-                            <span>Type : {channelData.channelDetails.type}</span>
+                        <div style={{
+                            margin: "0 15%",
+                            padding: "20px 0",
+                            borderBottom: "1px solid black",
+                            borderTop: "1px solid black"
+                        }}>
+                            <strong>Name: {channelData.channelDetails.name || "name is not specified"}</strong>
                             <br/>
-                            <span>Header : {channelData.channelDetails.headers.join(", ")}</span>
+                            <strong>Type : {channelData.channelDetails.type}</strong>
+                            <br/>
+                            <strong>Header : {channelData.channelDetails.headers.join(", ")}</strong>
 
-                            {channelData.inputJobs && channelData.inputJobs.length > 0 && <><hr/><h6>Input Jobs:</h6></>}
-                            {channelData.inputJobs && channelData.inputJobs.map(job => <>{job.jobNodeDetails.name}, id: {job.id} </>)}
-
-                            {channelData.outputJobs && channelData.outputJobs.length > 0 && <><hr/><h6>Output Jobs:</h6></>}
-                            {channelData.outputJobs && channelData.outputJobs.map(job => <>{job.jobNodeDetails.name}, id: {job.id} </>)}
                         </div>
                     ))}
                     
                     <hr/>
                 </div>
             ))}
+            
+            
+            <SecuredNode
+                roles={null}
+                alternative={null}
+                moderator
+                jobNodePrivilegeConfig={{
+                    jobNode: (element.getParent().getParent() as JobNodeElement).getData(),
+                    privileges: [JobNodePrivilege.MANAGER]
+                }}
+                projectPrivilegeConfig={{
+                    project : element.getGof().getProjectData(),
+                    privileges : [ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT]
+                }}
+            >
+                <button className="btn btn-danger" onClick={e => {
+                    removeJobNodePlug(element.getGof().getProjectData().id, 
+                        (element.getParent().getParent() as JobNodeElement).getData().id,
+                        (element.getParent() as PlugBarElement).getOrientation(), 
+                        element.getLabel()
+                    ).then(response => element.getGof().getRefresh()());
+                }}>Delete</button>
+
+            </SecuredNode>
             
         </div>
     );

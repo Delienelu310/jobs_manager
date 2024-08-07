@@ -27,7 +27,6 @@ const ProjectPlug = ({element} : ProjectPlugArgs) => {
             <div>
                 <strong>Name: </strong>{element.getLabel()}<br/>
 
-
                 <h5 className="m-3">Channel: </h5>
                 <strong>Channel Name:</strong>{channelData.channelDetails.name}<br/>
                 <strong>Type : {channelData.channelDetails.type}</strong> <br/>

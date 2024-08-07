@@ -3,6 +3,9 @@ import { PlugBarElement } from "../gof/PlugBarElement";
 import { addJobNodePlug } from "../../../api/abstraction/jobNodeApi";
 import { JobNodeElement } from "../gof/JobNodeElement";
 import { ChannelList, ChannelTypes } from "../../../api/abstraction/projectApi";
+import SecuredNode from "../../../authentication/SecuredNode";
+import OpenerComponent from "../../OpenerComponent";
+import { JobNodePrivilege, ProjectPrivilege } from "../../../api/authorization/privilegesApi";
 
 
 export interface JobNodePlugBarMenu{
@@ -22,39 +25,63 @@ const JobNodePlugBarMenu = ({element} : JobNodePlugBarMenu) => {
     
     return (
         <div>
-            <div>
-                <label>Label: </label>
-                <input value={newPlugLabel} onChange={e => setNewPlugLabel(e.target.value)}/>
+            <h3>Job Node {element.getOrientation() ? "Outputs" : "Inputs"} menu</h3>
 
-
-                <button className="btn btn-success" onClick={e => {
-                    addJobNodePlug(element.getGof().getProjectData().id, 
-                        (element.getParent() as JobNodeElement ).getData().id, 
-                        element.getOrientation(), 
-                        newPlugLabel
-                    ).then(respone => element.getGof().getRefresh()()).catch(e => console.log(e))
-                }}>Add plug</button>
-            </div>
-            
-            
-            {Object.entries(plugs).map( ([key, channelList]) => ( <div>
-                <h3>{key}</h3>
-                <h3>Channel list:</h3>
-                {channelList.channelList.map( (channelData) => (
-                    <div>
+            <SecuredNode
+                alternative={null}
+                roles={null}
+                moderator
+                projectPrivilegeConfig={{
+                    project: element.getGof().getProjectData(),
+                    privileges: [ProjectPrivilege.ADMIN, ProjectPrivilege.ARCHITECT, ProjectPrivilege.MODERATOR]
+                }}
+                jobNodePrivilegeConfig={{
+                    jobNode: (element.getParent() as JobNodeElement).getData(),
+                    privileges: [JobNodePrivilege.MANAGER]
+                }}
+            >
+                <OpenerComponent
+                    closedLabel={<h5>Add {element.getOrientation() ? "Output" : "Input"}</h5>}
+                    openedElement={
                         <div>
-                            <h5>Channel: {channelData.channelDetails.name}</h5>
-                            <span>Type : {channelData.channelDetails.type}</span>
-                            <br/>
-                            <span>Header : {channelData.channelDetails.headers.join(", ")}</span>
+                            <strong>Label: </strong>
+                            <input className="form-control m-2" value={newPlugLabel} onChange={e => setNewPlugLabel(e.target.value)}/>
 
-                            {channelData.inputJobs && channelData.inputJobs.length > 0 && <><hr/><h6>Input Jobs:</h6></>}
-                            {channelData.inputJobs && channelData.inputJobs.map(job => <>{job.jobNodeDetails.name}, id: {job.id} </>)}
 
-                            {channelData.outputJobs && channelData.outputJobs.length > 0 && <><hr/><h6>Output Jobs:</h6></>}
-                            {channelData.outputJobs && channelData.outputJobs.map(job => <>{job.jobNodeDetails.name}, id: {job.id} </>)}
+                            <button className="btn btn-success m-2" onClick={e => {
+                                addJobNodePlug(element.getGof().getProjectData().id, 
+                                    (element.getParent() as JobNodeElement ).getData().id, 
+                                    element.getOrientation(), 
+                                    newPlugLabel
+                                ).then(respone => element.getGof().getRefresh()()).catch(e => console.log(e))
+                            }}>Add plug</button>
                         </div>
-                        <hr/>
+                    }
+                />
+                <hr/>
+            </SecuredNode>
+                
+          
+            <h5>Labels list:</h5>
+            
+            {Object.entries(plugs).map( ([key, channelList]) => ( <div style={{
+                margin: "30px 15%", 
+                borderBottom: "3px solid black",
+                borderTop: "3px solid black",
+            }}>
+                <h5>{key}</h5>
+              
+                {channelList.channelList.map( (channelData) => (
+                    
+                    <div style={{
+                        margin: "20px 15%",
+                        borderBottom: "2px solid black"
+                    }}>
+                        <strong>Channel: {channelData.channelDetails.name}</strong>
+                        <br/>
+                        <strong>Type : {channelData.channelDetails.type}</strong>
+                        <br/>
+                        <strong>Header : {channelData.channelDetails.headers.join(", ")}</strong>
                     </div>
                 ))}
 

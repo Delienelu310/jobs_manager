@@ -10,6 +10,7 @@ import { GraphElementEventHandler } from "./eventHandlers/GraphElementEventHandl
 import { ChannelElementEventHandler } from "./eventHandlers/ChannelElementEventHandler";
 import { deleteChannel } from "../../../api/abstraction/channelApi";
 import { AxiosResponse } from "axios";
+import ChannelMenu from "../menus/ChannelMenu";
 
 
 export interface StaticChannelConfig{
@@ -41,9 +42,7 @@ export class ChannelElement implements GraphElement{
         return deleteChannel(this.getGof().getProjectData().id, this.channelData.id);
     }
     public getMenuComponent() : JSX.Element{
-        return (
-            <div>This is channel menu</div>   
-        )
+        return <ChannelMenu element={this}/>
     }
 
     public getEventHandler(): GraphElementEventHandler {

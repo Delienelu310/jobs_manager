@@ -1,15 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { JobNodeVerticeDetails, ProjectGraph, updateJobNodeVertice, updateProjectGraph  } from "../../api/ui/projectGraphApi";
-import { ChannelDetails, ChannelFullData, ChannelTypes, JobNodeDetails, ProjectFullData } from "../../api/abstraction/projectApi";
+import { ProjectGraph } from "../../api/ui/projectGraphApi";
+import { ChannelDetails, ChannelTypes, JobNodeDetails, ProjectFullData } from "../../api/abstraction/projectApi";
 
 import { JobNodeElement, StaticJobNodeElementConfig } from "./gof/JobNodeElement";
 import { StaticPlugBarConfig, PlugBarElement } from "./gof/PlugBarElement";
 import { DynamicCanvasConfig, GOF, StaticCanvasConfig } from "./gof/GOF";
 import { NullGraphElement } from "./gof/NullGraphElement";
-import { PlugElement } from "./gof/PlugElement";
 import { ChannelElement, StaticChannelConfig } from "./gof/ChannelElement";
 import { PanelMods } from "./gof/eventHandlers/PanelMods";
-import { createJobNode } from "../../api/abstraction/jobNodeApi";
 import SecuredNode from "../../authentication/SecuredNode";
 import { ProjectPrivilege } from "../../api/authorization/privilegesApi";
 
@@ -356,6 +354,7 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
                 </div>
 
                 <hr/>
+                <button className="btn btn-danger m-3" onClick={() => setMenu(<div>Choose Element...</div>)}>Close menu</button>
                 {menu}
             </>}
         </div>
