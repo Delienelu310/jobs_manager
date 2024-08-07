@@ -3,6 +3,8 @@ import { JobEntitySimple, retrieveJobEntityById } from "../../../api/ilum_resour
 import JobScriptMenu from "./JobScriptMenu";
 import { QueueTypes, removeJobEntityFromQueue } from "../../../api/ilum_resources/queueOperationsApi";
 import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../../../pages/JobNodePage";
+import SecuredNode from "../../../authentication/SecuredNode";
+import { JobNodePrivilege } from "../../../api/authorization/privilegesApi";
 
 
 export interface JobEntityMenuContext{
@@ -86,9 +88,21 @@ const JobEntityMenu = ({context, jobEntityId} : JobEntityMenuArgs) => {
                     />)}>Job scribt</button>
                     <br/>
 
-                    <hr/>
+                    <SecuredNode
+                        projectPrivilegeConfig={null}
+                        roles={null}
+                        moderator={true}
+                        alternative={null}
+                        jobNodePrivilegeConfig={{
+                            jobNode: context.jobNodePageRefresh.jobNodeData,
+                            privileges : [JobNodePrivilege.MANAGER, context.queueType == QueueTypes.JOBS_QUEUE ? JobNodePrivilege.SCRIPTER : JobNodePrivilege.TESTER]
+                        }}
+                    >
+                        <hr/>
 
-                    <button className="btn btn-danger m-2" onClick={deleteJob}>Remove</button>
+                        <button className="btn btn-danger m-2" onClick={deleteJob}>Remove</button>
+                    </SecuredNode>
+                   
 
                 </div>
                 :

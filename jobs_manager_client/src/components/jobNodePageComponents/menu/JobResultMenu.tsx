@@ -3,6 +3,8 @@ import { deleteJobResult, JobResultSimple, retrieveJobResultById } from "../../.
 import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../../../pages/JobNodePage";
 import OpenerComponent from "../../OpenerComponent";
 import JobScriptMenu from "./JobScriptMenu";
+import SecuredNode from "../../../authentication/SecuredNode";
+import { JobNodePrivilege } from "../../../api/authorization/privilegesApi";
 
 export interface JobErrorResultMenuContext{
     jobNodePageRefresh : JobNodePageRefresh
@@ -154,11 +156,23 @@ const JobErrorResultMenu = ({data, context} : JobErrorResultMenuAgs) => {
                         </>
                     }
 
+                    <SecuredNode
+                        alternative={null}
+                        roles={null}
+                        projectPrivilegeConfig={null}
+                        moderator
+                        jobNodePrivilegeConfig={{
+                            jobNode: context.jobNodePageRefresh.jobNodeData,
+                            privileges: [JobNodePrivilege.MANAGER]
+                        }}
+                    >
+                        <h5>Actions</h5>
+                        <button className="btn btn-danger m-2" onClick={deleteResult}>Delete</button>
+                        <hr/>
+                    </SecuredNode>
+                   
 
-                    <h5>Actions</h5>
-                    <button className="btn btn-danger m-2" onClick={deleteResult}>Delete</button>
-
-                    <hr/>
+                  
 
                     {actualData.jobResultDetails.errorMessage ? 
                         <>

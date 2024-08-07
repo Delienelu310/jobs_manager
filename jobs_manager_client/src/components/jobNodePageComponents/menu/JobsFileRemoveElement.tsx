@@ -1,5 +1,7 @@
+import { JobNodePrivilege } from "../../../api/authorization/privilegesApi";
 import { JobScriptSimple, removeJobsFileFromJobScript } from "../../../api/ilum_resources/jobScriptsApi";
 import { JobsFileSimple } from "../../../api/ilum_resources/jobsFilesApi";
+import SecuredNode from "../../../authentication/SecuredNode";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
 import JobsFileMenu from "./JobsFileMenu";
 
@@ -35,12 +37,29 @@ const JobsFileRemoveElement = ({data, context} : JobsFileRemoveElementArgs) => {
             <br/>
             <strong>Author: </strong> {data.publisher.username}
             <h5>Classes used:</h5>
-            {data.allClasses.map(cl => <><i>{cl}</i> <br/></>)}
-            <br/>
+            <div style={{
+                overflow: "scroll",
+                maxHeight: "400px"
+            }}>
+                {data.allClasses.map(cl => <><i>{cl}</i> <br/></>)}
+            </div>
             
+          
             
+            <SecuredNode
+                moderator={true}
+                alternative={null}
+                projectPrivilegeConfig={null}
+                roles={null}
+                jobNodePrivilegeConfig={{
+                    jobNode: context.jobNodePageRefresh.jobNodeData,
+                    privileges: [JobNodePrivilege.MANAGER, JobNodePrivilege.SCRIPTER, JobNodePrivilege.TESTER]
+                }}
+            >
+                <button className="btn btn-danger m-2" onClick={removeJobsFile}>Remove</button>
+               
+            </SecuredNode>
 
-            <button className="btn btn-danger m-2" onClick={removeJobsFile}>Remove</button>
             <br/>
 
 

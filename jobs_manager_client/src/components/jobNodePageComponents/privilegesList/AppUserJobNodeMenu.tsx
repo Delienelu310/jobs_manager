@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../../../pages/JobNodePage";
 import { AppUserSimple, retrieveUser } from "../../../api/authorization/usersApi";
 import { addPrivilegeToJobNodeUser, JobNodePrivilege, removePrivilegeFromJobNodeUser, removeUserFromJobNode, retrieveJobNodeUserPrivileges } from "../../../api/authorization/privilegesApi";
+import SecuredNode from "../../../authentication/SecuredNode";
 
 
 export interface AppUserJobNodeMenuContext{
@@ -89,7 +90,19 @@ const AppUserJobNodeMenu = ({username, context} :AppUserJobNodeMenuArgs ) => {
                     <h5>Absent privileges:</h5>
                     {Object.values(JobNodePrivilege).filter(p => !privileges.includes(p) && p != JobNodePrivilege.MANAGER).map(p => <>
                         <strong>{p}</strong>
-                        <button className="btn btn-primary m-2" onClick={e => addPrivilege(p)}>Add</button>
+                        <SecuredNode
+                            projectPrivilegeConfig={null}
+                            roles={null}
+                            alternative={null}
+                            moderator
+                            jobNodePrivilegeConfig={{
+                                jobNode: context.jobNodePageRefresh.jobNodeData,
+                                privileges: [JobNodePrivilege.MANAGER]
+                            }}
+                        >
+                            <button className="btn btn-primary m-2" onClick={e => addPrivilege(p)}>Add</button>
+                        </SecuredNode>
+                      
                         <br/>
                     </>)}
 
@@ -97,13 +110,37 @@ const AppUserJobNodeMenu = ({username, context} :AppUserJobNodeMenuArgs ) => {
 
                     {privileges.map(privilege => <>
                         <strong>{privilege}</strong>
-                        <button className="btn btn-danger m-2" onClick={e => removePrivilege(privilege)}>X</button>
+                        <SecuredNode
+                            projectPrivilegeConfig={null}
+                            roles={null}
+                            alternative={null}
+                            moderator
+                            jobNodePrivilegeConfig={{
+                                jobNode: context.jobNodePageRefresh.jobNodeData,
+                                privileges: [JobNodePrivilege.MANAGER]
+                            }}
+                        >
+                             <button className="btn btn-danger m-2" onClick={e => removePrivilege(privilege)}>X</button>
+                        </SecuredNode>
+                       
                         <br/>
                     </>)}
 
-                    <hr/>
-
-                    <button className="btn btn-danger m-2" onClick={removeUser}>Remove User</button>
+                    <SecuredNode
+                        projectPrivilegeConfig={null}
+                        roles={null}
+                        alternative={null}
+                        moderator
+                        jobNodePrivilegeConfig={{
+                            jobNode: context.jobNodePageRefresh.jobNodeData,
+                            privileges: [JobNodePrivilege.MANAGER]
+                        }}
+                    >
+                        <hr/>
+                    
+                        <button className="btn btn-danger m-2" onClick={removeUser}>Remove User</button>
+                    </SecuredNode>
+                  
                 </div>
                 :
                 <div>Loading...</div>

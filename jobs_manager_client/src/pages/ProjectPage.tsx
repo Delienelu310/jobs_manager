@@ -45,7 +45,7 @@ const ProjectPage = () => {
                         privileges: null
                     }}
                     moderator={true}
-                    roles={[Roles.MANAGER, Roles.WORKER]}
+                    roles={null}
                     alternative={<Navigate to={"/welcome"}/>}
                 >
                     <ProjectGraphComponent 

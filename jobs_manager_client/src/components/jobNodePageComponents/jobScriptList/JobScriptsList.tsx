@@ -5,23 +5,39 @@ import JobScriptElement, { JobScriptListContext } from "./JobScriptElement";
 import ServerBoundList from "../../lists/ServerBoundList";
 import { JobNodeResourceListArgs } from "../JobNodeResourcesListPanel";
 import OpenerComponent from "../../OpenerComponent";
+import { JobNodePrivilege } from "../../../api/authorization/privilegesApi";
+import SecuredNode from "../../../authentication/SecuredNode";
 
 
 
 const JobScriptsList = ({context, dependency} : JobNodeResourceListArgs) => {
     return (
         <div>
-            <OpenerComponent
-                closedLabel={<h4>Create Job Script</h4>}
-                openedElement={
-                <JobScriptCreator
-                    context={{
-                        jobNodePageRefresh : context
-                    }}
-                />}
-            />
+            <SecuredNode
+                alternative={null}
+                projectPrivilegeConfig={null}
+                roles={null}
+                moderator
+                jobNodePrivilegeConfig={{
+                    jobNode: context.jobNodeData,
+                    privileges: [JobNodePrivilege.MANAGER, JobNodePrivilege.SCRIPTER, JobNodePrivilege.TESTER]
+                }}
+            >
+                <OpenerComponent
+                    closedLabel={<h4>Create Job Script</h4>}
+                    openedElement={
+                    <JobScriptCreator
+                        context={{
+                            jobNodePageRefresh : context
+                        }}
+                    />}
+                />
+                
+                <hr/>
+            </SecuredNode>
+          
             
-            <hr/>
+          
 
             <h3>List of Job Scripts</h3>
 

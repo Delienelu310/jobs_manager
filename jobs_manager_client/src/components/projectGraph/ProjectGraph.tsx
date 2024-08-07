@@ -10,6 +10,8 @@ import { PlugElement } from "./gof/PlugElement";
 import { ChannelElement, StaticChannelConfig } from "./gof/ChannelElement";
 import { PanelMods } from "./gof/eventHandlers/PanelMods";
 import { createJobNode } from "../../api/abstraction/jobNodeApi";
+import SecuredNode from "../../authentication/SecuredNode";
+import { ProjectPrivilege } from "../../api/authorization/privilegesApi";
 
 interface StaticGraphCanvasConfig{
     
@@ -58,7 +60,10 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
     });
     const [newHeader, setNewHeader] = useState<string>("");
 
-
+    const [newJobNodeDetails, setNewJobNodeDetails] = useState<JobNodeDetails>({
+            name : ""
+        });
+        
     const [gof, setGof] = useState<GOF>(new GOF(
         staticConfig.canvas,
         projectFullData,
@@ -68,17 +73,9 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
         setMenu,
         mod,
         refresh,
-        newChannelDetails
+        newChannelDetails,
+        newJobNodeDetails
     ));
-
-
-
-    const [newJobNodeDetails, setNewJobNodeDetails] = useState<JobNodeDetails>({
-        name : ""
-    });
-    const [newJobVerticeDetails, setNewJobVerticeDetails] = useState<JobNodeVerticeDetails>({x: 0, y : 0});
-
-    
 
     function prepareGof(){
 
@@ -91,7 +88,8 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
             setMenu,
             mod,
             refresh,
-            newChannelDetails
+            newChannelDetails,
+            newJobNodeDetails
         );
 
         //1. prepare job nodes
@@ -186,7 +184,7 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
 
         prepareGof();
 
-    }, [projectGraph, projectFullData, dynamicConfig, mod]);
+    }, [projectGraph, projectFullData, dynamicConfig, mod, newChannelDetails, newJobNodeDetails]);
 
 
     useEffect(() => {
@@ -241,75 +239,119 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
                     <h5>Mod : {PanelMods[gof.getMod()]}</h5>
                     <h5>Also Mod : {PanelMods[mod]}</h5>
                     <button onClick={e => setMod(PanelMods.CURSOR)}>Cursor</button>
-                    <button onClick={e => setMod(PanelMods.CONNECT)}>Connect</button>
-                    <button onClick={e => setMod(PanelMods.DELETE)}>Delete</button>
+                    <SecuredNode
+                        roles={null}
+                        jobNodePrivilegeConfig={null}
+                        moderator
+                        projectPrivilegeConfig={{
+                            project: projectFullData,
+                            privileges : [ProjectPrivilege.ADMIN, ProjectPrivilege.ARCHITECT, ProjectPrivilege.MODERATOR]
+                        }}
+                        alternative={<>
+                            <button disabled>Connect</button>
+                            <button disabled>Delete</button>
+                            <button disabled>Job Node</button>
+                        </>}
+                    >
+                        <button onClick={e => setMod(PanelMods.CONNECT)}>Connect</button>
+                        <button onClick={e => setMod(PanelMods.DELETE)}>Delete</button>
+                        <button onClick={e => setMod(PanelMods.JOB_NODE)}>Job Node</button>
+                    </SecuredNode>
+                   
                     
-                    <div>
-                        <label>Name:</label>
-                        <input className="m-2" value={newJobNodeDetails.name} onChange={e => setNewJobNodeDetails(
-                            {
-                                ...newJobNodeDetails,
-                                name : e.target.value
-                            }
-                        )}/>
-                        <br/>
-                        <label>x: < input type="number" className="m-2" value={newJobVerticeDetails.x} onChange={e => {
-                            try{
-                                setNewJobVerticeDetails({...newJobVerticeDetails, x: parseInt(e.target.value) })
-                            }catch(e){}
-                        }}/></label>
-                        <br/>
-                        <label>y: < input type="number" className="m-2" value={newJobVerticeDetails.y} onChange={e => {
-                            try{
-                                setNewJobVerticeDetails({...newJobVerticeDetails, y: parseInt(e.target.value) })
-                            }catch(e){};
+                    {mod == PanelMods.JOB_NODE && <div>
+                        <SecuredNode
+                             roles={null}
+                             jobNodePrivilegeConfig={null}
+                             alternative={null}
+                             moderator
+                             projectPrivilegeConfig={{
+                                 project: projectFullData,
+                                 privileges : [ProjectPrivilege.ADMIN, ProjectPrivilege.ARCHITECT, ProjectPrivilege.MODERATOR]
+                             }}
+                        >   
+                        <div style={{
+                            margin: "20px 20%"
+                        }}>
+                            <h5>Job Node Panel</h5>
+                            <strong>Name:</strong>
+                            <input className=" form-control m-2" value={newJobNodeDetails.name} onChange={e => setNewJobNodeDetails(
+                                {
+                                    ...newJobNodeDetails,
+                                    name : e.target.value
+                                }
+                            )}/>
+                        </div>
                             
-                        }}/></label>
-                        <br/>
-
-                        <button className="btn btn-success" onClick={e => 
-                            createJobNode(projectFullData.id, newJobNodeDetails)
-                                .then(response => {
-                                    return updateProjectGraph(projectFullData.id).then(response2 => {
-                                        return updateJobNodeVertice(projectFullData.id, response.data, newJobVerticeDetails);
-                                    });
-                                }).then(response => {
-                                    refresh();
-                                })
-                                .catch(e => console.log(e))
-                        }>Add JobNode</button>
-                    </div>
+                        </SecuredNode>
+                       
+                    </div>}
 
                     <hr/>
                     {mod == PanelMods.CONNECT && <div>
-                        <h3>Channel creation panel:</h3>
-                        <label>Channel name : <input value={newChannelDetails.name} onChange={e => 
-                            setNewChannelDetails({...newChannelDetails, name : e.target.value})}/>
-                        </label>
-                        <br/>
-                        <select value={newChannelDetails.type}>
-                            {Object.values(ChannelTypes).map(key => <option value={key}>{key}</option>)}
-                        </select>
+                        <SecuredNode
+                            roles={null}
+                            jobNodePrivilegeConfig={null}
+                            alternative={null}
+                            moderator
+                            projectPrivilegeConfig={{
+                                project: projectFullData,
+                                privileges : [ProjectPrivilege.ADMIN, ProjectPrivilege.ARCHITECT, ProjectPrivilege.MODERATOR]
+                            }}
+                        >
+                            <div style={{
+                                margin: "20px 20%"
+                            }}>
+                                <h3>Channel creation panel:</h3>
 
-                        <label>Headers: </label>
-                        <input value={newHeader} onChange={e => setNewHeader(e.target.value)}/>
-                        <button className="btn btn-primary" onClick={e => {
-                            let newHeaders = Array.from(newChannelDetails.headers);
-                            newHeaders.push(newHeader);
 
-                            setNewChannelDetails({
-                                ...newChannelDetails,
-                                headers: newHeaders
-                            })
-                        }}>Add header</button>
 
-                        {newChannelDetails.headers.map(header => <div key={header}>{header} 
-                            <button className="btn btn-danger" onClick={e => setNewChannelDetails({
-                                ...newChannelDetails,
-                                headers: newChannelDetails.headers.filter(h => h != header)
-                            })}>X</button>
-                        </div>)}
+                                <strong>Channel name: </strong>
+                                <input className="form-control m-2" value={newChannelDetails.name} onChange={e => 
+                                    setNewChannelDetails({...newChannelDetails, name : e.target.value})}/>
+                               
+                                <strong>Channe type:</strong>
+                                <select className="form-control m-2" value={newChannelDetails.type}>
+                                    {Object.values(ChannelTypes).map(key => <option value={key}>{key}</option>)}
+                                </select>
 
+                                <h5>Headers: </h5>
+                                {newChannelDetails.headers.map((header, index) => 
+                                    <div key={index + "_" + header} style={{borderBottom: "1px solid black", margin: "10px 10%", height: "40px"}}>
+                                        <span style={{fontSize: "20px"}}>{header} </span>
+                                        <button style={{float: "right"}}className="btn btn-danger" onClick={e => {
+
+                                            const newHeaders = Array.from(newChannelDetails.headers);
+
+                                            newHeaders.splice(index, 1);
+
+                                            setNewChannelDetails({
+                                                ...newChannelDetails,
+                                                headers: newHeaders
+                                            })
+                                        }}>X</button>
+                                    </div>
+                                )}
+
+                                
+                                <strong>Add new header:</strong>
+                                <input className="form-control m-2" value={newHeader} onChange={e => setNewHeader(e.target.value)}/>
+                                <button className="btn btn-primary" onClick={e => {
+                                    let newHeaders = Array.from(newChannelDetails.headers);
+                                    newHeaders.push(newHeader);
+
+                                    setNewChannelDetails({
+                                        ...newChannelDetails,
+                                        headers: newHeaders
+                                    })
+                                }}>Add header</button>
+
+                               
+
+                            </div>
+                   
+                        </SecuredNode>
+                      
                     </div>}
                 </div>
 

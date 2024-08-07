@@ -6,24 +6,37 @@ import AppUserElement, { AppUserElementContext } from "./AppUserElement";
 import ServerBoundList from "../../lists/ServerBoundList";
 import { JobNodeResourceListArgs } from "./../JobNodeResourcesListPanel";
 import OpenerComponent from "../../OpenerComponent";
+import SecuredNode from "../../../authentication/SecuredNode";
 
 
 
 const PrivilegesList = ({context, dependency} : JobNodeResourceListArgs) => {
     return (
         <div>
-            <div className="m-3">
-                <OpenerComponent
-                    closedLabel={<h5>Add User To JobNode</h5>}
-                    openedElement={
-                        <AppUserAdditionComponent
-                            context={{
-                                jobNodePageRefresh : context
-                            }}
-                        />
-                    }
-                />
-            </div>
+            <SecuredNode
+                projectPrivilegeConfig={null}
+                roles={null}
+                alternative={null}
+                moderator
+                jobNodePrivilegeConfig={{
+                    jobNode: context.jobNodeData,
+                    privileges : [JobNodePrivilege.MANAGER]
+                }}
+            >
+                <div className="m-3">
+                    <OpenerComponent
+                        closedLabel={<h5>Add User To JobNode</h5>}
+                        openedElement={
+                            <AppUserAdditionComponent
+                                context={{
+                                    jobNodePageRefresh : context
+                                }}
+                            />
+                        }
+                    />
+                </div>
+            </SecuredNode>
+            
             
            
             <h3>Job Node Privilege List</h3>

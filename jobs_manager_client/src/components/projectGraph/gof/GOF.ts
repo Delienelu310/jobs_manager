@@ -1,6 +1,7 @@
 import { connect } from "../../../api/abstraction/channelApi";
-import { ChannelDetails, ChannelTypes, ProjectFullData } from "../../../api/abstraction/projectApi";
-import { ProjectGraph } from "../../../api/ui/projectGraphApi";
+import { createJobNode } from "../../../api/abstraction/jobNodeApi";
+import { ChannelDetails, ChannelTypes, JobNodeDetails, ProjectFullData } from "../../../api/abstraction/projectApi";
+import { ProjectGraph, updateJobNodeVertice, updateProjectGraph } from "../../../api/ui/projectGraphApi";
 import { PanelMods } from "./eventHandlers/PanelMods";
 import { GraphElement } from "./GraphElement";
 import { JobNodeElement } from "./JobNodeElement";
@@ -57,6 +58,7 @@ export class GOF{
     private mod : PanelMods;
     private refresh : () => void;
     private newChannelDetails : ChannelDetails;
+    private newJobNodeDetails : JobNodeDetails;
     
 
     public constructor(
@@ -68,7 +70,8 @@ export class GOF{
         setMenu : React.Dispatch<React.SetStateAction<JSX.Element>>,
         mod : PanelMods,
         refresh : () => void,
-        newChannelDetails : ChannelDetails
+        newChannelDetails : ChannelDetails,
+        newJobNodeDetails : JobNodeDetails
     ){
         this.config = config;
         this.projectData = projectData;
@@ -79,6 +82,7 @@ export class GOF{
         this.mod = mod;
         this.refresh = refresh;
         this.newChannelDetails = newChannelDetails;
+        this.newJobNodeDetails = newJobNodeDetails;
 
     }
 
@@ -321,6 +325,22 @@ export class GOF{
                 }
 
 
+            }],
+            [PanelMods.JOB_NODE, (event) => {
+                const [dx, dy] = this.getOffsets();
+
+                createJobNode(this.projectData.id, this.newJobNodeDetails)
+                    .then(response => {
+                        return updateProjectGraph(this.projectData.id).then(response2 => {
+                            return updateJobNodeVertice(this.projectData.id, response.data, {
+                                x : event.clientX - dx, 
+                                y : event.clientY - dy
+                            });
+                        });
+                    }).then(response => {
+                        this.refresh();
+                    })
+                    .catch(e => console.log(e))
             }]
         ]);
     

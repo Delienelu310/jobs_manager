@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { JobNodeElement } from "../gof/JobNodeElement";
+import SecuredNode from "../../../authentication/SecuredNode";
 
 export interface JobNodeMenuArgs{
     element : JobNodeElement
@@ -7,13 +8,29 @@ export interface JobNodeMenuArgs{
 
 
 const JobNodeMenu = ({element} : JobNodeMenuArgs) => {
+    
+    const navigate = useNavigate();
+    
     return (
         <div>
 
-            <h3>{element.getData().jobNodeDetails.name}</h3>
-            <span>ID: {element.getData().id}</span>
+            <h5>Job Node Menu</h5>
 
-            <Link to={`/projects/${element.getGof().getProjectData().id}/job_nodes/${element.getData().id}`}>More</Link>
+            <strong>Name : {element.getData().jobNodeDetails.name}</strong> <br/>
+            <strong>ID: {element.getData().id}</strong><br/>
+
+            <SecuredNode
+                alternative={null}
+                roles={null}
+                projectPrivilegeConfig={null}
+                moderator
+                jobNodePrivilegeConfig={{
+                    jobNode: element.getData(),
+                    privileges : null
+                }}
+            >
+                <button className="btn btn-primary m-3" onClick={() => navigate(`/projects/${element.getGof().getProjectData().id}/job_nodes/${element.getData().id}`)}>More</button>
+            </SecuredNode>
 
         </div>
     );

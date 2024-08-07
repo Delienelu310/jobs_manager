@@ -1,5 +1,7 @@
+import { JobNodePrivilege } from "../../../api/authorization/privilegesApi";
 import { addJobsFileToJobScript, JobScriptSimple, removeJobsFileFromJobScript } from "../../../api/ilum_resources/jobScriptsApi";
 import { JobsFileSimple } from "../../../api/ilum_resources/jobsFilesApi";
+import SecuredNode from "../../../authentication/SecuredNode";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
 import JobsFileMenu from "./JobsFileMenu";
 
@@ -50,14 +52,30 @@ const JobsFileAddElement = ({data, context} : JobsFileAddElementArgs) => {
             <strong>Author: </strong> {data.publisher.username}
 
             <h5>Classes used:</h5>
-            {data.allClasses.map(cl => <><i>{cl}</i> <br/></>)}
+            <div style={{
+                maxHeight: "400px",
+                overflow: "scroll"
+            }}>
+                {data.allClasses.map(cl => <><i>{cl}</i> <br/></>)}
+            </div>
+           
+            <SecuredNode 
+                alternative={null}
+                projectPrivilegeConfig={null}
+                roles={null}
+                moderator={true}
+                jobNodePrivilegeConfig={{
+                    jobNode: context.jobNodePageRefresh.jobNodeData,
+                    privileges: [JobNodePrivilege.MANAGER, JobNodePrivilege.SCRIPTER, JobNodePrivilege.TESTER]
+                }}
+            >
+                {context.jobScript.jobsFiles.map(jf => jf.id).includes(data.id) ? 
+                    <button className="btn btn-danger" onClick={removeJobsFile}>Remove</button>
+                    :
+                    <button className="btn btn-success" onClick={addJobsFile}>Add</button>
+                }
+            </SecuredNode>
             
-            <br/>
-            {context.jobScript.jobsFiles.map(jf => jf.id).includes(data.id) ? 
-                <button className="btn btn-danger" onClick={removeJobsFile}>Remove</button>
-                :
-                <button className="btn btn-success" onClick={addJobsFile}>Add</button>
-            }
             
 
             <br/>

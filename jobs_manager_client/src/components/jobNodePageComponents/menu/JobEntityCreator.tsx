@@ -5,6 +5,8 @@ import { JobScriptSimple, retreiveJobScript } from "../../../api/ilum_resources/
 import JobScriptMenu from "./JobScriptMenu";
 import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../../../pages/JobNodePage";
 import JobEntityMenu from "./JobEntityMenu";
+import SecuredNode from "../../../authentication/SecuredNode";
+import { JobNodePrivilege } from "../../../api/authorization/privilegesApi";
 
 
 export interface JobEntityCreatorContext{
@@ -84,49 +86,77 @@ const JobEntityCreator = ({
     return (
         <div>
             <h3>Job Entity Menu</h3>
+            <SecuredNode
+                projectPrivilegeConfig={null}
+                roles={null}
+                jobNodePrivilegeConfig={{
+                    jobNode : context.jobNodePageRefresh.jobNodeData,
+                    privileges: [JobNodePrivilege.MANAGER, JobNodePrivilege.SCRIPTER, JobNodePrivilege.TESTER]
+                }}
+                alternative={
+                    <h5>You dont have privilege to create scripts</h5>
+                }
+                moderator={true}
+            >
+                <hr/>
 
-            <hr/>
+                {jobScriptData ? 
+                    <>
+                        <h5>Chosen script data:</h5>
+                        <h5> {jobScriptData.jobScriptDetails.name}</h5>
+                        <strong>Class name:</strong>
+                        <i>{jobScriptData.classFullName}</i>
+                        <br/>
+                        <strong>Author: </strong> {jobScriptData.author.username}
+                        <br/>
+                        <button className="btn btn-success m-2" onClick={e => context.jobNodePageRefresh.setMenu(<JobScriptMenu
+                            context={context}
+                            data={jobScriptData.id}
+                        />)}>More... </button>
 
-            {jobScriptData ? 
-                <>
-                    <h5>Chosen script data:</h5>
-                    <h5> {jobScriptData.jobScriptDetails.name}</h5>
-                    <strong>Class name:</strong>
-                    <i>{jobScriptData.classFullName}</i>
-                    <br/>
-                    <strong>Author: </strong> {jobScriptData.author.username}
-                    <br/>
-                    <button className="btn btn-success m-2" onClick={e => context.jobNodePageRefresh.setMenu(<JobScriptMenu
-                        context={context}
-                        data={jobScriptData.id}
-                    />)}>More... </button>
+                    </>
+                    :
+                    <span>Job Script data is loading...</span>
 
-                </>
-                :
-                <span>Job Script data is loading...</span>
+                }
 
-            }
+                <hr/>
 
-            <hr/>
-           
-            <h5>Job Entity Data:</h5>
-            <strong>Queue type: </strong>
-            <select className="form-control m-2" value={chosenQueueType} onChange={e => setChosenQueueType(e.target.value)}>
-                {Object.values(QueueTypes).map(type => <option value={type}>{type}</option>)}
-            </select>
+                <h5>Job Entity Data:</h5>
+                <strong>Queue type: </strong>
+                <select className="form-control m-2" value={chosenQueueType} onChange={e => setChosenQueueType(e.target.value)}>
+                    {Object.values(QueueTypes).map(type => <SecuredNode
+                        projectPrivilegeConfig={null}
+                        roles={null}
+                        alternative={null}
+                        moderator={true}
+                        jobNodePrivilegeConfig={{
+                            jobNode: context.jobNodePageRefresh.jobNodeData,
+                            privileges: [JobNodePrivilege.MANAGER, type == QueueTypes.JOBS_QUEUE ?  
+                                JobNodePrivilege.SCRIPTER
+                                :
+                                JobNodePrivilege.TESTER
+                            ]
+                        }}
+                    >
+                        <option value={type}>{type}</option>
+                    </SecuredNode>)}
+                </select>
 
-            <strong>Name:</strong>
-            <input className="form-control m-2" value={jobEntityDetails.name} onChange={e => setJobEntityDetails({...jobEntityDetails, name : e.target.value})}/>
-        
-            <strong>Description:</strong>
-            <textarea className="form-control m-2" value={jobEntityDetails.description} onChange={e => setJobEntityDetails({...jobEntityDetails, description : e.target.value})}/>
-       
-            <strong>Configuration</strong>
-            <textarea className="form-control m-2" value={configuration} onChange={e => setConfiguration(e.target.value)}/>
-          
+                <strong>Name:</strong>
+                <input className="form-control m-2" value={jobEntityDetails.name} onChange={e => setJobEntityDetails({...jobEntityDetails, name : e.target.value})}/>
+
+                <strong>Description:</strong>
+                <textarea className="form-control m-2" value={jobEntityDetails.description} onChange={e => setJobEntityDetails({...jobEntityDetails, description : e.target.value})}/>
+
+                <strong>Configuration</strong>
+                <textarea className="form-control m-2" value={configuration} onChange={e => setConfiguration(e.target.value)}/>
 
 
-            <button className="btn btn-success m-2" onClick={addJob}>Add</button>
+
+                <button className="btn btn-success m-2" onClick={addJob}>Add</button>
+            </SecuredNode>
+         
         </div>
     );
 }
