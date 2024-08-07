@@ -16,10 +16,14 @@ import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
+import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
+import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
 import com.ilumusecase.jobs_manager.resources.ilum.JobEntityDetails;
 import com.ilumusecase.jobs_manager.resources.ilum.JobScript;
 import com.ilumusecase.jobs_manager.resources.ilum.JobsFile;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeJobRoles;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
@@ -82,6 +86,8 @@ public class JobNodeQueueController {
     
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/queue/{queue_type}")
     @JsonMapperRequest(resource = "JobEntity", type="simple")
+    @AuthorizeJobRoles
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public Object retrieveQueue(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
@@ -99,6 +105,8 @@ public class JobNodeQueueController {
     }
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/queue/{queue_type}/count")
+    @AuthorizeJobRoles
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public long retrieveQueueCount(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
@@ -119,6 +127,8 @@ public class JobNodeQueueController {
     }
 
     @PostMapping("/projects/{project_id}/job_nodes/{job_node_id}/{queue_type}/job_entities/{job_script_id}")
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER, JobNodePrivilege.SCRIPTER, JobNodePrivilege.TESTER})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public String addJobEntityToQueue(
         Authentication authentication,
         @ProjectId @PathVariable("project_id") String projectId,
@@ -164,6 +174,8 @@ public class JobNodeQueueController {
 
 
     @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/{queue_type}/job_entities/{job_entity_id}")
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER, JobNodePrivilege.SCRIPTER, JobNodePrivilege.TESTER})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public void removeJobEntityFromQueue(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,

@@ -98,7 +98,7 @@ public class AuthorizationAspect {
             if(annotationHandlerInterface.get().authorize(joinPoint, method, annotation, authentication)) return;
         }
 
-        throw new RuntimeException();
+        throw new RuntimeException("Not authorized");
     }
     
 }

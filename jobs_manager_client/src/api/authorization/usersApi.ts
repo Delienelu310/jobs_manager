@@ -74,3 +74,11 @@ export function updateDetails(username : string, newDetails : AppUserDetails
 ) : Promise<AxiosResponse<void>>{
     return apiClient.put(`/users/${username}/details`, newDetails);
 }
+
+export function updateModeratorPassword(username : string, newPassword : string
+
+) : Promise<AxiosResponse<void>>{
+    return apiClient.put(`/moderators/${username}/password`, btoa(newPassword) as string,  {headers: {
+        'Content-Type': 'text/plain'
+    }});
+}

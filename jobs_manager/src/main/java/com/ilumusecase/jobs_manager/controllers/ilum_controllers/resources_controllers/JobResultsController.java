@@ -9,7 +9,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
+import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
+import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroupDetails;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeJobRoles;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
 
 import java.util.List;
 import jakarta.validation.constraints.Min;
@@ -25,21 +29,10 @@ public class JobResultsController {
     @Autowired
     private RepositoryFactory repositoryFactory;
 
-
-    
-    @GetMapping("/job_results")
-    @JsonMapperRequest(type="simple", resource = "JobResult")
-    public Object retrieveAll(){
-        return repositoryFactory.getJobResultRepository().retrieveAll();
-    }
-
-    @DeleteMapping("/job_results")
-    public void clear(){
-        repositoryFactory.getJobResultRepository().clear();
-    }
-
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results")
     @JsonMapperRequest(type="simple", resource = "JobResult")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles
     public Object retrieveJobResults(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,
@@ -76,6 +69,8 @@ public class JobResultsController {
     }
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/count")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles
     public Long retrieveJobResultsCount(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,
@@ -110,6 +105,8 @@ public class JobResultsController {
 
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/ilum_groups")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles
     public List<IlumGroupData> retrieveIlumGroupsOfJobResults(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,
@@ -123,6 +120,8 @@ public class JobResultsController {
     }
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/ilum_groups/count")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles
     public Long retrieveIlumGroupsOfJobResultsCount(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,
@@ -137,6 +136,8 @@ public class JobResultsController {
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/job_scripts")
     @JsonMapperRequest(type="simple", resource = "JobScript")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles
     public Object retrieveJobScriptOfJobResults(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,
@@ -161,6 +162,8 @@ public class JobResultsController {
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/job_scripts/count")
     @JsonMapperRequest(type="simple", resource = "JobScript")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles
     public Long retrieveJobScriptOfJobResultsCount(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,
@@ -182,6 +185,8 @@ public class JobResultsController {
 
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/job_scripts/{job_script_id}/metrics")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles
     public List<String> retrieveMetricsOfTester(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,
@@ -198,6 +203,8 @@ public class JobResultsController {
     }
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/job_scripts/{job_script_id}/metrics/count")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles
     public Long retrieveMetricsOfTesterCount(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,
@@ -212,6 +219,8 @@ public class JobResultsController {
  
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/{job_result_id}")
     @JsonMapperRequest(type="simple", resource = "JobResult")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles
     public Object retrieveJobResultById(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,
@@ -222,6 +231,8 @@ public class JobResultsController {
 
 
     @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/{job_result_id}")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER})
     public void deleteResult(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,

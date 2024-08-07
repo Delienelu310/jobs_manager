@@ -17,6 +17,8 @@ public class RoleAuthHandler implements AnnotationHandlerInterface{
     public boolean authorize(JoinPoint joinPoint, Method method, Annotation annotation, Authentication authentication){
         AuthorizeRoles authorizeRoles = (AuthorizeRoles)annotation;
 
+        if(authorizeRoles.roles().length == 0) return true;
+
         return authentication.getAuthorities().stream().anyMatch(role -> {
             for(Roles roleAllowed : authorizeRoles.roles()){
                 if(role.toString().equals("ROLE_" + roleAllowed.toString())) return true;

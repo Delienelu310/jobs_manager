@@ -22,8 +22,8 @@ import com.ilumusecase.jobs_manager.resources.abstraction.ChannelDetails;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthAdminRoleOnly;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
-import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.DisableDefaultAuth;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
 @RestController
@@ -38,7 +38,7 @@ public class ChannelController {
 
 
     @GetMapping("/channels")
-    @DisableDefaultAuth
+    @AuthAdminRoleOnly
     public MappingJacksonValue retrieveAllChannels(){
         return jsonMappersFactory.getChannelJsonMapper().getFullChannelList(
             repositoryFactory.getChannelsRepository().retrieveAll()
@@ -46,7 +46,7 @@ public class ChannelController {
     }
 
     @GetMapping("/projects/{project_id}/channels")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles
     public MappingJacksonValue retreiveChannelsByProjectId(@ProjectId @PathVariable("project_id") String projectId){
 
         return jsonMappersFactory.getChannelJsonMapper().getFullChannelList(
@@ -56,7 +56,7 @@ public class ChannelController {
     }
 
     @GetMapping("/projects/{project_id}/channels/{channel_id}")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles
     public MappingJacksonValue retrieveChannel(@ProjectId @PathVariable("project_id") String projectId, @PathVariable("channel_id") String channelId){
         Channel channel = repositoryFactory.getChannelsRepository().retrieveById(channelId);
         if( !channel.getProject().getId().equals(projectId) ){
@@ -67,7 +67,7 @@ public class ChannelController {
     }
 
     @PostMapping("/projects/{project_id}/channels")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public MappingJacksonValue createChannel(@ProjectId @PathVariable("project_id") String projectId, @RequestBody ChannelDetails channelDetails){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         return jsonMappersFactory.getChannelJsonMapper().getFullChannel(
@@ -77,7 +77,7 @@ public class ChannelController {
     }
 
     @DeleteMapping("/projects/{project_id}/channels/{channel_id}")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public void deleteChannelById(@ProjectId @PathVariable("project_id") String projectId, @PathVariable("channel_id") String channelId){
         // remove channel from input and output of project
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
@@ -127,7 +127,7 @@ public class ChannelController {
     }
 
     @PutMapping("/projects/{project_id}/channels/{channel_id}/start")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public void startChannel(@ProjectId @PathVariable("project_id") String projectId, @PathVariable("channel_id") String channelId){
         Channel channel = repositoryFactory.getChannelsRepository().retrieveById(channelId);
         if( !channel.getProject().getId().equals(projectId) ){
@@ -139,7 +139,7 @@ public class ChannelController {
     }
 
     @PutMapping("/projects/{project_id}/channels/{channel_id}/stop")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public void stopChannel(@ProjectId @PathVariable("project_id") String projectId, @PathVariable("channel_id") String channelId){
         Channel channel = repositoryFactory.getChannelsRepository().retrieveById(channelId);
         if( !channel.getProject().getId().equals(projectId) ){

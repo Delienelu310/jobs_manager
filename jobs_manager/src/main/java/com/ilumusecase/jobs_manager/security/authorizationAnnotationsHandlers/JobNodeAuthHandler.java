@@ -30,7 +30,7 @@ public class JobNodeAuthHandler implements AnnotationHandlerInterface{
     public boolean authorize(JoinPoint joinPoint, Method method, Annotation annotation, Authentication authentication) {
 
 
-        AuthorizeJobRoles authorizeProjectRoles = (AuthorizeJobRoles)annotation;
+        AuthorizeJobRoles authorizeJobRoles = (AuthorizeJobRoles)annotation;
         AppUser appUser = repositoryFactory.getUserDetailsManager().findByUsername(authentication.getName());
 
         //find projectId - argument with ProjectId annotation, and jodNodeId in the same way
@@ -49,12 +49,18 @@ public class JobNodeAuthHandler implements AnnotationHandlerInterface{
         }
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId.orElseThrow(RuntimeException::new));
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId.orElseThrow(RuntimeException::new));
-
         if(!jobNode.getProject().equals(project)) throw new RuntimeException();
+
+        
+        if(!jobNode.getPrivileges().containsKey(authentication.getName())) return false;
+        //in case if roles are set null, we should just check if the user is in privileges map
+        if(authorizeJobRoles.roles().length == 0 ){
+            return true;
+        }
         
         return jobNode.getPrivileges().get(appUser.getUsername()).getList().stream().anyMatch(role -> {
-            for(JobNodePrivilege projectPrivilege : authorizeProjectRoles.roles()){
-                if(projectPrivilege == role) return true;
+            for(JobNodePrivilege jobNodePrivilege : authorizeJobRoles.roles()){
+                if(jobNodePrivilege == role) return true;
             }
             return false;
         });

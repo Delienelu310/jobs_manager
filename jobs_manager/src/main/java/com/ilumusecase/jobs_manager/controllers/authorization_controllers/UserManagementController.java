@@ -22,7 +22,7 @@ import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
 import com.ilumusecase.jobs_manager.resources.authorities.AppUserDetails;
 import com.ilumusecase.jobs_manager.security.Roles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthAdminRoleOnly;
-import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.DisableDefaultAuth;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeRoles;
 
 import jakarta.validation.constraints.Min;
 
@@ -39,7 +39,7 @@ public class UserManagementController {
 
     @GetMapping("/users")
     @JsonMapperRequest(type="full", resource = "AppUser")
-    @DisableDefaultAuth
+    @AuthorizeRoles
     public Object retrieveAllUsers(
         @RequestParam(name= "query", required = false, defaultValue = "") String query,
         @RequestParam(name= "fullname", required = false, defaultValue = "") String fullname,
@@ -50,7 +50,7 @@ public class UserManagementController {
     }
 
     @GetMapping("/users/count")
-    @DisableDefaultAuth
+    @AuthorizeRoles
     public long retrieveAllUsers(
         @RequestParam(name= "query", required = false, defaultValue = "") String query,
         @RequestParam(name= "fullname", required = false, defaultValue = "") String fullname
@@ -60,7 +60,7 @@ public class UserManagementController {
 
     @GetMapping("/users/{id}")
     @JsonMapperRequest(type="full", resource = "AppUser")
-    @DisableDefaultAuth
+    @AuthorizeRoles
     public Object retrieveUserById(@PathVariable("id") String id){
         return  repositoryFactory.getUserDetailsManager().retrieveUserById(id);
     }
@@ -78,7 +78,6 @@ public class UserManagementController {
    
     @PostMapping("/moderators")
     @AuthAdminRoleOnly
-    @DisableDefaultAuth
     public void createModerator(@RequestBody AppUserRequestBody appUserBody){
 
         UserDetails userDetails = User
@@ -96,7 +95,6 @@ public class UserManagementController {
     }
 
     @DeleteMapping("/moderators/{username}")
-    @DisableDefaultAuth
     @AuthAdminRoleOnly
     public void deleteModerator(@PathVariable("username") String username){
         AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(username);
@@ -109,7 +107,7 @@ public class UserManagementController {
 
 
     @PostMapping("/users")
-    @DisableDefaultAuth
+    // only moderator and admin
     public void createNewUser( @RequestBody AppUserRequestBody appUserBody){
 
         if(repositoryFactory.getUserDetailsManager().userExists(appUserBody.username)){
@@ -138,7 +136,7 @@ public class UserManagementController {
     }
 
     @DeleteMapping("/users/{id}")
-    @DisableDefaultAuth
+    //only moderator and admin
     public void deleteUser(@PathVariable("id") String id){
         AppUser appUser = repositoryFactory.getUserDetailsManager().findByUsername(id);
         if(appUser.getAuthorities().stream().anyMatch(auth -> auth.toString().equals("ROLE_ADMIN") || auth.toString().equals("ROLE_MODERATOR"))){
@@ -152,6 +150,7 @@ public class UserManagementController {
     }
 
     @PutMapping("/users/password")
+    @AuthorizeRoles
     public void updateMyPassword( @RequestBody OldNewPassword oldNewPassword){
 
         repositoryFactory.getUserDetailsManager().changePassword(
@@ -161,11 +160,39 @@ public class UserManagementController {
 
     }
 
+    @PutMapping("/moderators/{username}/password")
+    @AuthAdminRoleOnly
+    public void updateModeratorPassword(@PathVariable("username") String username, @RequestBody String base64EncodedPassword ){
+
+        AppUser user = repositoryFactory.getUserDetailsManager().findByUsername(username);
+        
+        boolean isAdmin = user.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        boolean isModerator = user.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_MODERATOR"));
+        
+        if(!isAdmin && !isModerator) throw new RuntimeException("End point should be used for moderators and admins only");
+
+        UserDetails userDetails = User.withUsername(username)
+            .password(new String(Base64.getDecoder().decode(base64EncodedPassword)))
+            .passwordEncoder(str -> passwordEncoder.encode(str))
+            .authorities(user.getAuthorities())
+            .build();
+        repositoryFactory.getUserDetailsManager().updateUser(userDetails);
+
+    }
+
+   
     @PutMapping("/users/{username}/password")
+    //only admin and moderator
     public void updatePassword(@PathVariable("username") String username, @RequestBody String base64EncodedPassword ){
 
         AppUser user = repositoryFactory.getUserDetailsManager().findByUsername(username);
         
+        if(user.getAuthorities().stream().anyMatch(auth -> 
+            auth.getAuthority().equals("ROLE_MODERATOR")
+            ||
+            auth.getAuthority().equals("ROLE_ADMIN")
+        )) throw new RuntimeException("The endpoint should not be used for admin or moderator");
+
         UserDetails userDetails = User.withUsername(username)
             .password(new String(Base64.getDecoder().decode(base64EncodedPassword)))
             .passwordEncoder(str -> passwordEncoder.encode(str))
@@ -176,9 +203,16 @@ public class UserManagementController {
     }
 
     @PutMapping("/users/{username}/roles")
+    //only admin and moderator
     public void updateRoles(@RequestBody Roles[] newRoles, @PathVariable("username") String username){
         AppUser user = repositoryFactory.getUserDetailsManager().findByUsername(username);
         
+        if(user.getAuthorities().stream().anyMatch(auth -> 
+            auth.getAuthority().equals("ROLE_MODERATOR")
+            ||
+            auth.getAuthority().equals("ROLE_ADMIN")
+        )) throw new RuntimeException("The endpoint should not be used for admin or moderator");
+
         String[] rolesStr = new String[newRoles.length];
         for(int i = 0; i < newRoles.length; i++ ){
             rolesStr[i] = newRoles[i].toString();
@@ -192,7 +226,7 @@ public class UserManagementController {
     }
 
     @PutMapping("/users/{username}/details")
-    @DisableDefaultAuth
+    @AuthorizeRoles
     public void udpateAppUserDetails(Authentication authentication, @RequestBody AppUserDetails appUserDetails, @PathVariable("username") String username){
           
         AppUser user = repositoryFactory.getUserDetailsManager().retrieveUserById(username);

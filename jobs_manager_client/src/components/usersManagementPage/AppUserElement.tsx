@@ -18,6 +18,7 @@ const AppUserElement = ({data, context} : AppUserElementArgs) => {
     return (
         <div className="list_table_element list_table_row_4" onClick={e => context.setMenu(
             <AppUserMenu
+                key={"user_menu_" + data.username}
                 username={data.username}
                 context={context}
             />

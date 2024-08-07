@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AppUserDetails, AppUserSimple, deleteModerator, deleteUser, retrieveUser, Roles, updateDetails, updatePassword, updateRoles } from "../../api/authorization/usersApi";
+import { AppUserDetails, AppUserSimple, deleteModerator, deleteUser, retrieveUser, Roles, updateDetails, updateModeratorPassword, updatePassword, updateRoles } from "../../api/authorization/usersApi";
 import { UsersManagementPageContext } from "../../pages/UsersManagementPage";
 import OpenerComponent from "../OpenerComponent";
 import { AxiosResponse } from "axios";
@@ -35,7 +35,18 @@ const AppUserMenu = ({
     }
 
     function changePassword(){
-        updatePassword(username, newPassword)
+        if(!data) return;
+
+        let updatePasswordPromise : Promise<AxiosResponse<void>>;
+        if(
+            data.authorities.map(auth => auth.authority).includes("ROLE_MODERATOR") || 
+            data.authorities.map(auth => auth.authority).includes("ROLE_ADMIN")
+        ){
+            updatePasswordPromise = updateModeratorPassword(username, newPassword);
+        }else{
+            updatePasswordPromise =  updatePassword(username, newPassword);
+        }
+        updatePasswordPromise
             .then(() => {
                 
             }).catch(e => console.log(e));
@@ -122,32 +133,37 @@ const AppUserMenu = ({
                         />
                         <hr/>   
 
-                        <OpenerComponent
-                            closedLabel={<h5>Update Roles</h5>}
-                            openedElement={
-                                <div>
-                                    <h5>Update Roles</h5>
+                        {data && data.authorities.map(auth => auth.authority).filter(auth => auth == "ROLE_ADMIN" || auth == "ROLE_MODERATOR").length == 0 &&
+                            <>
+                                <OpenerComponent
+                                    closedLabel={<h5>Update Roles</h5>}
+                                    openedElement={
+                                        <div>
+                                            <h5>Update Roles</h5>
 
-                                    <select className="form-control m-2" value={newRoles} multiple onChange={e => {
-                                        let newNewRoles = Array.from(newRoles);
+                                            <select className="form-control m-2" value={newRoles} multiple onChange={e => {
+                                                let newNewRoles = Array.from(newRoles);
 
-                                        if(newNewRoles.includes(e.target.value)){
-                                            newNewRoles = newNewRoles.filter(val => val != e.target.value)
-                                        }else{
-                                            newNewRoles.push(e.target.value);
-                                        }
-                                        setNewRoles(newNewRoles);
-                                    }}>
-                                        {Object.values(Roles).map(role => <option value={role}>{role}</option>)}
-                                    </select>
-                                    <button className="btn btn-danger m-2">Deselect</button>
-                                    <br/>
+                                                if(newNewRoles.includes(e.target.value)){
+                                                    newNewRoles = newNewRoles.filter(val => val != e.target.value)
+                                                }else{
+                                                    newNewRoles.push(e.target.value);
+                                                }
+                                                setNewRoles(newNewRoles);
+                                            }}>
+                                                {Object.values(Roles).map(role => <option value={role}>{role}</option>)}
+                                            </select>
+                                            <button className="btn btn-danger m-2">Deselect</button>
+                                            <br/>
 
-                                    <button className="btn btn-success m-2" onClick={changeRoles}>Update Roles</button>
-                                </div>
-                            }
-                        />     
-                        <hr/>
+                                            <button className="btn btn-success m-2" onClick={changeRoles}>Update Roles</button>
+                                        </div>
+                                    }
+                                /> 
+                                <hr/>
+                            </>
+                        }
+                  
 
                         <OpenerComponent
                             closedLabel={<h5>Update details:</h5>}

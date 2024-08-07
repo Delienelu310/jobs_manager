@@ -16,8 +16,10 @@ import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
+import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 import com.ilumusecase.jobs_manager.resources.ui.JobNodeVertice;
 import com.ilumusecase.jobs_manager.resources.ui.ProjectGraph;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
@@ -29,6 +31,7 @@ public class ProjectGraphController {
 
     @GetMapping("/projects/{project_id}/graph")
     @JsonMapperRequest(type="graph", resource = "ProjectGraph")
+    @AuthorizeProjectRoles
     public Object retrieveProjectGraph(
         @ProjectId @PathVariable("project_id") String projectId
     ){
@@ -40,6 +43,7 @@ public class ProjectGraphController {
     //refresh the project graph, so that it would include new jobnodes, or create it, if it does not exist
     @PutMapping("/projects/{project_id}/graph")
     @JsonMapperRequest(type="graph", resource = "ProjectGraph")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public Object updateProjectGraph(
         @ProjectId @PathVariable("project_id") String projectId
     ){
@@ -86,6 +90,7 @@ public class ProjectGraphController {
 
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/graph")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public void updateJobNodeVertice(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,

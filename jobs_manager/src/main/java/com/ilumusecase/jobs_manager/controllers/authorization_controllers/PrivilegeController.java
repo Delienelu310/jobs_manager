@@ -35,6 +35,7 @@ public class PrivilegeController {
 
     @GetMapping("/projects/{project_id}/privileges")
     @JsonMapperRequest(type="full", resource = "AppUser")
+    @AuthorizeProjectRoles
     public Object retrieveProjectPrivileges(
         @ProjectId @PathVariable("project_id") String projectId,
         @RequestParam(name = "query", defaultValue = "", required = false) String query,
@@ -53,6 +54,7 @@ public class PrivilegeController {
 
 
     @GetMapping("/projects/{project_id}/privileges/count")
+    @AuthorizeProjectRoles
     public long retrieveProjectPrivileges(
         @ProjectId @PathVariable("project_id") String projectId,
         @RequestParam(name = "query", defaultValue = "", required = false) String query,
@@ -68,6 +70,8 @@ public class PrivilegeController {
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/privileges")
     @JsonMapperRequest(type="full", resource = "AppUser")
+    @AuthorizeJobRoles
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public Object retrieveJobNodePrivileges(
         @ProjectId @PathVariable("project_id") String projectId,
         @ProjectId @PathVariable("job_node_id") String jobNodeId,
@@ -92,6 +96,8 @@ public class PrivilegeController {
 
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/privileges/count")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles
     public long retrieveJobNodePrivilegesCount(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
@@ -110,6 +116,7 @@ public class PrivilegeController {
     }
 
     @GetMapping("/projects/{project_id}/privileges/users/{username}")
+    @AuthorizeProjectRoles
     public List<ProjectPrivilege> retrieveJobNodeUserPrivileges(
         @ProjectId @PathVariable("project_id") String projectId,
         @PathVariable("username") String username
@@ -121,6 +128,8 @@ public class PrivilegeController {
 
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/privileges/users/{username}")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles
     public List<JobNodePrivilege> retrieveJobNodeUserPrivileges(
         @ProjectId @PathVariable("project_id") String projectId,
         @ProjectId @PathVariable("job_node_id") String jobNodeId,
@@ -135,7 +144,7 @@ public class PrivilegeController {
 
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/privileges/users/{user_id}/{privilege}")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     @AuthorizeJobRoles(roles = JobNodePrivilege.MANAGER)
     public void addPrivilegeToJobNode(
         @PathVariable("project_id") String projectId,
@@ -162,7 +171,8 @@ public class PrivilegeController {
 
 
     @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/privileges/users/{user_id}/{privilege}")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles(roles = JobNodePrivilege.MANAGER)
     public void removePrivilegeFromJobNode(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,
@@ -181,7 +191,10 @@ public class PrivilegeController {
 
         repositoryFactory.getJobNodePrivilegeList().update(jobNode.getPrivileges().get(appUser.getUsername()));
     }
+
     @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/privileges/users/{user_id}")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles(roles = JobNodePrivilege.MANAGER)
     public void removeUserFromJobNode(
         @PathVariable("project_id") String projectId,
         @PathVariable("job_node_id") String jobNodeId,

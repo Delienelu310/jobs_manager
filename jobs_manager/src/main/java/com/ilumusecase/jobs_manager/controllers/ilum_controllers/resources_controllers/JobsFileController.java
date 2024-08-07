@@ -22,10 +22,14 @@ import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
+import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
+import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 import com.ilumusecase.jobs_manager.resources.ilum.JobsFile;
 import com.ilumusecase.jobs_manager.resources.ilum.JobsFileDetails;
 import com.ilumusecase.jobs_manager.resources.ilum.JobsFileState;
 import com.ilumusecase.jobs_manager.s3clients.S3ClientFactory;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeJobRoles;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
@@ -44,6 +48,8 @@ public class JobsFileController {
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_files")
     @JsonMapperRequest(resource = "JobsFile", type = "simple")
+    @AuthorizeJobRoles
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public Object retrieveJobsFilesOfJobNode(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
@@ -68,6 +74,8 @@ public class JobsFileController {
 
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_files/count")
+    @AuthorizeJobRoles
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public long retrieveJobsFilesOfJobNodeCount(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
@@ -88,6 +96,8 @@ public class JobsFileController {
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_files/{jobs_file_id}")
     @JsonMapperRequest(resource = "JobsFile", type = "simple")
+    @AuthorizeJobRoles
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public Object retrieveJobsFileById(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
@@ -103,6 +113,8 @@ public class JobsFileController {
     }
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_files/{jobs_file_id}/state")
+    @AuthorizeJobRoles
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public JobsFileState retrieveJobsFileState(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
@@ -125,6 +137,8 @@ public class JobsFileController {
     } 
 
     @PostMapping(value = "/projects/{project_id}/job_nodes/{job_node_id}/jobs_files", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER, JobNodePrivilege.SCRIPTER, JobNodePrivilege.TESTER})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public String  uploadJobsFile(
         Authentication authentication,
         @ProjectId @PathVariable("project_id") String projectId,
@@ -172,6 +186,8 @@ public class JobsFileController {
     }
 
     @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_files/{jobs_file_id}")
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER, JobNodePrivilege.SCRIPTER, JobNodePrivilege.TESTER})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public void deleteJobsFile(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
@@ -195,6 +211,8 @@ public class JobsFileController {
 
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/jobs_files/{jobs_file_id}/job_details")
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER, JobNodePrivilege.SCRIPTER, JobNodePrivilege.TESTER})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public void updateJobsFileDetails(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
@@ -218,6 +236,8 @@ public class JobsFileController {
         value = "/projects/{project_id}/job_nodes/{job_node_id}/jobs_files/{jobs_file_id}/file", 
         consumes = { MediaType.MULTIPART_FORM_DATA_VALUE }
     )
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER, JobNodePrivilege.SCRIPTER, JobNodePrivilege.TESTER})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public void updateJobsFileFile(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,

@@ -22,7 +22,6 @@ import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
 import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeJobRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
-import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.DisableDefaultAuth;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
@@ -37,17 +36,10 @@ public class JobsNodeController {
     private ChannelController channelController;
 
 
-    @GetMapping("/job_nodes")
-    @JsonMapperRequest(type="full", resource = "JobNode")
-    @DisableDefaultAuth
-    public Object retrieveAllNodes(){
-        return repositoryFactory.getJobNodesRepository().retrieveAll();
-    }
-
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/full")
     @JsonMapperRequest(type="full", resource = "JobNode")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.VIEWER, ProjectPrivilege.SCRIPTER})
-    @AuthorizeJobRoles(roles = {JobNodePrivilege.VIEWER, JobNodePrivilege.SCRIPTER})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeJobRoles
     public Object retrieveByIdFull(
         @ProjectId @PathVariable("project_id") String projectId, 
         @JobNodeId @PathVariable("job_node_id") String jobNodeId
@@ -58,8 +50,8 @@ public class JobsNodeController {
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/ilum")
     @JsonMapperRequest(type="ilumGroup", resource = "JobNode")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.VIEWER, ProjectPrivilege.SCRIPTER})
-    @AuthorizeJobRoles(roles = {JobNodePrivilege.VIEWER, JobNodePrivilege.SCRIPTER})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeJobRoles
     public Object retrieveByIdWithIlumGroup(
         @ProjectId @PathVariable("project_id") String projectId, 
         @JobNodeId @PathVariable("job_node_id") String jobNodeId
@@ -77,7 +69,7 @@ public class JobsNodeController {
     }
 
     @PostMapping("/projects/{project_id}/job_nodes")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public String createJobNode(
         @ProjectId @PathVariable("project_id") String projectId, 
         @RequestBody JobNodeDetails jobNodeDetails
@@ -94,7 +86,8 @@ public class JobsNodeController {
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER})
     public void updateJobNodeDetails(
         @ProjectId @PathVariable("project_id") String projectId, 
         @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
@@ -110,7 +103,8 @@ public class JobsNodeController {
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/add/input/{label}")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER})
     public void addInputLabel(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
@@ -131,7 +125,8 @@ public class JobsNodeController {
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/add/output/{label}")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER})
     public void addOutputChannel(
         @ProjectId @PathVariable("project_id") String projectId, 
         @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
@@ -153,7 +148,8 @@ public class JobsNodeController {
 
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/remove/input/{label}")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER})
     public void removeInputLabel(
         @ProjectId @PathVariable("project_id") String projectId, 
         @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
@@ -207,7 +203,8 @@ public class JobsNodeController {
     }
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/remove/output/{label}")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER})
     public void removeOutputLabel(
         @ProjectId @PathVariable("project_id") String projectId, 
         @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
@@ -261,7 +258,7 @@ public class JobsNodeController {
 
  
     @PutMapping("/projects/{project_id}/job_nodes/connect")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public void connectJobNodes(
         @ProjectId @PathVariable(value="project_id") String projectId,
         @RequestParam(required = false, value="input_job_node_id") String inputJobNodeId,
@@ -377,7 +374,7 @@ public class JobsNodeController {
     }
 
     @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public void deleteJobNode(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId

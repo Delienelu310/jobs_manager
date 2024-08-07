@@ -19,10 +19,14 @@ import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
+import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
+import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroupConfiguraion;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroupDetails;
 import com.ilumusecase.jobs_manager.schedulers.JobEntityScheduler;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeJobRoles;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
@@ -45,6 +49,8 @@ public class IlumGroupController {
     }
 
     @PostMapping("/projects/{project_id}/job_nodes/{job_node_id}/start")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER})
     public void startJobNode(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
@@ -118,6 +124,8 @@ public class IlumGroupController {
     Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
 
     @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/stop")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER})
     public void stopIlumGroup(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId

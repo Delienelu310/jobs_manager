@@ -43,6 +43,11 @@ public class ProjectAuthHandler implements AnnotationHandlerInterface{
         }
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId.orElseThrow(RuntimeException::new));
 
+        if(!project.getPrivileges().containsKey(appUser.getUsername())){
+            return false;
+        }
+
+        if(authorizeProjectRoles.roles().length == 0) return true;
         
         return project.getPrivileges().get(appUser.getUsername()).getList().stream().anyMatch(role -> {
             for(ProjectPrivilege projectPrivilege : authorizeProjectRoles.roles()){
