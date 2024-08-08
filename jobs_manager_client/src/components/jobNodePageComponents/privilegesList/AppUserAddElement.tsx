@@ -5,6 +5,7 @@ import { AppUserSimple } from "../../../api/authorization/usersApi";
 
 export interface AppUserAddElementContext{
     action : (username : string) => void
+    isPreseent : (username : string) => boolean
 }
 
 export interface AppUserAddElementArgs{
@@ -22,6 +23,10 @@ const AppUserAddElement = ({data, context} : AppUserAddElementArgs) => {
             </div>
             <div className="list_table_cell">
                 <i>{data.appUserDetails.fullname}</i>
+            </div>
+
+            <div className="list_table_cell">
+                <i>{context.isPreseent(data.username) || "Not"} In Project</i>
             </div>
 
         </div>

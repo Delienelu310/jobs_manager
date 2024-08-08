@@ -6,6 +6,7 @@ import { ProjectFullData, retrieveProject } from "../api/abstraction/projectApi"
 import SecuredNode from "../authentication/SecuredNode";
 import { ProjectPrivilege } from "../api/authorization/privilegesApi";
 import { Roles } from "../api/authorization/usersApi";
+import PrivilegeList from "../components/projectPageComponents/PrivilegeList";
 
 
 export interface AllProjectData{
@@ -38,6 +39,7 @@ const ProjectPage = () => {
     return (
         <div>
             {allProjectData && 
+                
                 <SecuredNode
                     jobNodePrivilegeConfig={null}
                     projectPrivilegeConfig={{
@@ -90,6 +92,15 @@ const ProjectPage = () => {
                             }
                         }}
                     />
+
+                    <hr/>
+
+
+                    <PrivilegeList
+                        projectData={allProjectData.projectFullData}
+                        refresh={refresh}
+                    />
+
                 </SecuredNode>
             
             }

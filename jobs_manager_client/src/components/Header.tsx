@@ -12,7 +12,10 @@ const Header = () => {
             <Link to="/projects" className="header_element header_element_left">Projects</Link>
             <Link to="/users" className="header_element header_element_left">Users</Link>
             {authentication ? 
-                <div onClick={logout} className="header_element header_element_right">Logout</div> :
+                <>
+                    <div onClick={logout} className="header_element header_element_right">Logout</div> 
+                    <div className="header_element  header_element_right">{authentication.username}</div> 
+                </>:
                 <Link to="/login" className="header_element header_element_right">Login</Link>   
             }
             

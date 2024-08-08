@@ -43,7 +43,7 @@ public class Project {
     @JsonFilter("plug-channel")
     private Map<String, Channel> outputChannels = new HashMap<>();
 
-    @DBRef(lazy = true)
+    @DBRef(lazy = false)
     private Map<String, PrivilegeList<ProjectPrivilege>> privileges = new HashMap<>();
 
     @Override

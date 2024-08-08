@@ -32,13 +32,13 @@ export default function AuthProvider({children} : {children : ReactNode})  {
     const [authentication, setAuthentication] = useState<Authentication | null>(null);
     const [requestInjector, setRequestInjector] = useState<number | null>(null);
 
-    useEffect(() => {
-        setRequestInjector(apiClient.interceptors.request.use((config) => {
-            config.headers.Authorization="Basic YWRtaW46YWRtaW4="
-            return config;
-        }));
-        setAuthentication({username: "admin", roles: ["ROLE_ADMIN"]})
-    }, []);
+    // useEffect(() => {
+    //     setRequestInjector(apiClient.interceptors.request.use((config) => {
+    //         config.headers.Authorization="Basic YWRtaW46YWRtaW4="
+    //         return config;
+    //     }));
+    //     setAuthentication({username: "admin", roles: ["ROLE_ADMIN"]})
+    // }, []);
     
 
     function logout() : void{

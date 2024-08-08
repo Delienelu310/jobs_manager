@@ -18,6 +18,7 @@ import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
 import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
 import com.ilumusecase.jobs_manager.resources.authorities.PrivilegeList;
 import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthAdminRoleOnly;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeJobRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
@@ -74,7 +75,7 @@ public class PrivilegeController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public Object retrieveJobNodePrivileges(
         @ProjectId @PathVariable("project_id") String projectId,
-        @ProjectId @PathVariable("job_node_id") String jobNodeId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @RequestParam(name = "query", defaultValue = "", required = false) String query,
         @RequestParam(name = "jobNodePrivileges", defaultValue = "", required = false) List<JobNodePrivilege> jobNodePrivileges,
         @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
@@ -132,7 +133,7 @@ public class PrivilegeController {
     @AuthorizeJobRoles
     public List<JobNodePrivilege> retrieveJobNodeUserPrivileges(
         @ProjectId @PathVariable("project_id") String projectId,
-        @ProjectId @PathVariable("job_node_id") String jobNodeId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("username") String username
     ){
 
@@ -147,8 +148,8 @@ public class PrivilegeController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     @AuthorizeJobRoles(roles = JobNodePrivilege.MANAGER)
     public void addPrivilegeToJobNode(
-        @PathVariable("project_id") String projectId,
-        @PathVariable("job_node_id") String jobNodeId,
+        @ProjectId  @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("user_id") String userId,
         @PathVariable("privilege") JobNodePrivilege privilege
     ){
@@ -174,8 +175,8 @@ public class PrivilegeController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     @AuthorizeJobRoles(roles = JobNodePrivilege.MANAGER)
     public void removePrivilegeFromJobNode(
-        @PathVariable("project_id") String projectId,
-        @PathVariable("job_node_id") String jobNodeId,
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("user_id") String userId,
         @PathVariable("privilege") JobNodePrivilege privilege
     ){
@@ -196,8 +197,8 @@ public class PrivilegeController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     @AuthorizeJobRoles(roles = JobNodePrivilege.MANAGER)
     public void removeUserFromJobNode(
-        @PathVariable("project_id") String projectId,
-        @PathVariable("job_node_id") String jobNodeId,
+        @ProjectId  @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("user_id") String userId
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
@@ -216,7 +217,7 @@ public class PrivilegeController {
     @PutMapping("/projects/{project_id}/privileges/users/{user_id}/{privilege}")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
     public void addPrivilegeToProject(
-        @PathVariable("project_id") String projectId,
+        @ProjectId @PathVariable("project_id") String projectId,
         @PathVariable("user_id") String userId,
         @PathVariable("privilege") ProjectPrivilege privilege
     ){
@@ -244,7 +245,7 @@ public class PrivilegeController {
     @DeleteMapping("/projects/{project_id}/privileges/users/{user_id}/{privilege}")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
     public void removePrivilegeFromProject(
-        @PathVariable("project_id") String projectId,
+        @ProjectId @PathVariable("project_id") String projectId,
         @PathVariable("user_id") String userId,
         @PathVariable("privilege") ProjectPrivilege privilege
     ){
@@ -261,10 +262,52 @@ public class PrivilegeController {
         repositoryFactory.getProjectPrivilegeList().update(project.getPrivileges().get(appUser.getUsername()));
     }
 
+    @DeleteMapping("/projects/{project_id}/privileges/users/{user_id}")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
+    public void removeUserFromProject(
+        @ProjectId @PathVariable("project_id") String projectId,
+        @PathVariable("user_id") String userId
+    ){
+       
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
+
+        if(!project.getPrivileges().containsKey(userId)){
+            throw new RuntimeException();
+        }
+        if(project.getPrivileges().get(userId).getList().contains(ProjectPrivilege.ADMIN)) throw new RuntimeException();
+        if(project.getPrivileges().get(userId).getList().contains(ProjectPrivilege.MODERATOR)) throw new RuntimeException();
+
+        
+        repositoryFactory.getProjectPrivilegeList().delete(project.getPrivileges().get(userId).getId());
+        project.getPrivileges().remove(userId);
+        repositoryFactory.getProjectRepository().updateProjectFull(project);
+    }
+    @DeleteMapping("/projects/{project_id}/privileges/moderators/{user_id}")
+    @AuthAdminRoleOnly
+    public void removeModeratorFromProject( 
+        @PathVariable("project_id") String projectId,
+        @PathVariable("user_id") String userId
+    ){
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
+
+        if(!project.getPrivileges().containsKey(userId)){
+            throw new RuntimeException();
+        }
+        if(project.getPrivileges().get(userId).getList().contains(ProjectPrivilege.ADMIN)) throw new RuntimeException();
+        if(!project.getPrivileges().get(userId).getList().contains(ProjectPrivilege.MODERATOR)) throw new RuntimeException();
+
+        
+        repositoryFactory.getProjectPrivilegeList().delete(project.getPrivileges().get(userId).getId());
+        project.getPrivileges().remove(userId);
+        repositoryFactory.getProjectRepository().updateProjectFull(project);
+
+    }
+
+
     @PutMapping("/projects/{project_id}/privileges/moderators/{user_id}")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN})
     public void addModeratorToProject(
-        @PathVariable("project_id") String projectId,
+        @ProjectId @PathVariable("project_id") String projectId,
         @PathVariable("user_id") String userId
     ){
 
@@ -283,22 +326,4 @@ public class PrivilegeController {
 
         repositoryFactory.getProjectPrivilegeList().update(project.getPrivileges().get(appUser.getUsername()));
     }
-
-
-    @PutMapping("/projects/{project_id}/privileges/moderators/{user_id}/MODERATOR")
-    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN})
-    public void removeModeratorFromProject(
-        @PathVariable("project_id") String projectId,
-        @PathVariable("user_id") String userId
-    ){
- 
-        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
-
-        AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(userId);
-
-        project.getPrivileges().get(appUser.getUsername()).getList().remove(ProjectPrivilege.MODERATOR);
-
-        repositoryFactory.getProjectPrivilegeList().update(project.getPrivileges().get(appUser.getUsername()));
-    }
-
 }

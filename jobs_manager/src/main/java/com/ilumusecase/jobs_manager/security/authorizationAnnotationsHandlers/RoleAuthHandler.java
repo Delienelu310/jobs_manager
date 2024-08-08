@@ -19,9 +19,9 @@ public class RoleAuthHandler implements AnnotationHandlerInterface{
 
         if(authorizeRoles.roles().length == 0) return true;
 
-        return authentication.getAuthorities().stream().anyMatch(role -> {
+        return authentication.getAuthorities().stream().map(auth -> auth.getAuthority()).anyMatch(role -> {
             for(Roles roleAllowed : authorizeRoles.roles()){
-                if(role.toString().equals("ROLE_" + roleAllowed.toString())) return true;
+                if(role.toString().equals("SCOPE_ROLE_" + roleAllowed.toString())) return true;
             }
             return false;
         });

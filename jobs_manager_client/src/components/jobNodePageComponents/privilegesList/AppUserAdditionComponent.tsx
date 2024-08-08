@@ -38,6 +38,8 @@ const AppUserAdditionComponent = ({context} : AppUserAdditionComponentArgs) => {
                     context={{ 
                         action : (username : string) => {
 
+                            if(context.jobNodePageRefresh.jobNodeData.privileges[username] != undefined) return;
+
                             addPrivilegeToJobNodeUser(
                                 context.jobNodePageRefresh.projectId,
                                 context.jobNodePageRefresh.jobNodeId,
@@ -51,7 +53,8 @@ const AppUserAdditionComponent = ({context} : AppUserAdditionComponentArgs) => {
                                     />        
                                 );
                             }).catch(e => console.log(e));
-                        }
+                        },
+                        isPreseent : (username : string) => context.jobNodePageRefresh.jobNodeData.privileges[username] != undefined
                     }}
                     dependencies={[]}
                     endpoint={{

@@ -54,11 +54,14 @@ public class AuthorizationAspect {
     public void allControllersPointcut(){}
 
     private boolean authorizeModerator(Authentication authentication){
-        return authentication.getAuthorities().stream().anyMatch(auth -> auth.toString().equals("ROLE_MODERATOR"));
+        return authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().toString().equals("SCOPE_ROLE_MODERATOR"));
     }
 
+
+
     private boolean authorizeAdmin(Authentication authentication){
-        return authentication.getAuthorities().stream().anyMatch(auth -> auth.toString().equals("ROLE_ADMIN"));
+        authentication.getAuthorities().stream().map(auth -> auth.getAuthority()).forEach(logger::info);
+        return authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("SCOPE_ROLE_ADMIN"));
     }
 
     private boolean authorizeDefault(Method method){

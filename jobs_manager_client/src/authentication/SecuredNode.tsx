@@ -41,6 +41,8 @@ const SecuredNode = ({
     
     
     function isAuthorized() : boolean{
+
+
         if(!authentication) return false;
 
         if(
@@ -49,7 +51,8 @@ const SecuredNode = ({
         ) return true;
 
         if(roles != null){
-            if( !(authentication.roles.filter(role => roles.map(r => Roles[r] as string).includes(role)).length > 0) ){
+            console.log(roles.map(r => "ROLE_" + Roles[r] as string));
+            if( !(authentication.roles.filter(role => roles.map(r => "ROLE_" + Roles[r] as string).includes(role)).length > 0) ){
                 return false;
             }
         }

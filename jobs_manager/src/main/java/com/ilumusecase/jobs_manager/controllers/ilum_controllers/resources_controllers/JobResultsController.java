@@ -14,6 +14,8 @@ import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroupDetails;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeJobRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
 import java.util.List;
 import jakarta.validation.constraints.Min;
@@ -34,8 +36,8 @@ public class JobResultsController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     @AuthorizeJobRoles
     public Object retrieveJobResults(
-        @PathVariable("project_id") String projectId,
-        @PathVariable("job_node_id") String jobNodeId,
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @RequestParam(name = "ilum_group_id", required = false, defaultValue = "") String ilumGroupId,
         @RequestParam(name = "query", defaultValue = "", required = false) String targetNameQuery,
         
@@ -72,8 +74,8 @@ public class JobResultsController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     @AuthorizeJobRoles
     public Long retrieveJobResultsCount(
-        @PathVariable("project_id") String projectId,
-        @PathVariable("job_node_id") String jobNodeId,
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @RequestParam(name = "ilum_group_id", required = false, defaultValue = "") String ilumGroupId,
         @RequestParam(name = "query", defaultValue = "", required = false) String targetNameQuery,
         
@@ -108,8 +110,8 @@ public class JobResultsController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     @AuthorizeJobRoles
     public List<IlumGroupData> retrieveIlumGroupsOfJobResults(
-        @PathVariable("project_id") String projectId,
-        @PathVariable("job_node_id") String jobNodeId,
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @RequestParam(name = "query", defaultValue = "", required = false) String query,
         @RequestParam(name = "from", defaultValue = "0", required = false) Long from,
         @RequestParam(name = "to", required = false) Long to,
@@ -123,8 +125,8 @@ public class JobResultsController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     @AuthorizeJobRoles
     public Long retrieveIlumGroupsOfJobResultsCount(
-        @PathVariable("project_id") String projectId,
-        @PathVariable("job_node_id") String jobNodeId,
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @RequestParam(name = "query", defaultValue = "", required = false) String query,
         @RequestParam(name = "from", defaultValue = "0", required = false) Long from,
         @RequestParam(name = "to", required = false) Long to
@@ -139,8 +141,8 @@ public class JobResultsController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     @AuthorizeJobRoles
     public Object retrieveJobScriptOfJobResults(
-        @PathVariable("project_id") String projectId,
-        @PathVariable("job_node_id") String jobNodeId,
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
 
         @RequestParam(name = "query", defaultValue = "", required = false) String testerNameQuery,
         @RequestParam(name = "tester_author", defaultValue = "", required = false) String testerAuthor,
@@ -165,8 +167,8 @@ public class JobResultsController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     @AuthorizeJobRoles
     public Long retrieveJobScriptOfJobResultsCount(
-        @PathVariable("project_id") String projectId,
-        @PathVariable("job_node_id") String jobNodeId,
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
 
         @RequestParam(name = "query", defaultValue = "", required = false) String testerNameQuery,
         @RequestParam(name = "tester_author", defaultValue = "", required = false) String testerAuthor,
@@ -188,8 +190,8 @@ public class JobResultsController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     @AuthorizeJobRoles
     public List<String> retrieveMetricsOfTester(
-        @PathVariable("project_id") String projectId,
-        @PathVariable("job_node_id") String jobNodeId,
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("job_script_id") String testerId,
 
 
@@ -206,8 +208,8 @@ public class JobResultsController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     @AuthorizeJobRoles
     public Long retrieveMetricsOfTesterCount(
-        @PathVariable("project_id") String projectId,
-        @PathVariable("job_node_id") String jobNodeId,
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("job_script_id") String testerId,
 
         @RequestParam(name = "query", defaultValue = "", required = false) String query,
@@ -222,8 +224,8 @@ public class JobResultsController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     @AuthorizeJobRoles
     public Object retrieveJobResultById(
-        @PathVariable("project_id") String projectId,
-        @PathVariable("job_node_id") String jobNodeId,
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("job_result_id") String jobResultId
     ){
         return repositoryFactory.getJobResultRepository().retrieveById(jobResultId).orElseThrow();
@@ -234,8 +236,8 @@ public class JobResultsController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER})
     public void deleteResult(
-        @PathVariable("project_id") String projectId,
-        @PathVariable("job_node_id") String jobNodeId,
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("job_result_id") String jobResultId
     
     ){

@@ -18,7 +18,7 @@ export function login(
     {username, password} : ClientData, 
     {setAuthentication, setRequestInjector} : {
         setAuthentication : React.Dispatch<React.SetStateAction<Authentication | null>>,
-        setRequestInjector : React.Dispatch<React.SetStateAction<number | null>>
+        setRequestInjector : React.Dispatch<React.SetStateAction<number | null>>,
     }
 ) : Promise<AxiosResponse<string>>{
 
@@ -30,7 +30,7 @@ export function login(
         }
     }).then(response   => {
         
-    
+        console.log(response);
   
         const payload : JwtPayload = jwtDecode<JwtPayload>(response.data);
         setAuthentication({username : payload.sub, roles: payload.scope.split(" ")});
