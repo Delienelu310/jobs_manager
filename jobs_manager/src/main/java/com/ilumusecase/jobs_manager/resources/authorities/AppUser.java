@@ -5,7 +5,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ilumusecase.jobs_manager.validation.annotations.Username;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,11 +24,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 public class AppUser implements UserDetails {
 
-    
+    @NotNull
+    @Valid
     private AppUserDetails appUserDetails;
     
     @Id
+    @Username
     private String username;
+    
     @JsonIgnore
     private String password;
     private Collection<? extends GrantedAuthority> authorities;

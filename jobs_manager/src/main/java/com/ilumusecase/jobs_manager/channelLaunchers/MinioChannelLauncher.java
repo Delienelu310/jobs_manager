@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.ilumusecase.jobs_manager.resources.abstraction.Channel;
 
-@Component("minio")
+@Component
 public class MinioChannelLauncher implements ChannelLauncher{
 
     @Override

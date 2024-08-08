@@ -9,6 +9,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,6 +23,8 @@ public class ChannelList {
 
     @DBRef
     @JsonFilter("node-plug-channel")
+    @NotNull
+    @Valid
     private List<Channel> channelList = new ArrayList<>();
 
 

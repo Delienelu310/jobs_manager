@@ -17,6 +17,8 @@ import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
 import com.ilumusecase.jobs_manager.resources.ilum.JobScript;
 import com.ilumusecase.jobs_manager.resources.ilum.JobsFile;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -27,35 +29,51 @@ public class JobNode {
 
     @Id
     private String id;
-    
+
+    @NotNull
+    @Valid
     private JobNodeDetails jobNodeDetails;
 
 
     @DBRef
     @JsonFilter("project-reference")
+    @NotNull
+    @Valid
     private Project project;
     
     @DBRef(lazy = true)
+    @NotNull
+    @Valid
     private Map<String, ChannelList> input = new HashMap<>();
     
     @DBRef(lazy = true)
+    @NotNull
+    @Valid
     private Map<String, ChannelList> output = new HashMap<>();
 
 
     @DBRef(lazy = true)
+    @NotNull
+    @Valid
     private Map<String, PrivilegeList<JobNodePrivilege>> privileges = new HashMap<>();
 
 
     @DBRef(lazy = true)
     @JsonFilter("job_node_jobs_files")
+    @NotNull
+    @Valid
     private List<JobsFile> jobsFiles = new LinkedList<>();
     
     @DBRef(lazy = true)
     @JsonFilter("job_node_job_scripts")
+    @NotNull
+    @Valid
     private List<JobScript> jobScripts = new LinkedList<>();
 
     @DBRef(lazy = true)
     @JsonFilter("job_node_job_results")
+    @NotNull
+    @Valid
     private List<JobEntity> jobResults = new LinkedList<>();
 
 
@@ -63,14 +81,19 @@ public class JobNode {
 
     @DBRef(lazy = true)
     @JsonFilter("job_node_jobs_queue")
+    @NotNull
+    @Valid
     private List<JobEntity> testingJobs = new LinkedList<>();
 
     @DBRef(lazy = true)
     @JsonFilter("job_node_jobs_queue")
+    @NotNull
+    @Valid
     private List<JobEntity> jobsQueue = new LinkedList<>();
 
     @DBRef(lazy = true)
     @JsonFilter("job_node_ilum_groups")
+    @Valid
     private IlumGroup ilumGroup = null;
 
     @Override

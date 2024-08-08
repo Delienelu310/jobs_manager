@@ -23,8 +23,14 @@ import com.ilumusecase.jobs_manager.resources.authorities.AppUserDetails;
 import com.ilumusecase.jobs_manager.security.Roles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthAdminRoleOnly;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeRoles;
+import com.ilumusecase.jobs_manager.validation.annotations.Base64Password;
+import com.ilumusecase.jobs_manager.validation.annotations.Username;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @RestController
 public class UserManagementController {
@@ -41,8 +47,8 @@ public class UserManagementController {
     @JsonMapperRequest(type="full", resource = "AppUser")
     @AuthorizeRoles
     public Object retrieveAllUsers(
-        @RequestParam(name= "query", required = false, defaultValue = "") String query,
-        @RequestParam(name= "fullname", required = false, defaultValue = "") String fullname,
+        @RequestParam(name= "query", required = false, defaultValue = "") @Size(max = 50) String query,
+        @RequestParam(name= "fullname", required = false, defaultValue = "") @Size(max = 50) String fullname,
         @RequestParam(name= "pageSize", required = false, defaultValue = "10") @Min(1) Integer pageSize,
         @RequestParam(name= "pageNumber", required = false, defaultValue = "0") @Min(0) Integer pageNumber
     ){
@@ -52,8 +58,8 @@ public class UserManagementController {
     @GetMapping("/users/count")
     @AuthorizeRoles
     public long retrieveAllUsers(
-        @RequestParam(name= "query", required = false, defaultValue = "") String query,
-        @RequestParam(name= "fullname", required = false, defaultValue = "") String fullname
+        @RequestParam(name= "query", required = false, defaultValue = "") @Size(max = 50) String query,
+        @RequestParam(name= "fullname", required = false, defaultValue = "") @Size(max = 50) String fullname
     ){
         return repositoryFactory.getUserDetailsManager().retrieveUsersCount(query, fullname);
     }
@@ -67,10 +73,10 @@ public class UserManagementController {
 
 
     private record AppUserRequestBody(
-        String passwordEncoded,
-        String username,
-        Roles[] roles,
-        AppUserDetails appUserDetails
+        @Base64Password String passwordEncoded,
+        @Username String username,
+        @NotNull Roles[] roles,
+        @Valid @NotNull AppUserDetails appUserDetails
     ){
 
     }
@@ -78,7 +84,7 @@ public class UserManagementController {
    
     @PostMapping("/moderators")
     @AuthAdminRoleOnly
-    public void createModerator(@RequestBody AppUserRequestBody appUserBody){
+    public void createModerator(@RequestBody @Valid @NotNull AppUserRequestBody appUserBody){
 
         UserDetails userDetails = User
             .withUsername(appUserBody.username)
@@ -96,7 +102,7 @@ public class UserManagementController {
 
     @DeleteMapping("/moderators/{username}")
     @AuthAdminRoleOnly
-    public void deleteModerator(@PathVariable("username") String username){
+    public void deleteModerator(@PathVariable("username") @Username String username){
         AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(username);
         if(!appUser.getAuthorities().stream().anyMatch(auth ->  auth.toString().equals("ROLE_MODERATOR"))){
             throw new RuntimeException("Endpoint must be used to delete moderator");
@@ -108,7 +114,7 @@ public class UserManagementController {
 
     @PostMapping("/users")
     // only moderator and admin
-    public void createNewUser( @RequestBody AppUserRequestBody appUserBody){
+    public void createNewUser( @RequestBody @Valid @NotNull AppUserRequestBody appUserBody){
 
         if(repositoryFactory.getUserDetailsManager().userExists(appUserBody.username)){
             throw new RuntimeException("User with username\""  + appUserBody.username + "\" exists already");
@@ -145,13 +151,16 @@ public class UserManagementController {
         repositoryFactory.getUserDetailsManager().deleteUserById(id);
     }
 
-    private record OldNewPassword(String oldBase64EncodedPassword, String newBase64EncodedPassword){
+    private record OldNewPassword(
+        @NotEmpty String oldBase64EncodedPassword, 
+        @Base64Password String newBase64EncodedPassword
+    ){
 
     }
 
     @PutMapping("/users/password")
     @AuthorizeRoles
-    public void updateMyPassword( @RequestBody OldNewPassword oldNewPassword){
+    public void updateMyPassword( @RequestBody @Valid @NotNull OldNewPassword oldNewPassword){
 
         repositoryFactory.getUserDetailsManager().changePassword(
             new String(Base64.getDecoder().decode(oldNewPassword.oldBase64EncodedPassword)),
@@ -162,7 +171,7 @@ public class UserManagementController {
 
     @PutMapping("/moderators/{username}/password")
     @AuthAdminRoleOnly
-    public void updateModeratorPassword(@PathVariable("username") String username, @RequestBody String base64EncodedPassword ){
+    public void updateModeratorPassword(@PathVariable("username") @Username String username, @RequestBody @Base64Password String base64EncodedPassword ){
 
         AppUser user = repositoryFactory.getUserDetailsManager().findByUsername(username);
         
@@ -183,7 +192,7 @@ public class UserManagementController {
    
     @PutMapping("/users/{username}/password")
     //only admin and moderator
-    public void updatePassword(@PathVariable("username") String username, @RequestBody String base64EncodedPassword ){
+    public void updatePassword(@PathVariable("username") @Username String username, @RequestBody @Base64Password String base64EncodedPassword ){
 
         AppUser user = repositoryFactory.getUserDetailsManager().findByUsername(username);
         
@@ -204,7 +213,7 @@ public class UserManagementController {
 
     @PutMapping("/users/{username}/roles")
     //only admin and moderator
-    public void updateRoles(@RequestBody Roles[] newRoles, @PathVariable("username") String username){
+    public void updateRoles(@RequestBody @NotNull  Roles[] newRoles, @PathVariable("username") @Username String username){
         AppUser user = repositoryFactory.getUserDetailsManager().findByUsername(username);
         
         if(user.getAuthorities().stream().anyMatch(auth -> 
@@ -227,7 +236,9 @@ public class UserManagementController {
 
     @PutMapping("/users/{username}/details")
     @AuthorizeRoles
-    public void udpateAppUserDetails(Authentication authentication, @RequestBody AppUserDetails appUserDetails, @PathVariable("username") String username){
+    public void udpateAppUserDetails(Authentication authentication, @RequestBody @Valid @NotNull AppUserDetails appUserDetails, 
+        @PathVariable("username") @Username String username
+    ){
           
         AppUser user = repositoryFactory.getUserDetailsManager().retrieveUserById(username);
 

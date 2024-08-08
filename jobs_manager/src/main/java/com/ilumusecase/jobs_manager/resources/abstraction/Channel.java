@@ -9,6 +9,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,21 +20,28 @@ import lombok.NoArgsConstructor;
 public class Channel {
     @Id
     private String id;
-
+    @NotNull
+    @Valid
     private ChannelDetails channelDetails;
 
     
     @DBRef
     @JsonFilter("project-reference")
+    @NotNull
+    @Valid
     private Project project;
 
 
     @DBRef
     @JsonFilter("channel-plug-jobNode")
+    @NotNull
+    @Valid
     private List<JobNode> inputJobs = new ArrayList<>();
     
     @DBRef
     @JsonFilter("channel-plug-jobNode")
+    @NotNull
+    @Valid
     private List<JobNode> outputJobs = new ArrayList<>();
 
     @Override

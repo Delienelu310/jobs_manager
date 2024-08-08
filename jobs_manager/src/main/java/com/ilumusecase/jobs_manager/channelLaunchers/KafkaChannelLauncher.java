@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.ilumusecase.jobs_manager.resources.abstraction.Channel;
 
-@Component("kafka")
+@Component
 public class KafkaChannelLauncher implements ChannelLauncher{
     
     @Autowired

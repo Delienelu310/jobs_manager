@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,9 +28,14 @@ import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.Auth
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @RestController
+@Validated
 public class ProjectController {
 
     @Autowired
@@ -46,8 +52,8 @@ public class ProjectController {
     @JsonMapperRequest(type="simple", resource = "Project")
     @AuthorizeRoles
     public Object getProjects(
-        @RequestParam(name = "query", defaultValue = "", required = false) String query,
-        @RequestParam(name = "admin", required = false) String admin,
+        @RequestParam(name = "query", defaultValue = "", required = false)  @Size(max = 50) String query,
+        @RequestParam(name = "admin", required = false) @Size(max = 50) String admin,
         @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
         @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber,
         Authentication authentication
@@ -63,8 +69,8 @@ public class ProjectController {
     @GetMapping("/projects/count")
     @AuthorizeRoles
     public long getProjectsCount(
-        @RequestParam(name = "query", defaultValue = "", required = false) String query,
-        @RequestParam(name = "admin", required = false) String admin,
+        @RequestParam(name = "query", defaultValue = "", required = false) @Size(max = 50) String query,
+        @RequestParam(name = "admin", required = false) @Size(max = 50) String admin,
         Authentication authentication
     ){
         query = query.trim();
@@ -85,7 +91,7 @@ public class ProjectController {
 
     @PostMapping("/projects")
     @AuthorizeRoles(roles={Roles.MANAGER})
-    public String createProject(Authentication authentication, @RequestBody ProjectDetails projectDetails){
+    public String createProject(Authentication authentication,  @RequestBody @Valid @NotNull ProjectDetails projectDetails){
 
         // add user as adming of the project
         Project project = repositoryFactory.getProjectRepository().createProject(projectDetails);
@@ -110,7 +116,11 @@ public class ProjectController {
 
     @PutMapping("/projects/{id}/input/add/{label}")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
-    public void addInputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label, @RequestBody ChannelDetails channelDetails){
+    public void addInputChannel(
+        @ProjectId @PathVariable("id") String id, 
+        @PathVariable("label") @Size(max = 50) @NotBlank String label, 
+        @RequestBody @Valid @NotNull ChannelDetails channelDetails
+    ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
         Channel channel =  repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
 
@@ -125,7 +135,7 @@ public class ProjectController {
 
     @PutMapping("/projects/{id}/input/remove/{label}")
     @AuthorizeProjectRoles(roles= { ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT })
-    public void removeInputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label){
+    public void removeInputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") @NotBlank @Size(max = 50) String label){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
 
         if(  !project.getInputChannels().containsKey(label) || project.getInputChannels().get(label) == null){
@@ -141,7 +151,11 @@ public class ProjectController {
 
     @PutMapping("/projects/{id}/output/add/{label}")
     @AuthorizeProjectRoles(roles= { ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT })
-    public void addOutputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label, @RequestBody ChannelDetails channelDetails){
+    public void addOutputChannel(
+        @ProjectId @PathVariable("id") String id, 
+        @PathVariable("label") @Size(max = 50) @NotBlank String label, 
+        @RequestBody @Valid @NotNull ChannelDetails channelDetails
+    ){
 
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
         Channel channel =  repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
@@ -158,7 +172,10 @@ public class ProjectController {
 
     @PutMapping("/projects/{id}/output/remove/{label}")
     @AuthorizeProjectRoles(roles= { ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT })
-    public void removeOutputChannel(@ProjectId @PathVariable("id") String id, @PathVariable("label") String label){
+    public void removeOutputChannel(
+        @ProjectId @PathVariable("id") String id,
+        @PathVariable("label") @Size(max = 50) @NotBlank String label
+    ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
 
         if(  !project.getOutputChannels().containsKey(label) || project.getOutputChannels().get(label) == null){
@@ -169,8 +186,6 @@ public class ProjectController {
         channelController.deleteChannelById(id, channel.getId());
         
         repositoryFactory.getProjectRepository().retrieveProjectById(id);
-        
-
     }
 
     @PutMapping("/projects/{id}/start/channels")
@@ -193,7 +208,7 @@ public class ProjectController {
 
     @PutMapping("/projects/{id}")
     @AuthorizeProjectRoles(roles= { ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
-    public void updateProject(@ProjectId @PathVariable("id") String id, @RequestBody ProjectDetails projectDetails){
+    public void updateProject(@ProjectId @PathVariable("id") String id, @RequestBody @Valid @NotNull ProjectDetails projectDetails){
         repositoryFactory.getProjectRepository().updateProject(id, projectDetails);
     }
 

@@ -13,7 +13,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.ilumusecase.jobs_manager.resources.authorities.PrivilegeList;
 import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
+import com.ilumusecase.jobs_manager.validation.annotations.Username;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -26,24 +29,40 @@ public class Project {
     @Id
     private String id;
 
+    @NotNull
+    @Valid
     private ProjectDetails projectDetails;
+
+    @Username
     private String admin;
 
     @DBRef(lazy=true)
     @JsonFilter("plug-channel")
+    @NotNull
+    @Valid
     private List<Channel> channels = new ArrayList<>();
+
     @DBRef(lazy=true)
     @JsonFilter("plug-jobNode")
+    @NotNull
+    @Valid
     private List<JobNode> jobNodes = new ArrayList<>(); 
 
     @DBRef(lazy=true)
     @JsonFilter("plug-channel")
+    @NotNull
+    @Valid
     private Map<String, Channel> inputChannels = new HashMap<>();
+
     @DBRef(lazy=true)
     @JsonFilter("plug-channel")
+    @NotNull
+    @Valid
     private Map<String, Channel> outputChannels = new HashMap<>();
 
-    @DBRef(lazy = false)
+    @DBRef(lazy = true)
+    @NotNull
+    @Valid
     private Map<String, PrivilegeList<ProjectPrivilege>> privileges = new HashMap<>();
 
     @Override
