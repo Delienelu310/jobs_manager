@@ -7,6 +7,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -19,10 +21,13 @@ public class JobNodeVertice {
 
     @DBRef(lazy = true)
     @JsonFilter("vertice_job_node")
+    @NotNull
+    @Valid
     private JobNode jobNode;
 
     private int x;
     private int y;
+
     @Override
     public int hashCode() {
         final int prime = 31;

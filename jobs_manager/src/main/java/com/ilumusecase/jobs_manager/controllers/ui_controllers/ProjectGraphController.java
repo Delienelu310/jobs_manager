@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -23,7 +24,10 @@ import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.Auth
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
+import jakarta.validation.constraints.NotNull;
+
 @RestController
+@Validated
 public class ProjectGraphController {
 
     @Autowired
@@ -94,7 +98,7 @@ public class ProjectGraphController {
     public void updateJobNodeVertice(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @RequestBody JobNodeVertice jobNodeVertice
+        @RequestBody @NotNull  JobNodeVertice jobNodeVertice
     ){
 
         JobNodeVertice jobNodeVerticeActual = repositoryFactory.getJobNodeVerticeRepository().retrieveByJobNodeId(jobNodeId).orElseThrow();

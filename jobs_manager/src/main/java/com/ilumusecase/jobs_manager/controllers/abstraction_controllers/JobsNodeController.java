@@ -1,6 +1,7 @@
 package com.ilumusecase.jobs_manager.controllers.abstraction_controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,8 +26,14 @@ import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.Auth
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 
 @RestController
+@Validated
 public class JobsNodeController {
 
     @Autowired
@@ -72,7 +79,7 @@ public class JobsNodeController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public String createJobNode(
         @ProjectId @PathVariable("project_id") String projectId, 
-        @RequestBody JobNodeDetails jobNodeDetails
+        @RequestBody @Valid @NotNull JobNodeDetails jobNodeDetails
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().createJobNode( project, jobNodeDetails);
@@ -91,7 +98,7 @@ public class JobsNodeController {
     public void updateJobNodeDetails(
         @ProjectId @PathVariable("project_id") String projectId, 
         @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
-        @RequestBody JobNodeDetails jobNodeDetails
+        @RequestBody @Valid @NotNull JobNodeDetails jobNodeDetails
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         if(!project.getJobNodes().stream().anyMatch(jn -> jn.getId().equals(jobNodeId))){
@@ -108,7 +115,7 @@ public class JobsNodeController {
     public void addInputLabel(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
-        @PathVariable("label") String label
+        @PathVariable("label") @NotBlank @Size(max = 50) String label
     ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         if( !jobNode.getProject().getId().equals(projectId)){
@@ -130,7 +137,7 @@ public class JobsNodeController {
     public void addOutputChannel(
         @ProjectId @PathVariable("project_id") String projectId, 
         @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
-        @PathVariable("label") String label
+        @PathVariable("label") @NotBlank @Size(max = 50)  String label
     ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
         if( !jobNode.getProject().getId().equals(projectId)){
@@ -153,7 +160,7 @@ public class JobsNodeController {
     public void removeInputLabel(
         @ProjectId @PathVariable("project_id") String projectId, 
         @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
-        @PathVariable("label") String label
+        @PathVariable("label") @NotBlank @Size(max = 50)  String label
     ){
         
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
@@ -208,7 +215,7 @@ public class JobsNodeController {
     public void removeOutputLabel(
         @ProjectId @PathVariable("project_id") String projectId, 
         @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
-        @PathVariable("label") String label
+        @PathVariable("label") @NotBlank @Size(max = 50)  String label
     ){
         
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
@@ -267,7 +274,7 @@ public class JobsNodeController {
         @RequestParam(required = false, value="output_label") String outputJobNodeLabel,
         @RequestParam(required = false, value ="project_input_label") String projectInputLabel,
         @RequestParam(required = false, value = "project_output_label") String projectOutputLabel,
-        @RequestBody(required = false) ChannelDetails channelDetails
+        @RequestBody(required = false) @Valid ChannelDetails channelDetails
 
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);

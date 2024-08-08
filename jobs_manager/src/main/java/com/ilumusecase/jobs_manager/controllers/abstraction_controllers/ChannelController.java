@@ -6,6 +6,7 @@ import java.util.LinkedList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +27,11 @@ import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.Auth
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
 @RestController
+@Validated
 public class ChannelController {
     
     @Autowired
@@ -68,7 +73,7 @@ public class ChannelController {
 
     @PostMapping("/projects/{project_id}/channels")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
-    public MappingJacksonValue createChannel(@ProjectId @PathVariable("project_id") String projectId, @RequestBody ChannelDetails channelDetails){
+    public MappingJacksonValue createChannel(@ProjectId @PathVariable("project_id") String projectId, @RequestBody @Valid @NotNull ChannelDetails channelDetails){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         return jsonMappersFactory.getChannelJsonMapper().getFullChannel(
             repositoryFactory.getChannelsRepository().createChannel(project, channelDetails)

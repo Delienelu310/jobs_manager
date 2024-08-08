@@ -3,6 +3,7 @@ package com.ilumusecase.jobs_manager.controllers.authorization_controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,10 +24,14 @@ import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.Auth
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
+import com.ilumusecase.jobs_manager.validation.annotations.Username;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @RestController
+@Validated
 public class PrivilegeController {
 
     @Autowired
@@ -39,8 +44,8 @@ public class PrivilegeController {
     @AuthorizeProjectRoles
     public Object retrieveProjectPrivileges(
         @ProjectId @PathVariable("project_id") String projectId,
-        @RequestParam(name = "query", defaultValue = "", required = false) String query,
-        @RequestParam(name = "projectPrivileges", defaultValue = "", required = false) List<ProjectPrivilege> projectPrivileges,
+        @RequestParam(name = "query", defaultValue = "", required = false) @Size(max = 50)  String query,
+        @RequestParam(name = "projectPrivileges", defaultValue = "", required = false) @Size(max = 20)  List<ProjectPrivilege> projectPrivileges,
         @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
         @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber
     ){
@@ -58,8 +63,8 @@ public class PrivilegeController {
     @AuthorizeProjectRoles
     public long retrieveProjectPrivileges(
         @ProjectId @PathVariable("project_id") String projectId,
-        @RequestParam(name = "query", defaultValue = "", required = false) String query,
-        @RequestParam(name = "projectPrivileges", defaultValue = "", required = false) List<ProjectPrivilege> projectPrivileges
+        @RequestParam(name = "query", defaultValue = "", required = false) @Size(max = 50)  String query,
+        @RequestParam(name = "projectPrivileges", defaultValue = "", required = false) @Size(max = 20)  List<ProjectPrivilege> projectPrivileges
     ){
         return repositoryFactory.getUserDetailsManager().retrieveProjectPrivilegesCount(
             projectId, 
@@ -76,8 +81,8 @@ public class PrivilegeController {
     public Object retrieveJobNodePrivileges(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @RequestParam(name = "query", defaultValue = "", required = false) String query,
-        @RequestParam(name = "jobNodePrivileges", defaultValue = "", required = false) List<JobNodePrivilege> jobNodePrivileges,
+        @RequestParam(name = "query", defaultValue = "", required = false) @Size(max = 50)  String query,
+        @RequestParam(name = "jobNodePrivileges", defaultValue = "", required = false) @Size(max = 20)  List<JobNodePrivilege> jobNodePrivileges,
         @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
         @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber
     ){
@@ -102,8 +107,8 @@ public class PrivilegeController {
     public long retrieveJobNodePrivilegesCount(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @RequestParam(name = "query", defaultValue = "", required = false) String query,
-        @RequestParam(name = "jobNodePrivileges", defaultValue = "", required = false) List<JobNodePrivilege> jobNodePrivileges
+        @RequestParam(name = "query", defaultValue = "", required = false) @Size(max = 50)  String query,
+        @RequestParam(name = "jobNodePrivileges", defaultValue = "", required = false) @Size(max = 20) List<JobNodePrivilege> jobNodePrivileges
     ){
 
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
@@ -120,7 +125,7 @@ public class PrivilegeController {
     @AuthorizeProjectRoles
     public List<ProjectPrivilege> retrieveJobNodeUserPrivileges(
         @ProjectId @PathVariable("project_id") String projectId,
-        @PathVariable("username") String username
+        @PathVariable("username") @Username String username
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
 
@@ -134,7 +139,7 @@ public class PrivilegeController {
     public List<JobNodePrivilege> retrieveJobNodeUserPrivileges(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("username") String username
+        @PathVariable("username") @Username String username
     ){
 
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
@@ -150,8 +155,8 @@ public class PrivilegeController {
     public void addPrivilegeToJobNode(
         @ProjectId  @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("user_id") String userId,
-        @PathVariable("privilege") JobNodePrivilege privilege
+        @PathVariable("user_id") @Username String userId,
+        @PathVariable("privilege") @NotNull JobNodePrivilege privilege
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
@@ -177,8 +182,8 @@ public class PrivilegeController {
     public void removePrivilegeFromJobNode(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("user_id") String userId,
-        @PathVariable("privilege") JobNodePrivilege privilege
+        @PathVariable("user_id") @Username String userId,
+        @PathVariable("privilege") @NotNull JobNodePrivilege privilege
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
@@ -199,7 +204,7 @@ public class PrivilegeController {
     public void removeUserFromJobNode(
         @ProjectId  @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("user_id") String userId
+        @PathVariable("user_id") @Username String userId
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
@@ -218,8 +223,8 @@ public class PrivilegeController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
     public void addPrivilegeToProject(
         @ProjectId @PathVariable("project_id") String projectId,
-        @PathVariable("user_id") String userId,
-        @PathVariable("privilege") ProjectPrivilege privilege
+        @PathVariable("user_id") @Username String userId,
+        @PathVariable("privilege") @NotNull ProjectPrivilege privilege
     ){
 
         if(privilege == ProjectPrivilege.MODERATOR){
@@ -246,8 +251,8 @@ public class PrivilegeController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
     public void removePrivilegeFromProject(
         @ProjectId @PathVariable("project_id") String projectId,
-        @PathVariable("user_id") String userId,
-        @PathVariable("privilege") ProjectPrivilege privilege
+        @PathVariable("user_id") @Username String userId,
+        @PathVariable("privilege") @NotNull ProjectPrivilege privilege
     ){
         if(privilege == ProjectPrivilege.MODERATOR){
             throw new RuntimeException();
@@ -266,7 +271,7 @@ public class PrivilegeController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR})
     public void removeUserFromProject(
         @ProjectId @PathVariable("project_id") String projectId,
-        @PathVariable("user_id") String userId
+        @PathVariable("user_id") @Username String userId
     ){
        
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
@@ -286,7 +291,7 @@ public class PrivilegeController {
     @AuthAdminRoleOnly
     public void removeModeratorFromProject( 
         @PathVariable("project_id") String projectId,
-        @PathVariable("user_id") String userId
+        @PathVariable("user_id") @Username String userId
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
 
@@ -308,7 +313,7 @@ public class PrivilegeController {
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN})
     public void addModeratorToProject(
         @ProjectId @PathVariable("project_id") String projectId,
-        @PathVariable("user_id") String userId
+        @PathVariable("user_id") @Username String userId
     ){
 
 
