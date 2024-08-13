@@ -13,6 +13,9 @@ import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,21 +26,30 @@ public class JobsFile {
     
     @Id
     private String id;
+    @NotBlank
     private String extension;
+    @NotNull
+    @Valid
     private JobsFileDetails jobDetails;
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_project_reference")
+    @Valid
+    @NotNull
     private Project project;
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_job_node_reference")
+    @Valid
+    @NotNull
     private JobNode jobNode;
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_publisher")
+    @Valid
     private AppUser publisher;
     
+    @NotNull
     private Set<String> allClasses = new HashSet<>();
 
 

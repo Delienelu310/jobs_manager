@@ -10,6 +10,8 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,10 +24,14 @@ public class JobResult {
     private String id;
     private String ilumId;
 
+    @NotNull
     private String ilumGroupId;
+    @NotNull
     private IlumGroupDetails ilumGroupDetails;
 
+    //check if json
     private String targetConfiguration;
+
     @DBRef(lazy = true)
     @JsonFilter("job_result_job_script")
     private JobScript tester;
@@ -33,18 +39,23 @@ public class JobResult {
     @JsonFilter("job_result_job_script")
     private JobScript target;
 
-
     private Long startTime;
     private Long endTime;
+
+    @Valid
     private JobResultDetails jobResultDetails; 
 
 
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_project_reference")
+    @NotNull
+    @Valid
     private Project project;
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_job_node_reference")
+    @NotNull
+    @Valid
     private JobNode jobNode;
 
     @Override

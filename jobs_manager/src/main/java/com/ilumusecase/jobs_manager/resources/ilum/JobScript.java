@@ -13,6 +13,10 @@ import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,25 +27,37 @@ public class JobScript {
     
     @Id
     private String id;
+    @NotBlank
+    @Size(min = 3, max = 100)
     private String classFullName;
+    @NotBlank
     private String extension;
 
+    @NotNull
+    @Valid
     private JobScriptDetails jobScriptDetails;
 
     @DBRef(lazy = true)
     @JsonFilter("job_script_jobs_files")
+    @NotNull
+    @Valid
     private List<JobsFile> jobsFiles = new LinkedList<>();
     
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_project_reference")
+    @NotNull
+    @Valid
     private Project project;
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_job_node_reference")
+    @NotNull
+    @Valid
     private JobNode jobNode;
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_publisher")
+    @Valid
     private AppUser author;
 
     @Override

@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,7 +25,9 @@ public class IlumGroup {
     private String id;
     private String ilumId;
 
+    @Valid
     private IlumGroupConfiguraion ilumGroupConfiguraion;
+    @NotNull
     private IlumGroupDetails ilumGroupDetails;
 
 
@@ -33,15 +37,20 @@ public class IlumGroup {
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_group_jobs")
+    @Valid
     private JobEntity currentJob;
     private LocalDateTime currentStartTime;
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_project_reference")
+    @NotNull
+    @Valid
     private Project project;
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_job_node_reference")
+    @NotNull
+    @Valid
     private JobNode jobNode;
 
     
