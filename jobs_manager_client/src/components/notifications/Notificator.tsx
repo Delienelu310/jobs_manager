@@ -3,18 +3,21 @@ import "../../css/components/notificator.css"
 
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import NotificationElement from "./NotificationElement";
+import { AxiosError } from "axios";
 
 
 export interface NotificatorContextValues {
     pushNotification : (config : NotificationConfig ) => void,
     deleteById : (id : number) => void,
-    clearNotifications : () => void
+    clearNotifications : () => void,
+    catchRequestError : (e : AxiosError<String>) => void
 }
 
 const NotificatorContext = createContext<NotificatorContextValues>({
     pushNotification: (cfg) => {},
     deleteById: (id) => {},
-    clearNotifications : () => {}
+    clearNotifications : () => {},
+    catchRequestError: (e) => {}
 });
 export const useNotificator = () => useContext(NotificatorContext);
 
@@ -54,6 +57,8 @@ const Notificator = ({children} : {children : ReactNode}) => {
     function pushNotification(config : NotificationConfig) : void{
         
         const id = generateNotificationId();
+
+        if(config.time != null && config.time< 0.5) config.time = 0.5;
 
         const data : NotificationData = {
             id : id,
@@ -104,6 +109,7 @@ const Notificator = ({children} : {children : ReactNode}) => {
 
     }
 
+
     function clearNotifications() : void{
         //clear notification map
         setNotifications(new Map<number, NotificationData>());
@@ -115,12 +121,22 @@ const Notificator = ({children} : {children : ReactNode}) => {
 
     }
 
+    
+    function catchRequestError(e : AxiosError<String>){
+        pushNotification({
+            message: (e.response?.data ?? "Unexpected Error") + "",
+            time : 5,
+            type: NotificationType.ERROR
+        });
+    }
+
     return (
         <NotificatorContext.Provider
             value={{
                 pushNotification,
                 deleteById,
-                clearNotifications
+                clearNotifications,
+                catchRequestError
 
             }}
         >

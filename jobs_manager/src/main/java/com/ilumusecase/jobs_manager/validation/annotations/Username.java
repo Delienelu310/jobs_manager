@@ -16,7 +16,7 @@ import java.lang.annotation.ElementType;
 @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Username {
-    String message() default "Invalid username";
+    String message() default "Invalid username: use letters, digits, 3 to 20 symbols only";
 
     Class<?>[] groups() default {};
 

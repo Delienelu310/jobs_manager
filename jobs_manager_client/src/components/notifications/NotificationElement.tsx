@@ -7,10 +7,9 @@ const NotificationElement = ({data} : {data : NotificationData}) => {
     
     return (
         <div className={`notification ${TypeToCss.get(data.config.type) ?? ""}`}>
-
-            <strong>{data.config.message.length > 50 ? data.config.message.substring(0, 48) + "..." : data.config.message}</strong>
-
             <button className="btn btn-danger" onClick={() => deleteById(data.id)}>X</button>
+
+            <strong><pre>{data.config.message || "No message specified"}</pre></strong>
 
         </div>
     );

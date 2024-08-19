@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AppUserDetails {
     
-    @NotBlank
-    @Size(min = 3, max = 50)
+    @NotBlank(message = "Full Name must not be blank")
+    @Size(min = 3, max = 50, message = "Full Name must have 3 to 50 letters")
     private String fullname;
-    @Size(min = 3, max = 500)
+    @Size(min = 3, max = 500, message = "Description must have 3 to 500 letters")
     private String description;
     
 

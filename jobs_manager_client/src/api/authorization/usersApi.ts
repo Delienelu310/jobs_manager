@@ -7,7 +7,8 @@ export enum Roles{
 }
 
 export interface AppUserDetails{
-    fullname : string
+    fullname : string,
+    description: string
 }
 
 export interface AppUserSimple{
@@ -22,6 +23,10 @@ export interface AppUserRequestBody{
     appUserDetails : AppUserDetails,
     roles : string[]
 
+}
+
+export function isUsernameBusy(username : string) : Promise<AxiosResponse<boolean>>{
+    return apiClient.get(`/users/${username}/busy`);
 }
 
 export function retrieveUser(username : string) : Promise<AxiosResponse<AppUserSimple>>{
@@ -82,3 +87,5 @@ export function updateModeratorPassword(username : string, newPassword : string
         'Content-Type': 'text/plain'
     }});
 }
+
+

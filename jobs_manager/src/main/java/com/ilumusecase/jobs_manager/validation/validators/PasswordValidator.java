@@ -32,10 +32,18 @@ public class PasswordValidator implements ConstraintValidator<Password, String>{
         //at least one special sign
         //password cannot have any other characters, char letters, digits and special chars
 
-        if(value == null) return false;
-        if(value.length() < 8) return false;
-        if(value.length() > 50) return false;
-
+        if(value == null){
+            context.buildConstraintViolationWithTemplate("Password cannot be empty")
+                .addConstraintViolation()
+                .disableDefaultConstraintViolation();
+            return false;
+        }
+        if(value.length() < 8 || value.length() > 50) {
+            context.buildConstraintViolationWithTemplate("Password must have 8 to 50 symbols")
+                .addConstraintViolation()
+                .disableDefaultConstraintViolation();
+            return false;
+        }
         boolean hasDigit = false;
         boolean hasUpperCaseChar = false;
         boolean hasLowerCaseChar = false;
@@ -47,6 +55,26 @@ public class PasswordValidator implements ConstraintValidator<Password, String>{
             else if(c >= 'a' && c <= 'z') hasLowerCaseChar = true;
             else if(this.specialCharacters.contains(c)) hasSpecialSign = true;
             else return false;
+        }
+
+        StringBuilder violatedMessage = new StringBuilder();
+        if(!hasDigit){
+            violatedMessage.append("Digit is required; ");
+        }
+        if(!hasUpperCaseChar){
+            violatedMessage.append("Upper case letter is required; ");
+        }
+
+        if(!hasLowerCaseChar){
+            violatedMessage.append("Lower case letter is required; ");       
+        }
+        if(!hasSpecialSign){
+            violatedMessage.append("Special sign is required; ");
+        }
+        if(violatedMessage.length() > 0){
+            context.buildConstraintViolationWithTemplate(violatedMessage.toString())
+                .addConstraintViolation()
+                .disableDefaultConstraintViolation();
         }
 
         return hasDigit && hasUpperCaseChar && hasLowerCaseChar && hasSpecialSign;

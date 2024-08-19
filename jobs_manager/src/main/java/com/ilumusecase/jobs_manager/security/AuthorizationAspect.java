@@ -21,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.ilumusecase.jobs_manager.JobsManagerApplication;
+import com.ilumusecase.jobs_manager.exceptions.security.NotAuthorizedException;
 import com.ilumusecase.jobs_manager.security.authorizationAnnotationsHandlers.AnnotationHandlerInterface;
 import com.ilumusecase.jobs_manager.security.authorizationAnnotationsHandlers.AuthAnnotationHandlerFactory;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthAdminRoleOnly;
@@ -101,7 +102,7 @@ public class AuthorizationAspect {
             if(annotationHandlerInterface.get().authorize(joinPoint, method, annotation, authentication)) return;
         }
 
-        throw new RuntimeException("Not authorized");
+        throw new NotAuthorizedException();
     }
     
 }

@@ -24,7 +24,8 @@ const AppUserMenu = ({
     const [newRoles, setNewRoles] = useState<string[]>([]);
 
     const [newUserDetails, setNewUserDetails] = useState<AppUserDetails>({
-        fullname : ""
+        fullname : "",
+        description: ""
     });
 
 

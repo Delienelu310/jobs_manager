@@ -43,6 +43,14 @@ public class UserManagementController {
 
     @Autowired
     private RepositoryFactory repositoryFactory;
+
+
+    @GetMapping("/users/{username}/busy")
+    public Boolean isBusy(
+        @PathVariable("username") String username
+    ){
+        return repositoryFactory.getUserDetailsManager().userExists(username);
+    }
     
 
     @GetMapping("/users")
