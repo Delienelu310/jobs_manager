@@ -1,0 +1,38 @@
+.notificator{
+
+    position: fixed;
+    top: 0;
+    margin: 50px 10%;
+    width : 80%;
+
+    z-index: 10;
+}
+
+
+.notification{
+    margin : 30px 5%;
+
+    border: 1px solid black;
+    border-radius: 25px;
+
+    height: 50px;
+    line-height: 50px;
+    overflow: hidden;
+
+}
+
+.notification_info{
+    background-color: antiquewhite;
+}
+
+.notification_error{
+
+    background-color: red;
+    color: white;
+
+}
+
+.notification .btn-danger{
+    float: right;
+    margin: 5px 20px;
+}

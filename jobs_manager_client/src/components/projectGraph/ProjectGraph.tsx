@@ -59,7 +59,8 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
     const [newHeader, setNewHeader] = useState<string>("");
 
     const [newJobNodeDetails, setNewJobNodeDetails] = useState<JobNodeDetails>({
-            name : ""
+            name : "",
+            description: ""
         });
         
     const [gof, setGof] = useState<GOF>(new GOF(
@@ -277,6 +278,13 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
                                 {
                                     ...newJobNodeDetails,
                                     name : e.target.value
+                                }
+                            )}/>
+                            <strong>Description:</strong>
+                            <textarea className=" form-control m-2" value={newJobNodeDetails.description} onChange={e => setNewJobNodeDetails(
+                                {
+                                    ...newJobNodeDetails,
+                                    description : e.target.value
                                 }
                             )}/>
                         </div>

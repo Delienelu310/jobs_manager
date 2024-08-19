@@ -10,30 +10,33 @@ import ProjectPage from './pages/ProjectPage';
 import JobNodePage from './pages/JobNodePage';
 import UsersManagementPage from './pages/UsersManagementPage';
 import Header from './components/Header';
+import Notificator from './components/notifications/Notificator';
 
 
 function App() {
   return (
     <div className="App">
       <AuthProvider>
-      
-        <BrowserRouter>
-          <Header/>
-          <Routes>
-            <Route path={"/login"} Component={LoginPage}/>
-          
-            <Route path={"/"} Component={WelcomePage}/>
-
-            <Route path={"/projects"} Component={ProjectListPage}/>
-
-            <Route path={"/projects/:projectId"} Component={ProjectPage}/>
-
-            <Route path={"/projects/:projectId/job_nodes/:jobNodeId"} Component={JobNodePage}/>
-
-            <Route path={"/users"} Component={UsersManagementPage}/>
+        <Notificator>
+          <BrowserRouter>
+            <Header/>
+            <Routes>
+              <Route path={"/login"} Component={LoginPage}/>
             
-          </Routes>
-        </BrowserRouter>
+              <Route path={"/"} Component={WelcomePage}/>
+
+              <Route path={"/projects"} Component={ProjectListPage}/>
+
+              <Route path={"/projects/:projectId"} Component={ProjectPage}/>
+
+              <Route path={"/projects/:projectId/job_nodes/:jobNodeId"} Component={JobNodePage}/>
+
+              <Route path={"/users"} Component={UsersManagementPage}/>
+              
+            </Routes>
+          </BrowserRouter>
+        </Notificator>
+       
       </AuthProvider>
       
     </div>
