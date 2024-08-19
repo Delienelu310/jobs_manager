@@ -79,3 +79,7 @@ export async function addProjectPlug(projectId : string, rightOrientation : bool
 export async function removeProjectPlug(projectId : string, rightOrientation : boolean, label : string) : Promise<AxiosResponse<void>>{
     return apiClient.put(`/projects/${projectId}/${rightOrientation ? "output" : "input"}/remove/${label}`);
 }
+
+export async function deleteProject(projectId : string) : Promise<AxiosResponse<void>>{
+    return apiClient.delete(`/projects/${projectId}`);
+}

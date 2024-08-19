@@ -10,6 +10,7 @@ import { ChannelElement, StaticChannelConfig } from "./gof/ChannelElement";
 import { PanelMods } from "./gof/eventHandlers/PanelMods";
 import SecuredNode from "../../authentication/SecuredNode";
 import { ProjectPrivilege } from "../../api/authorization/privilegesApi";
+import { Formik } from "formik";
 
 interface StaticGraphCanvasConfig{
     
@@ -310,7 +311,7 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
                             }}>
                                 <h3>Channel creation panel:</h3>
 
-
+            
 
                                 <strong>Channel name: </strong>
                                 <input className="form-control m-2" value={newChannelDetails.name} onChange={e => 
