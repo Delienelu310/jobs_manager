@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
-import { AppUserDetails, AppUserSimple, deleteModerator, deleteUser, retrieveUser, Roles, updateDetails, updateModeratorPassword, updatePassword, updateRoles } from "../../api/authorization/usersApi";
+import { AppUserSimple, deleteModerator, deleteUser, retrieveUser, Roles, updateDetails, updateModeratorPassword, updatePassword, updateRoles } from "../../api/authorization/usersApi";
 import { UsersManagementPageContext } from "../../pages/UsersManagementPage";
 import OpenerComponent from "../OpenerComponent";
 import { AxiosResponse } from "axios";
 import SecuredNode from "../../authentication/SecuredNode";
+import { ErrorMessage, Field, Formik, Form } from "formik";
+import { validatePassword } from "../../validation/customValidations";
+import * as Yup from 'yup';
+import { NotificationType, useNotificator } from "../notifications/Notificator";
 
 
 export interface AppUserMenuArgs{
@@ -11,60 +15,56 @@ export interface AppUserMenuArgs{
     context : UsersManagementPageContext
 }
 
+
+const updatePasswordValidationSchema = Yup.object({
+    newPassword : Yup.string()
+        .required('Password is required'),
+    repeatPassword : Yup.string()
+        .oneOf([Yup.ref('newPassword'), ''], 'Passwords must match')
+        .required('Confirm password is required')
+}); 
+
+const udpateDetailsValidationSchema = Yup.object({
+    fullname : Yup.string()
+        .min(3, "Full Name must be of size between 3 and 50")
+        .max(50, "Full Name must be of size between 3 and 50")
+        .nonNullable("Full Name must not be blank")
+        .required("Full Name is required"),
+    description: Yup.string()
+        .min(3, "Description must be of size between 3 and 500")
+        .max(500, "Description must be of size between 3 and 500")
+        .nonNullable("Description must not be blank")
+    
+})
+
 const AppUserMenu = ({
     username, context
 } : AppUserMenuArgs) => {
 
 
+    const {pushNotification, catchRequestError} = useNotificator();
+
     const [data, setData] = useState<AppUserSimple | null>(null);
 
-    const [newPassword, setNewPassword] = useState<string>("");
-    const [newRepeatPassword, setNewRepeatPassword] = useState<string>("");
-
     const [newRoles, setNewRoles] = useState<string[]>([]);
-
-    const [newUserDetails, setNewUserDetails] = useState<AppUserDetails>({
-        fullname : "",
-        description: ""
-    });
 
 
     function getData(){
         retrieveUser(username).then(r => {
             setData(r.data)
-        }).catch(e => console.log(e));
-    }
-
-    function changePassword(){
-        if(!data) return;
-
-        let updatePasswordPromise : Promise<AxiosResponse<void>>;
-        if(
-            data.authorities.map(auth => auth.authority).includes("ROLE_MODERATOR") || 
-            data.authorities.map(auth => auth.authority).includes("ROLE_ADMIN")
-        ){
-            updatePasswordPromise = updateModeratorPassword(username, newPassword);
-        }else{
-            updatePasswordPromise =  updatePassword(username, newPassword);
-        }
-        updatePasswordPromise
-            .then(() => {
-                
-            }).catch(e => console.log(e));
-    }
-
-    function changeDetails(){
-        updateDetails(username, newUserDetails)
-            .then(() => {
-                getData();
-                context.setUsersListDependency(Math.random())
-            }).catch(e => console.log(e));
+        }).catch(catchRequestError);
     }
 
     function changeRoles(){
         updateRoles(username, newRoles)
             .then(() => {
+                getData();
                 context.setUsersListDependency(Math.random());
+                pushNotification({
+                    message: "Roles are updated successfully",
+                    time: 3,
+                    type: NotificationType.INFO
+                });
             }).catch(e => console.log(e));
     }
 
@@ -101,8 +101,12 @@ const AppUserMenu = ({
 
                     <hr/>
 
+                    
+
                     <strong>Username: </strong> {data.username} <br/>
                     <strong>Full name: </strong> {data.appUserDetails.fullname} <br/>
+                    <strong>Description:</strong>
+                    <p>{data.appUserDetails.description || "Description is not specified"}</p>
                     <strong>Roles:</strong>
                     <br/>
                     {data.authorities.map(auth => auth.authority).map(auth => <>
@@ -122,15 +126,52 @@ const AppUserMenu = ({
                         <OpenerComponent
                             closedLabel={  <h5>Update password:</h5>}
                             openedElement={
-                                <div>
-                                    <h5>Update password:</h5>
-                                    <strong>New Password:</strong>
-                                    <input className="form-control m-2" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)}/>
-                                    <strong>Repeat new Password</strong>
-                                    <input className="form-control m-2" type="password" value={newRepeatPassword} onChange={e => setNewRepeatPassword(e.target.value)}/>
-                                    <button className="btn btn-success m-2" onClick={changePassword}>Change Password</button>
-                                </div>
-                            }
+                                <Formik
+                                    initialValues={{
+                                        newPassword: "",
+                                        repeatPassword: ""
+                                    }}
+                                    validationSchema={updatePasswordValidationSchema}
+                                    onSubmit={(values) => {
+                                        let updatePasswordPromise : Promise<AxiosResponse<void>>;
+                                        if(
+                                            data.authorities.map(auth => auth.authority).includes("ROLE_MODERATOR") || 
+                                            data.authorities.map(auth => auth.authority).includes("ROLE_ADMIN")
+                                        ){
+                                            updatePasswordPromise = updateModeratorPassword(username, values.newPassword);
+                                        }else{
+                                            updatePasswordPromise =  updatePassword(username, values.repeatPassword);
+                                        }
+                                        updatePasswordPromise
+                                            .then(() => {
+                                                pushNotification({
+                                                    message: "Password Changed Successfully",
+                                                    time: 5,
+                                                    type: NotificationType.INFO
+                                                })
+                                            }).catch(catchRequestError);
+                                    }}
+                                >
+                                    {() => (
+                                        <Form>
+                                            <h5>Update password:</h5>
+                                            <div>
+                                                <strong><label htmlFor="newPassword">New Password:</label></strong>
+                                                <Field name="newPassword" className="form-control m-2" type="password" validate={validatePassword}/>
+                                                <ErrorMessage className="text-danger" name="newPassword" component="div"/>
+                                            </div>
+                                            
+                                            <div>
+                                                <strong><label htmlFor="newPassword">Repeat new Password:</label></strong>
+                                                <Field name="repeatPassword" className="form-control m-2" type="password"/>
+                                                <ErrorMessage className="text-danger" name="repeatPassword" component="div"/>
+                                            </div>
+                                            
+                                            <button type="submit" className="btn btn-success m-2">Change Password</button>
+                                        </Form>
+                                    )}
+                                </Formik>
+                                }
                         />
                         <hr/>   
 
@@ -139,6 +180,7 @@ const AppUserMenu = ({
                                 <OpenerComponent
                                     closedLabel={<h5>Update Roles</h5>}
                                     openedElement={
+
                                         <div>
                                             <h5>Update Roles</h5>
 
@@ -154,7 +196,7 @@ const AppUserMenu = ({
                                             }}>
                                                 {Object.values(Roles).map(role => <option value={role}>{role}</option>)}
                                             </select>
-                                            <button className="btn btn-danger m-2">Deselect</button>
+                                            <button className="btn btn-danger m-2" onClick={e => setNewRoles([])}>Deselect</button>
                                             <br/>
 
                                             <button className="btn btn-success m-2" onClick={changeRoles}>Update Roles</button>
@@ -169,21 +211,57 @@ const AppUserMenu = ({
                         <OpenerComponent
                             closedLabel={<h5>Update details:</h5>}
                             openedElement={
-                                <div>
-                                    <h5>Update details:</h5>
+                                <Formik
+                                    initialValues={{
+                                        fullname: data.appUserDetails.fullname,
+                                        desciption: data.appUserDetails.description
+                                    }}
+                                    validationSchema={udpateDetailsValidationSchema}
+                                    onSubmit={(values) => {
+                                        console.log("t is hjere");
+                                        updateDetails(username, {fullname: values.fullname, description: values.desciption})
+                                            .then(() => {
+                                                getData();
+                                                context.setUsersListDependency(Math.random());
 
+                                                pushNotification({
+                                                    message: "The Details are updated",
+                                                    time: 5,
+                                                    type: NotificationType.INFO
+                                                });
+                                            }).catch();
+                                    }}
+                                >
+                                    {() => (
+                                        <Form>
+                                            <h5>Update details:</h5>
 
-                                    <strong>Full Name:</strong>
-                                    <input className="form-control m-2" value={newUserDetails.fullname} onChange={e => setNewUserDetails({...newUserDetails, fullname : e.target.value})}/>
-                                    <button className="btn btn-success m-2" onClick={changeDetails}>Update Details</button>
-                                </div>
+                                            <div>
+                                                <strong><label>Full Name:</label></strong>
+                                                <Field className="form-control m-2" name="fullname" id="fullname"/>
+                                                <ErrorMessage className="text-danger" name="fullname" component="div"/>
+                                            </div>
+
+                                            <div>
+                                                <strong><label>Description:</label></strong>
+                                                <Field as="textarea" className="form-control m-2" name="description" id="description"/>
+                                                <ErrorMessage className="text-danger" name="description" component="div"/>
+                                            </div>
+                                            
+                                            <button className="btn btn-success m-2" type="submit">Update Details</button>
+                                        </Form>
+                                    )}
+                                  
+                                </Formik>
                             }
                             
                         />
 
-                    <hr/>
+                        <hr/>
 
-                        <button className="btn btn-danger m-2" onClick={delUser}>Delete</button>
+                        {data.authorities.map(authority => authority.authority).includes("ROLE_ADMIN") || 
+                            <button className="btn btn-danger m-2" onClick={delUser}>Delete</button>
+                        }
                     </SecuredNode>
                     
 

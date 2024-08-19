@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ilumusecase.jobs_manager.exceptions.GeneralResponseException;
+import com.ilumusecase.jobs_manager.exceptions.security.NotAuthorizedException;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
@@ -115,7 +117,7 @@ public class UserManagementController {
     public void deleteModerator(@PathVariable("username") @Username String username){
         AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(username);
         if(!appUser.getAuthorities().stream().anyMatch(auth ->  auth.toString().equals("ROLE_MODERATOR"))){
-            throw new RuntimeException("Endpoint must be used to delete moderator");
+            throw new GeneralResponseException("Endpoint must be used to delete moderator");
         }
 
         repositoryFactory.getUserDetailsManager().deleteUserById(username);
@@ -127,7 +129,7 @@ public class UserManagementController {
     public void createNewUser( @RequestBody @Valid @NotNull AppUserRequestBody appUserBody){
 
         if(repositoryFactory.getUserDetailsManager().userExists(appUserBody.username)){
-            throw new RuntimeException("User with username\""  + appUserBody.username + "\" exists already");
+            throw new GeneralResponseException("User with username\""  + appUserBody.username + "\" exists already");
         }
 
         String[] rolesFiltered = new String[appUserBody.roles.length];
@@ -155,8 +157,8 @@ public class UserManagementController {
     //only moderator and admin
     public void deleteUser(@PathVariable("id") String id){
         AppUser appUser = repositoryFactory.getUserDetailsManager().findByUsername(id);
-        if(appUser.getAuthorities().stream().anyMatch(auth -> auth.toString().equals("ROLE_ADMIN") || auth.toString().equals("ROLE_MODERATOR"))){
-            throw new RuntimeException("Endpoint cannot be used to delete moderator");
+        if(appUser.getAuthorities().stream().anyMatch(auth -> auth.toString().equals("SCOPE_ROLE_ADMIN") || auth.toString().equals("SCOPE_ROLE_MODERATOR"))){
+            throw new GeneralResponseException("Endpoint cannot be used to delete moderator");
         }
         repositoryFactory.getUserDetailsManager().deleteUserById(id);
     }
@@ -185,10 +187,10 @@ public class UserManagementController {
 
         AppUser user = repositoryFactory.getUserDetailsManager().findByUsername(username);
         
-        boolean isAdmin = user.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-        boolean isModerator = user.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_MODERATOR"));
+        boolean isAdmin = user.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("SCOPE_ROLE_ADMIN"));
+        boolean isModerator = user.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("SCOPE_ROLE_MODERATOR"));
         
-        if(!isAdmin && !isModerator) throw new RuntimeException("End point should be used for moderators and admins only");
+        if(!isAdmin && !isModerator) throw new NotAuthorizedException();
 
         UserDetails userDetails = User.withUsername(username)
             .password(new String(Base64.getDecoder().decode(base64EncodedPassword)))
@@ -207,10 +209,10 @@ public class UserManagementController {
         AppUser user = repositoryFactory.getUserDetailsManager().findByUsername(username);
         
         if(user.getAuthorities().stream().anyMatch(auth -> 
-            auth.getAuthority().equals("ROLE_MODERATOR")
+            auth.getAuthority().equals("SCOPE_ROLE_MODERATOR")
             ||
-            auth.getAuthority().equals("ROLE_ADMIN")
-        )) throw new RuntimeException("The endpoint should not be used for admin or moderator");
+            auth.getAuthority().equals("SCOPE_ROLE_ADMIN")
+        )) throw new NotAuthorizedException();
 
         UserDetails userDetails = User.withUsername(username)
             .password(new String(Base64.getDecoder().decode(base64EncodedPassword)))
@@ -227,10 +229,10 @@ public class UserManagementController {
         AppUser user = repositoryFactory.getUserDetailsManager().findByUsername(username);
         
         if(user.getAuthorities().stream().anyMatch(auth -> 
-            auth.getAuthority().equals("ROLE_MODERATOR")
+            auth.getAuthority().equals("SCOPE_ROLE_MODERATOR")
             ||
-            auth.getAuthority().equals("ROLE_ADMIN")
-        )) throw new RuntimeException("The endpoint should not be used for admin or moderator");
+            auth.getAuthority().equals("SCOPE_ROLE_ADMIN")
+        )) throw new NotAuthorizedException();
 
         String[] rolesStr = new String[newRoles.length];
         for(int i = 0; i < newRoles.length; i++ ){
@@ -253,18 +255,18 @@ public class UserManagementController {
         AppUser user = repositoryFactory.getUserDetailsManager().retrieveUserById(username);
 
         if(
-            !authentication.getAuthorities().stream().map(auth -> auth.getAuthority()).anyMatch(auth -> auth.equals("ROLE_ADMIN"))
+            !authentication.getAuthorities().stream().map(auth -> auth.getAuthority()).anyMatch(auth -> auth.equals("SCOPE_ROLE_ADMIN"))
             &&
             !authentication.getName().equals(username)
             &&
             !(
-                authentication.getAuthorities().stream().map(auth -> auth.getAuthority()).anyMatch(auth -> auth.equals("ROLE_MODERATOR"))
+                authentication.getAuthorities().stream().map(auth -> auth.getAuthority()).anyMatch(auth -> auth.equals("SCOPE_ROLE_MODERATOR"))
                 &&
-                !user.getAuthorities().stream().map(auth -> auth.getAuthority()).anyMatch(auth -> auth.equals("ROLE_MODERATOR") || auth.equals("ROLE_ADMIN"))
+                !user.getAuthorities().stream().map(auth -> auth.getAuthority()).anyMatch(auth -> auth.equals("SCOPE_ROLE_MODERATOR") || auth.equals("SCOPE_ROLE_ADMIN"))
             )
 
         ){
-            throw new RuntimeException(" You are not authorized to change details of the user");
+            throw new NotAuthorizedException();
         } 
         
 

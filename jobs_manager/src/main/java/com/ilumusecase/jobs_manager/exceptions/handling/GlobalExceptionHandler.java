@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.ilumusecase.jobs_manager.exceptions.security.NotAuthorizedException;
+import com.ilumusecase.jobs_manager.exceptions.ResponseException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +30,10 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(message.toString(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(NotAuthorizedException.class)
+    @ExceptionHandler(ResponseException.class)
     @ResponseBody
-    public ResponseEntity<String> handleAuthorizationException(NotAuthorizedException ex){
-        return new ResponseEntity<>("You are not authorized to do this action", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<String> handleAuthorizationException(ResponseException ex){
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
 }
