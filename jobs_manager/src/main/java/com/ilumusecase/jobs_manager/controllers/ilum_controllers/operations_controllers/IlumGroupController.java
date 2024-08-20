@@ -5,6 +5,7 @@ import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,8 @@ public class IlumGroupController {
     ){
         //step 0 : validation
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
         if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
 
         if(jobNode.getJobsQueue().size() == 0){
@@ -130,7 +132,8 @@ public class IlumGroupController {
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId
     ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));;
         if(jobNode.getIlumGroup() == null){
             throw new RuntimeException();
         }

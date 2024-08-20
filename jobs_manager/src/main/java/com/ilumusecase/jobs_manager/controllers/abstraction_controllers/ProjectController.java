@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ilumusecase.jobs_manager.JobsManagerApplication;
+import com.ilumusecase.jobs_manager.exceptions.GeneralResponseException;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.Channel;
@@ -125,7 +126,7 @@ public class ProjectController {
         Channel channel =  repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
 
         if(project.getInputChannels().containsKey(label) && project.getInputChannels().get(label) != null){
-            throw new RuntimeException("The label is already taken");
+            throw new GeneralResponseException("The label is already taken");
         }
         project.getInputChannels().put(label, channel);
         project.getChannels().add(channel);
@@ -139,7 +140,7 @@ public class ProjectController {
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
 
         if(  !project.getInputChannels().containsKey(label) || project.getInputChannels().get(label) == null){
-            throw new RuntimeException();
+            throw new GeneralResponseException("The label does not exist");
         }
         Channel channel = project.getInputChannels().get(label);
 
@@ -161,7 +162,7 @@ public class ProjectController {
         Channel channel =  repositoryFactory.getChannelsRepository().createChannel(project, channelDetails);
 
         if(project.getOutputChannels().containsKey(label) && project.getOutputChannels().get(label) != null){
-            throw new RuntimeException("The label is already taken");
+            throw new GeneralResponseException("The label is already taken");
         }
         project.getOutputChannels().put(label, channel);
         project.getChannels().add(channel);
@@ -179,7 +180,7 @@ public class ProjectController {
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(id);
 
         if(  !project.getOutputChannels().containsKey(label) || project.getOutputChannels().get(label) == null){
-            throw new RuntimeException();
+            throw new GeneralResponseException("The label does not exist");
         }
         Channel channel = project.getOutputChannels().get(label);
 

@@ -1,6 +1,7 @@
 package com.ilumusecase.jobs_manager.repositories.mongodb.abstraction;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -23,8 +24,8 @@ public class JobNodesMongoRepository implements JobNodesRepository{
     }
 
     @Override
-    public JobNode retrieveById(String id) {
-        return mongoJobNode.findById(id).get();
+    public Optional<JobNode> retrieveById(String id) {
+        return mongoJobNode.findById(id);
     }
 
     @Override
@@ -33,25 +34,25 @@ public class JobNodesMongoRepository implements JobNodesRepository{
     }
 
     @Override
-    public JobNode createJobNode(Project project, JobNodeDetails jobNodeDetails) {
+    public String createJobNode(Project project, JobNodeDetails jobNodeDetails) {
         JobNode jobNode = new JobNode();
         jobNode.setProject(project);
         jobNode.setJobNodeDetails(jobNodeDetails);
 
-        return mongoJobNode.save(jobNode);
+        return mongoJobNode.save(jobNode).getId();
     }
 
     @Override
-    public JobNode updateJobNode(String id, JobNodeDetails jobNodeDetails) {
+    public void updateJobNode(String id, JobNodeDetails jobNodeDetails) {
         
         JobNode jobNode = mongoJobNode.findById(id).get();
         jobNode.setJobNodeDetails(jobNodeDetails);
-        return mongoJobNode.save(jobNode);
+        mongoJobNode.save(jobNode);
     }
 
     @Override
-    public JobNode updateJobNodeFull(JobNode jobNode) {
-        return mongoJobNode.save(jobNode);
+    public void updateJobNodeFull(JobNode jobNode) {
+        mongoJobNode.save(jobNode);
     }
 
     @Override

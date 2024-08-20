@@ -73,7 +73,11 @@ const JobNodePlugMenu = ({
                         (element.getParent().getParent() as JobNodeElement).getData().id,
                         (element.getParent() as PlugBarElement).getOrientation(), 
                         element.getLabel()
-                    ).then(response => element.getGof().getContext().refresh());
+                    ).then(response => {
+                        element.getGof().getContext().refresh();
+                        element.getGof().getContext().setMenuSource(null);
+                    })
+                    .catch(element.getGof().getContext().catchRequestError);
                 }}>Delete</button>
 
             </SecuredNode>

@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import com.ilumusecase.jobs_manager.exceptions.ResourceNotFoundException;
 import com.ilumusecase.jobs_manager.repositories.interfaces.abstraction.ProjectRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.abstraction.MongoProject;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
@@ -25,7 +26,7 @@ public class ProjectMongoRepository implements ProjectRepository {
 
     @Override
     public Project retrieveProjectById(String id) {
-        return mongoProject.findById(id).get();
+        return mongoProject.findById(id).orElseThrow(() -> new ResourceNotFoundException(Project.class.getSimpleName(), id));
     }
 
     @Override

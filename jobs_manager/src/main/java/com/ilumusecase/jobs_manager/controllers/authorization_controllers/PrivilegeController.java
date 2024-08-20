@@ -2,6 +2,7 @@ package com.ilumusecase.jobs_manager.controllers.authorization_controllers;
 
 import java.util.List;
 
+import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -87,7 +88,8 @@ public class PrivilegeController {
         @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber
     ){
 
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
         if(!jobNode.getProject().getId().equals(projectId)) throw new RuntimeException();
 
 
@@ -111,7 +113,8 @@ public class PrivilegeController {
         @RequestParam(name = "jobNodePrivileges", defaultValue = "", required = false) @Size(max = 20) List<JobNodePrivilege> jobNodePrivileges
     ){
 
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
         if(!jobNode.getProject().getId().equals(projectId)) throw new RuntimeException();
 
         return repositoryFactory.getUserDetailsManager().retrieveJobNodePrivilegesCount(
@@ -142,7 +145,8 @@ public class PrivilegeController {
         @PathVariable("username") @Username String username
     ){
 
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
         if(!jobNode.getProject().getId().equals(projectId)) throw new RuntimeException();
 
         return jobNode.getPrivileges().getOrDefault(username, new PrivilegeList<>()).getList();
@@ -159,7 +163,8 @@ public class PrivilegeController {
         @PathVariable("privilege") @NotNull JobNodePrivilege privilege
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
         if( !project.getId().equals(jobNode.getProject().getId())) throw new RuntimeException();
 
         AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(userId);
@@ -186,7 +191,8 @@ public class PrivilegeController {
         @PathVariable("privilege") @NotNull JobNodePrivilege privilege
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
         if( !project.getId().equals(jobNode.getProject().getId())) throw new RuntimeException();
 
         AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(userId);
@@ -207,7 +213,8 @@ public class PrivilegeController {
         @PathVariable("user_id") @Username String userId
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
         if( !project.getId().equals(jobNode.getProject().getId())) throw new RuntimeException();
 
         AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(userId);

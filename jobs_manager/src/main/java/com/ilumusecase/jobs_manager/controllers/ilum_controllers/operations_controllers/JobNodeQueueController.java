@@ -1,6 +1,7 @@
 package com.ilumusecase.jobs_manager.controllers.ilum_controllers.operations_controllers;
 
 
+import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -97,7 +98,8 @@ public class JobNodeQueueController {
         @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
         @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber        
     ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
         if(!jobNode.getProject().getId().equals(projectId)) throw new RuntimeException();
 
 
@@ -114,7 +116,8 @@ public class JobNodeQueueController {
         @RequestParam(name="author", required = false, defaultValue = "") String author,
         @RequestParam(name="query", required = false, defaultValue = "") String query      
     ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
         if(!jobNode.getProject().getId().equals(projectId)) throw new RuntimeException();
 
 
@@ -139,7 +142,8 @@ public class JobNodeQueueController {
     ){
 
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
         JobScript jobScript = repositoryFactory.getJobScriptRepository().retrieveJobScriptById(jobScriptId).orElseThrow(RuntimeException::new);
         AppUser author = repositoryFactory.getUserDetailsManager().findByUsername(authentication.getName());
 
@@ -182,7 +186,8 @@ public class JobNodeQueueController {
         @PathVariable("job_entity_id") String jobEntityId,
         @PathVariable("queue_type") String queueType
     ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
         JobEntity jobEntity = repositoryFactory.getJobRepository().retrieveJobEntity(jobEntityId);
         if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
         if(!jobNodeId.equals(jobEntity.getJobNode().getId())) throw new RuntimeException();

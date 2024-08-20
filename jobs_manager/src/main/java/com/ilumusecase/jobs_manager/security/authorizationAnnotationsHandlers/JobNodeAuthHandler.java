@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Optional;
 
+import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.aspectj.lang.JoinPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -47,8 +48,11 @@ public class JobNodeAuthHandler implements AnnotationHandlerInterface{
             if(jobNodeId.isPresent() && projectId.isPresent()) break;
             index++;
         }
-        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId.orElseThrow(RuntimeException::new));
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId.orElseThrow(RuntimeException::new));
+        final String jobNodeIdValue = jobNodeId.orElseThrow(() -> new RuntimeException("Wrong usage of JobNodeAuthorization annotation : JobNodeId argument required"));
+        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId.orElseThrow(() -> new RuntimeException("Wrong usage of JobNodeAuthorization annotation: ProjectId argument requried")));
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeIdValue)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeIdValue));
+;
         if(!jobNode.getProject().equals(project)) throw new RuntimeException();
 
         

@@ -46,12 +46,14 @@ const SecuredNode = ({
         if(!authentication) return false;
 
         if(
-            authentication.roles.includes("SCOPE_ROLE_ADMIN") ||
+            authentication.roles.includes("ROLE_ADMIN") || 
+            authentication.roles.includes("SCOPE_ROLE_ADMIN") || 
+            authentication.roles.includes("ROLE_MODERATOR") && moderator ||
             authentication.roles.includes("SCOPE_ROLE_MODERATOR") && moderator
         ) return true;
 
         if(roles != null){
-            console.log(roles.map(r => "SCOPE_ROLE_" + Roles[r] as string));
+           
             if( !(authentication.roles.filter(role => roles.map(r => "SCOPE_ROLE_" + Roles[r] as string).includes(role)).length > 0) ){
                 return false;
             }

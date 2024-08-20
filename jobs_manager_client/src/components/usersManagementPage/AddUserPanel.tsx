@@ -39,21 +39,21 @@ const AddUserPanel = ({context} : AddUserPanelArgs) => {
     const {catchRequestError, pushNotification} = useNotificator();
 
     async function checkIfUsernameIsFree(username : string) : Promise<string | undefined>{
-    try{
-        if(!username) return "Username is required"
-        return (await isUsernameBusy(username)).data ? "Username is already used" : undefined;
-    }catch(e){
-        
-        pushNotification({
-            message: "Internal Server Error: Impossible to check the Username",
-            time: 5,
-            type: NotificationType.INFO
-        })
+        try{
+            if(!username) return "Username is required"
+            return (await isUsernameBusy(username)).data ? "Username is already used" : undefined;
+        }catch(e){
+            
+            pushNotification({
+                message: "Internal Server Error: Impossible to check the Username",
+                time: 5,
+                type: NotificationType.INFO
+            })
 
-        return "Internal Server Error: Impossible to check the Username";
+            return "Internal Server Error: Impossible to check the Username";
+        }
+        
     }
-    
-}
 
 
     return (
@@ -136,13 +136,13 @@ const AddUserPanel = ({context} : AddUserPanelArgs) => {
                                 value={values["authorities"]}  
                                 onChange={e => {
                                     let newAuthorities = Array.from(values['authorities']);
-                                    console.log(newAuthorities);
+                                
                                     if(newAuthorities.includes(e.target.value)){
                                         newAuthorities = newAuthorities.filter(val => val != e.target.value);
                                     }else{
                                         newAuthorities.push(e.target.value);
                                     }
-                                    console.log(newAuthorities)
+                                 
                                     setFieldValue("authorities",newAuthorities);
                                 }}
                             >

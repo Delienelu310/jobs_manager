@@ -14,6 +14,7 @@ import { ProjectPrivilege } from "../../api/authorization/privilegesApi";
 import * as Yup from 'yup';
 import { NotificationConfig, NotificationType, useNotificator } from "../notifications/Notificator";
 import { AxiosError } from "axios";
+import { GraphElement } from "./gof/GraphElement";
 
 interface StaticGraphCanvasConfig{
     
@@ -42,12 +43,14 @@ export interface ProjectGraphComponentContext{
 
 
     readonly setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>;
-    readonly setMenu : React.Dispatch<React.SetStateAction<JSX.Element>>;
+    // readonly setMenu : React.Dispatch<React.SetStateAction<JSX.Element>>;
+    readonly setMenuSource : React.Dispatch<React.SetStateAction<GraphElement | null>>;
     readonly mod : PanelMods;
     readonly refresh : () => void
 
 
     readonly newChannelDetails : ChannelDetails;
+    readonly connectValidationSchema : Yup.AnyObjectSchema;
     readonly newJobNodeDetails : JobNodeDetails;
     readonly jobNodeDetailsValidation : Yup.AnyObjectSchema;
 
@@ -62,7 +65,11 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [mod, setMod] = useState<PanelMods>(PanelMods.CURSOR);
-    const [menu, setMenu] = useState<JSX.Element>(<div>Choose Element...</div>);
+
+    // const [menu, setMenu] = useState<JSX.Element>(<div>Choose Element...</div>);
+    const [menuSource, setMenuSource] = useState< GraphElement | null>(null);
+
+
     const [dynamicConfig, setDynamicConfig] = useState<DynamicCanvasConfig>({
         offset : {
             x : 0,
@@ -86,6 +93,35 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
         headers: []
     });
     const [newHeader, setNewHeader] = useState<string>("");
+
+    interface ChannelDetailsErrors{
+        name : string | null,
+        newHeader : string | null
+    }
+    const connectValidationSchema = Yup.object({
+        name : Yup.string()
+            .required()
+            .min(3)
+            .max(20),
+        newHeader : Yup.string()
+            .test("test-new-header", "Header is not valid", (value) => {
+                if(!value) return false;
+                if(!value.trim()) return false;
+
+                value = value.trim();
+                if(value.length < 3 || value.length > 20) return false;
+
+                if((value.charAt(0) < 'a' || value.charAt(0) > 'z') && (value.charAt(0) < 'A' || value.charAt(0) > "Z")) return false;
+
+                return true;
+
+            })
+    });
+
+    const [newChannelDetailsErorrs, setNewChannelDetailsErrors] = useState<ChannelDetailsErrors>({
+        name : null,
+        newHeader : null
+    });
 
 
 
@@ -126,10 +162,11 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
         projectGraph,
         dynamic: dynamicConfig,
         setDynamic: setDynamicConfig,
-        setMenu,
+        setMenuSource,
         mod,
         refresh,
         newChannelDetails,
+        connectValidationSchema,
         newJobNodeDetails,
         jobNodeDetailsValidation: jobNodeDetailsSchema,
         pushNotification,
@@ -138,97 +175,111 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
 
     function prepareGof(){
 
-        let newGof : GOF = new GOF({
-            config: staticConfig.canvas,
-            projectData: projectFullData,
-            projectGraph,
-            dynamic: dynamicConfig,
-            setDynamic: setDynamicConfig,
-            setMenu,
-            mod,
-            refresh,
-            newChannelDetails,
-            newJobNodeDetails,
-            jobNodeDetailsValidation: jobNodeDetailsSchema,
-            pushNotification,
-            catchRequestError
+     
+
+        setGof(oldGof => {
+
+            let newGof : GOF = new GOF({
+                config: staticConfig.canvas,
+                projectData: projectFullData,
+                projectGraph,
+                dynamic: dynamicConfig,
+                setDynamic: setDynamicConfig,
+                setMenuSource,
+                mod,
+                refresh,
+                newChannelDetails,
+                connectValidationSchema,
+                newJobNodeDetails,
+                jobNodeDetailsValidation: jobNodeDetailsSchema,
+                pushNotification,
+                catchRequestError
+            });
+    
+            //1. prepare job nodes
+            //2. prepare project plugs
+            //3. create channels
+            //4. set channels input/output Ids
+    
+            //1. 
+            for(let jobNode of projectFullData.jobNodes){
+                let verticesFiltered = projectGraph.vertices.filter(v => v.jobNode.id == jobNode.id);
+                let vertice = verticesFiltered[0];
+                let jobNodeElement = new JobNodeElement(
+                    newGof, 
+                    jobNode, 
+                    vertice,
+                    staticConfig.jobNodes,
+                    setProjectGraph,
+                    setDynamicConfig
+            );
+    
+                    newGof.addElement(jobNodeElement);
+            }
+    
+    
+            //2.
+            let inputPlugBarElement : PlugBarElement =  new PlugBarElement(newGof, new NullGraphElement(), staticConfig.projectPlugs, false);
+            let outputPlugBarElement : PlugBarElement = new PlugBarElement(newGof, new NullGraphElement(), staticConfig.projectPlugs, true);
+            newGof.addElement(inputPlugBarElement);
+            newGof.addElement(outputPlugBarElement);
+    
+    
+            //3. 
+            let channelElements : Map<string, ChannelElement> = new Map<string, ChannelElement>([]);
+            for(let channel of projectFullData.channels){
+                let channelElement : ChannelElement = new ChannelElement(newGof, channel, staticConfig.channels);
+                channelElements.set(channel.id, channelElement);
+            }
+    
+    
+            //4. 
+            // add plugs from project inputs/outputs
+            for(let [key, channel] of Object.entries(projectFullData.inputChannels)){
+                let elem = channelElements.get(channel.id);
+                if(!elem) continue;
+    
+                elem.getInputIds().add(`project_input_${key}`);
+            }
+            for(let [key, channel] of Object.entries(projectFullData.outputChannels)){
+                let elem = channelElements.get(channel.id);
+                if(!elem) continue;
+                
+                elem.getOutputIds().add(`project_output_${key}`);
+            }
+    
+            //add plugs from jobnodes
+            for(let jobNode of projectFullData.jobNodes){
+                for(let [label, channelList] of Object.entries(jobNode.input)){
+                    for(let channel of channelList.channelList){
+                        let elem = channelElements.get(channel.id);
+                        if(!elem) continue;
+    
+                        elem.getOutputIds().add(`jobnode_${jobNode.id}_input_${label}`);
+                    }
+                }
+                for(let [label, channelList] of Object.entries(jobNode.output)){
+                    for(let channel of channelList.channelList){
+                        let elem = channelElements.get(channel.id);
+                        if(!elem) continue;
+    
+                        elem.getInputIds().add(`jobnode_${jobNode.id}_output_${label}`);
+                    }
+                }
+            }
+    
+            channelElements.forEach(elem => newGof.addElement(elem));
+
+            //reset menu
+
+            setMenuSource(oldMenu => {
+                if(oldMenu == null) return null;
+
+                return newGof.findById(oldMenu.getGofId());
+            })
+
+            return newGof;
         });
-
-        //1. prepare job nodes
-        //2. prepare project plugs
-        //3. create channels
-        //4. set channels input/output Ids
-
-        //1. 
-        for(let jobNode of projectFullData.jobNodes){
-            let verticesFiltered = projectGraph.vertices.filter(v => v.jobNode.id == jobNode.id);
-            let vertice = verticesFiltered[0];
-            let jobNodeElement = new JobNodeElement(
-                newGof, 
-                jobNode, 
-                vertice,
-                staticConfig.jobNodes,
-                setProjectGraph,
-                setDynamicConfig
-        );
-
-                newGof.addElement(jobNodeElement);
-        }
-
-
-        //2.
-        let inputPlugBarElement : PlugBarElement =  new PlugBarElement(newGof, new NullGraphElement(), staticConfig.projectPlugs, false);
-        let outputPlugBarElement : PlugBarElement = new PlugBarElement(newGof, new NullGraphElement(), staticConfig.projectPlugs, true);
-        newGof.addElement(inputPlugBarElement);
-        newGof.addElement(outputPlugBarElement);
-
-
-        //3. 
-        let channelElements : Map<string, ChannelElement> = new Map<string, ChannelElement>([]);
-        for(let channel of projectFullData.channels){
-            let channelElement : ChannelElement = new ChannelElement(newGof, channel, staticConfig.channels);
-            channelElements.set(channel.id, channelElement);
-        }
-
-
-        //4. 
-        // add plugs from project inputs/outputs
-        for(let [key, channel] of Object.entries(projectFullData.inputChannels)){
-            let elem = channelElements.get(channel.id);
-            if(!elem) continue;
-
-            elem.getInputIds().add(`project_input_${key}`);
-        }
-        for(let [key, channel] of Object.entries(projectFullData.outputChannels)){
-            let elem = channelElements.get(channel.id);
-            if(!elem) continue;
-            
-            elem.getOutputIds().add(`project_output_${key}`);
-        }
-
-        //add plugs from jobnodes
-        for(let jobNode of projectFullData.jobNodes){
-            for(let [label, channelList] of Object.entries(jobNode.input)){
-                for(let channel of channelList.channelList){
-                    let elem = channelElements.get(channel.id);
-                    if(!elem) continue;
-
-                    elem.getOutputIds().add(`jobnode_${jobNode.id}_input_${label}`);
-                }
-            }
-            for(let [label, channelList] of Object.entries(jobNode.output)){
-                for(let channel of channelList.channelList){
-                    let elem = channelElements.get(channel.id);
-                    if(!elem) continue;
-
-                    elem.getInputIds().add(`jobnode_${jobNode.id}_output_${label}`);
-                }
-            }
-        }
-
-        channelElements.forEach(elem => newGof.addElement(elem));
-
-        setGof(newGof);
     }
 
 
@@ -438,13 +489,33 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
                             }}>
                                 <h3>Channel creation panel:</h3>
 
-            
+                                <div className="m-2">
+                                    <strong>Channel name: </strong>
+                                    <input className="form-control m-2" value={newChannelDetails.name} 
+                                        onChange={e => {
+                                            setNewChannelDetails({...newChannelDetails, name : e.target.value})
+                                            connectValidationSchema.validateAt("name", {name : e.target.value})
+                                                .then(r => setNewChannelDetailsErrors({...newChannelDetailsErorrs, name : null}))
+                                                .catch(e => {
+                                                    if(e instanceof Yup.ValidationError){
+                                                        setNewChannelDetailsErrors({...newChannelDetailsErorrs, name : (e as Yup.ValidationError).message});
+                                                    }else{
+                                                        pushNotification({
+                                                            message: "Unexpected error when validating the channel name",
+                                                            type: NotificationType.ERROR,
+                                                            time: 5
+                                                        });
+                                                    }
+                                                })
+                                            
+                                        }}
+                                    />
+                                    {newChannelDetailsErorrs.name && <div className="text-danger">{newChannelDetailsErorrs.name}</div>}
+                                </div>
 
-                                <strong>Channel name: </strong>
-                                <input className="form-control m-2" value={newChannelDetails.name} onChange={e => 
-                                    setNewChannelDetails({...newChannelDetails, name : e.target.value})}/>
+                                
                                
-                                <strong>Channe type:</strong>
+                                <strong>Channel type:</strong>
                                 <select className="form-control m-2" value={newChannelDetails.type}>
                                     {Object.values(ChannelTypes).map(key => <option value={key}>{key}</option>)}
                                 </select>
@@ -453,6 +524,30 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
                                 {newChannelDetails.headers.map((header, index) => 
                                     <div key={index + "_" + header} style={{borderBottom: "1px solid black", margin: "10px 10%", height: "40px"}}>
                                         <span style={{fontSize: "20px"}}>{header} </span>
+
+                                        <button style={{float: "right"}} className="btn btn-primary" onClick={e => {
+                                            
+                                            if(index == 0) return;
+                                            const newHeaders = [...newChannelDetails.headers];
+                                            const previous = newHeaders[index - 1];
+                                            newHeaders[index - 1] = newHeaders[index];
+                                            newHeaders[index] = previous
+
+                                            setNewChannelDetails({...newChannelDetails, headers : newHeaders})
+                                        }}>Up</button>
+
+                                        <button style={{float: "right"}} className="btn btn-primary" onClick={e => {
+                                            if(index == newChannelDetails.headers.length - 1) return;
+                                            const newHeaders = [...newChannelDetails.headers];
+                                            const next = newHeaders[index + 1];
+                                            newHeaders[index + 1] = newHeaders[index];
+                                            newHeaders[index] = next
+
+                                            setNewChannelDetails({...newChannelDetails, headers : newHeaders})
+                                        }}>Down</button>
+
+
+
                                         <button style={{float: "right"}}className="btn btn-danger" onClick={e => {
 
                                             const newHeaders = Array.from(newChannelDetails.headers);
@@ -469,15 +564,54 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
 
                                 
                                 <strong>Add new header:</strong>
-                                <input className="form-control m-2" value={newHeader} onChange={e => setNewHeader(e.target.value)}/>
-                                <button className="btn btn-primary" onClick={e => {
-                                    let newHeaders = Array.from(newChannelDetails.headers);
-                                    newHeaders.push(newHeader);
+                                <input className="form-control m-2" value={newHeader} onChange={e => {
+                                    setNewHeader(e.target.value)
+                                    connectValidationSchema.validateAt("newHeader", {newHeader : e.target.value})
+                                        .then(r => setNewChannelDetailsErrors({...newChannelDetailsErorrs, newHeader : null}))
+                                        .catch(e => {
+                                            if(e instanceof Yup.ValidationError){
+                                                setNewChannelDetailsErrors({...newChannelDetailsErorrs, newHeader : (e as Yup.ValidationError).message});
+                                            }else{
+                                                pushNotification({
+                                                    message: "Unexpected error when validating the channel new header",
+                                                    type: NotificationType.ERROR,
+                                                    time: 5
+                                                });
+                                            }
+                                        })
 
-                                    setNewChannelDetails({
-                                        ...newChannelDetails,
-                                        headers: newHeaders
-                                    })
+                                }}/>
+                                {newChannelDetailsErorrs.newHeader && <div className="text-danger">{newChannelDetailsErorrs.newHeader}</div>}
+                                
+                                <button className="btn btn-primary" onClick={e => {
+
+                                    connectValidationSchema.validateAt("newHeader", {newHeader : newHeader})
+                                        .then(r => {
+                                            let newHeaders = Array.from(newChannelDetails.headers);
+                                            newHeaders.push(newHeader);
+
+                                            setNewChannelDetails({
+                                                ...newChannelDetails,
+                                                headers: newHeaders
+                                            })
+                                        }).catch(e => {
+                                            if(e instanceof Yup.ValidationError){
+                                            
+                                                pushNotification({
+                                                    message:  (e as Yup.ValidationError).message,
+                                                    type: NotificationType.ERROR,
+                                                    time: 5
+                                                });
+                                            }else{
+                                                pushNotification({
+                                                    message: "Unexpected error when validating the channel new header",
+                                                    type: NotificationType.ERROR,
+                                                    time: 5
+                                                });
+                                            }
+                                        })
+
+                                   
                                 }}>Add header</button>
 
                                
@@ -490,8 +624,8 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
                 </div>
 
                 <hr/>
-                <button className="btn btn-danger m-3" onClick={() => setMenu(<div>Choose Element...</div>)}>Close menu</button>
-                {menu}
+                <button className="btn btn-danger m-3" onClick={() => setMenuSource(null)}>Close menu</button>
+                {menuSource == null ? <div>Choose Element...</div> :  menuSource.getMenuComponent()}
             </>}
         </div>
     )

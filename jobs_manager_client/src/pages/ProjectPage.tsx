@@ -7,6 +7,7 @@ import SecuredNode from "../authentication/SecuredNode";
 import { ProjectPrivilege } from "../api/authorization/privilegesApi";
 import { Roles } from "../api/authorization/usersApi";
 import PrivilegeList from "../components/projectPageComponents/PrivilegeList";
+import { useNotificator } from "../components/notifications/Notificator";
 
 
 export interface AllProjectData{
@@ -17,6 +18,8 @@ export interface AllProjectData{
 const ProjectPage = () => {
 
     const {projectId} = useParams();
+
+    const {catchRequestError} = useNotificator();
 
     const [allProjectData, setAllProjectData] = useState<AllProjectData>();
 
@@ -29,7 +32,7 @@ const ProjectPage = () => {
             .then(graph => {
                 return retrieveProject(projectId)
                     .then(projectFullData => setAllProjectData({projectFullData : projectFullData, projectGraph : graph}))
-            }).catch(e => console.log(e));
+            }).catch(catchRequestError);
     }
 
     useEffect(() => {

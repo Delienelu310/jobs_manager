@@ -76,9 +76,7 @@ export class PlugBarElement implements GraphElement{
 
         if(this.parent.isNull()){
             return <ProjectPlugBarMenu
-                projectFullData={this.getGof().getContext().projectData}
-                orientation={this.getOrientation()}
-                refresh={this.getGof().getContext().refresh}
+                plugBarElement={this}
             />
         }else{
             return <JobNodePlugBarMenu element={this}/>

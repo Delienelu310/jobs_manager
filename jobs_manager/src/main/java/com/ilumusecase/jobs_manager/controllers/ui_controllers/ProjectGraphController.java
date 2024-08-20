@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ilumusecase.jobs_manager.exceptions.ResourceNotFoundException;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
@@ -40,7 +41,7 @@ public class ProjectGraphController {
     public Object retrieveProjectGraph(
         @ProjectId @PathVariable("project_id") String projectId
     ){
-        return repositoryFactory.getProjectGraphRepository().retrieveProjectGraphByProjectId(projectId).orElseThrow();
+        return repositoryFactory.getProjectGraphRepository().retrieveProjectGraphByProjectId(projectId).orElseThrow(() -> new ResourceNotFoundException(ProjectGraph.class.getSimpleName(), projectId));
     }
 
 
@@ -104,7 +105,9 @@ public class ProjectGraphController {
         @RequestBody @Valid @NotNull  JobNodeVerticeCoords jobNodeVertice
     ){
 
-        JobNodeVertice jobNodeVerticeActual = repositoryFactory.getJobNodeVerticeRepository().retrieveByJobNodeId(jobNodeId).orElseThrow();
+        JobNodeVertice jobNodeVerticeActual = repositoryFactory.getJobNodeVerticeRepository().retrieveByJobNodeId(jobNodeId).orElseThrow(
+            () -> new ResourceNotFoundException(JobNodeVertice.class.getSimpleName(), jobNodeId)
+        );
 
         jobNodeVerticeActual.setX(jobNodeVertice.x());
         jobNodeVerticeActual.setY(jobNodeVertice.y());

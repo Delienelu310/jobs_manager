@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ilumusecase.jobs_manager.exceptions.GeneralResponseException;
+import com.ilumusecase.jobs_manager.exceptions.ResourceNotFoundException;
+import com.ilumusecase.jobs_manager.exceptions.WrongResourcesInheritanceInUrlException;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.Channel;
@@ -51,7 +54,7 @@ public class JobsNodeController {
         @ProjectId @PathVariable("project_id") String projectId, 
         @JobNodeId @PathVariable("job_node_id") String jobNodeId
     ){
-        return repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        return repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId).orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
     
     }
 
@@ -63,7 +66,7 @@ public class JobsNodeController {
         @ProjectId @PathVariable("project_id") String projectId, 
         @JobNodeId @PathVariable("job_node_id") String jobNodeId
     ){
-        return repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        return repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId).orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
     }
 
 
@@ -82,13 +85,15 @@ public class JobsNodeController {
         @RequestBody @Valid @NotNull JobNodeDetails jobNodeDetails
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().createJobNode( project, jobNodeDetails);
+    
+        String jobNodeId = repositoryFactory.getJobNodesRepository().createJobNode( project, jobNodeDetails);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId).orElseThrow(() -> new RuntimeException("Problem with database"));
 
         
         project.getJobNodes().add(jobNode);
         repositoryFactory.getProjectRepository().updateProjectFull(project);
 
-        return jobNode.getId();
+        return jobNodeId;
         
     }
 
@@ -102,7 +107,7 @@ public class JobsNodeController {
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         if(!project.getJobNodes().stream().anyMatch(jn -> jn.getId().equals(jobNodeId))){
-            throw new RuntimeException();
+            throw new WrongResourcesInheritanceInUrlException(Project.class.getSimpleName(), JobNode.class.getSimpleName());
         }
         
         repositoryFactory.getJobNodesRepository().updateJobNode(jobNodeId, jobNodeDetails);
@@ -117,13 +122,14 @@ public class JobsNodeController {
         @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
         @PathVariable("label") @NotBlank @Size(max = 50) String label
     ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
         if( !jobNode.getProject().getId().equals(projectId)){
-            throw new RuntimeException();
+            throw new WrongResourcesInheritanceInUrlException(Project.class.getSimpleName(), JobNode.class.getSimpleName());
         }
 
         if( jobNode.getInput().containsKey(label)){
-            throw new RuntimeException();
+            throw new GeneralResponseException("Exception: input with label \"" + label +  "\" already exists");
         }  
 
         ChannelList channelList = repositoryFactory.getChannelListRepository().create();
@@ -139,13 +145,14 @@ public class JobsNodeController {
         @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
         @PathVariable("label") @NotBlank @Size(max = 50)  String label
     ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
         if( !jobNode.getProject().getId().equals(projectId)){
-            throw new RuntimeException();
+            throw new WrongResourcesInheritanceInUrlException(Project.class.getSimpleName(), JobNode.class.getSimpleName());
         }
 
         if( jobNode.getOutput().containsKey(label)){
-            throw new RuntimeException();
+            throw new GeneralResponseException("Exception: output with label \"" + label +  "\" already exists");
         }  
 
         ChannelList channelList = repositoryFactory.getChannelListRepository().create();
@@ -164,13 +171,14 @@ public class JobsNodeController {
     ){
         
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
         if( !jobNode.getProject().getId().equals(projectId)){
-            throw new RuntimeException();
+            throw new WrongResourcesInheritanceInUrlException(Project.class.getSimpleName(), JobNode.class.getSimpleName());
         }
 
         if( !jobNode.getInput().containsKey(label)){
-            throw new RuntimeException();
+            throw new GeneralResponseException("Label " + label + " does not exist");
         }  
 
         for(Channel channel : jobNode.getInput().get(label).getChannelList()){
@@ -219,13 +227,14 @@ public class JobsNodeController {
     ){
         
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
         if( !jobNode.getProject().getId().equals(projectId)){
-            throw new RuntimeException();
+            throw new WrongResourcesInheritanceInUrlException(Project.class.getSimpleName(), JobNode.class.getSimpleName());
         }
 
         if( !jobNode.getOutput().containsKey(label)){
-            throw new RuntimeException();
+            throw new GeneralResponseException("Label " + label + " does not exist");
         }  
 
         for(Channel channel : jobNode.getOutput().get(label).getChannelList()){
@@ -281,10 +290,12 @@ public class JobsNodeController {
         //output job sends data, input job receives it
         JobNode inputJob = null, outputJob = null;
         if(inputJobNodeId != null){
-            inputJob = repositoryFactory.getJobNodesRepository().retrieveById(inputJobNodeId);
+            inputJob = repositoryFactory.getJobNodesRepository().retrieveById(inputJobNodeId)
+                .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), inputJobNodeId));
         }
         if(outputJobNodeId != null){
-            outputJob = repositoryFactory.getJobNodesRepository().retrieveById(outputJobNodeId);
+            outputJob = repositoryFactory.getJobNodesRepository().retrieveById(outputJobNodeId)
+                .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), outputJobNodeId));
         }
 
         // firstly, check if the parameters are alright
@@ -297,36 +308,36 @@ public class JobsNodeController {
             ||
             outputJob != null && inputJob != null && inputJobNodeLabel != null && outputJobNodeLabel != null
         )){
-            throw new RuntimeException();
+            throw new GeneralResponseException("Input and Output is not specified correctly");
         }
 
         // check first and second mods:
         if(outputJob != null && outputJobNodeLabel != null && projectOutputLabel != null){
             if(!project.getOutputChannels().containsKey(projectOutputLabel) || project.getOutputChannels().get(projectOutputLabel) == null){
-                throw new RuntimeException();
+                throw new GeneralResponseException("Output label does not exist");
             }
             if( !outputJob.getOutput().containsKey(outputJobNodeLabel) || outputJob.getOutput().get(outputJobNodeLabel) == null){
-                throw new RuntimeException();
+                throw new GeneralResponseException("Input label does not exist");
             }
         }
 
         if(inputJob != null && inputJobNodeLabel != null && projectInputLabel != null){
             if(!project.getInputChannels().containsKey(projectInputLabel) || project.getInputChannels().get(projectInputLabel) == null){
-                throw new RuntimeException();
+                throw new GeneralResponseException("Input label does not exist");
             }
             if( !inputJob.getInput().containsKey(inputJobNodeLabel) || inputJob.getInput().get(inputJobNodeLabel) == null){
-                throw new RuntimeException();
+                throw new GeneralResponseException("Output label does not exist");
             }
         }
 
         // check third mod:
         if(inputJob != null && inputJobNodeLabel != null && outputJob != null && outputJobNodeLabel != null){
             if(!inputJob.getInput().containsKey(inputJobNodeLabel) || inputJob.getInput().get(inputJobNodeLabel) == null){
-                throw new RuntimeException();
+                throw new GeneralResponseException("Output label does not exist");
             }
             
             if(!outputJob.getOutput().containsKey(outputJobNodeLabel) || outputJob.getOutput().get(outputJobNodeLabel) == null){
-                throw new RuntimeException();
+                throw new GeneralResponseException("Input label does not exist");
             }
         }
 
@@ -388,9 +399,11 @@ public class JobsNodeController {
     ){
 
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId);
+        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
+
         if( !jobNode.getProject().getId().equals(projectId) ){
-            throw new RuntimeException();
+            throw new WrongResourcesInheritanceInUrlException(Project.class.getSimpleName(), JobNode.class.getSimpleName());
         }
 
 

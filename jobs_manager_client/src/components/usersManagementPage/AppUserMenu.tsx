@@ -218,7 +218,7 @@ const AppUserMenu = ({
                                     }}
                                     validationSchema={udpateDetailsValidationSchema}
                                     onSubmit={(values) => {
-                                        console.log("t is hjere");
+                                  
                                         updateDetails(username, {fullname: values.fullname, description: values.desciption})
                                             .then(() => {
                                                 getData();
@@ -229,7 +229,7 @@ const AppUserMenu = ({
                                                     time: 5,
                                                     type: NotificationType.INFO
                                                 });
-                                            }).catch();
+                                            }).catch(catchRequestError);
                                     }}
                                 >
                                     {() => (

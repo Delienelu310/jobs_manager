@@ -1,7 +1,7 @@
 import { connect } from "../../../api/abstraction/channelApi";
 import { createJobNode, deleteJobNode } from "../../../api/abstraction/jobNodeApi";
-import { ChannelDetails, ProjectFullData } from "../../../api/abstraction/projectApi";
-import { ProjectGraph, updateJobNodeVertice, updateProjectGraph } from "../../../api/ui/projectGraphApi";
+import { ChannelDetails } from "../../../api/abstraction/projectApi";
+import {  updateJobNodeVertice, updateProjectGraph } from "../../../api/ui/projectGraphApi";
 import { NotificationType } from "../../notifications/Notificator";
 import { ProjectGraphComponentContext } from "../ProjectGraph";
 import { PanelMods } from "./eventHandlers/PanelMods";
@@ -189,7 +189,7 @@ export class GOF{
                 let elem = this.findClickTarget(event.clientX - dx, event.clientY - dy);
                 if(elem.isNull()) return;
                 
-                this.context.setMenu(elem.getMenuComponent());
+                this.context.setMenuSource(elem);
 
             }],
             [PanelMods.DELETE, (event) => {
@@ -198,7 +198,7 @@ export class GOF{
                 let elem = this.findClickTarget(event.clientX - dx, event.clientY - dy);
                 elem.deleteElement()
                     ?.then(r => this.context.refresh())
-                    .catch(e => console.log(e))
+                    .catch(this.context.catchRequestError)
                 ;
             }],
             [PanelMods.CONNECT, (event) => {
@@ -254,7 +254,42 @@ export class GOF{
                         parameters.push(`input_job_node_id=${jobId}`);
                     }
 
-                    connect(this.context.projectData.id, parameters, this.context.newChannelDetails)
+                    let requestBody : ChannelDetails = this.context.newChannelDetails;
+
+                    if(!isLeftOfProject && !isRightOfProject){
+                        if(
+                            !this.context.newChannelDetails.name ||
+                            this.context.newChannelDetails.name.length < 3 ||
+                            this.context.newChannelDetails.name.length > 20
+                        ){
+                            this.context.pushNotification({
+                                message: "Exception: Channel name is invalid",
+                                type : NotificationType.ERROR,
+                                time: 5
+                            })
+
+                            return;
+                        }
+
+                        if(this.context.newChannelDetails.headers.length < 1 
+                            || this.context.newChannelDetails.headers.length > 20
+                        ){
+                            this.context.pushNotification({
+                                message: "Exception: Invalid headers size",
+                                type : NotificationType.ERROR,
+                                time : 5
+                            })
+                            return;
+                        }
+                    }else{
+                        if(isLeftOfProject){
+                            requestBody = this.context.projectData.inputChannels[newConnectMod.input.getLabel()].channelDetails
+                        }else{
+                            requestBody = this.context.projectData.outputChannels[newConnectMod.output.getLabel()].channelDetails
+                        }
+                    }
+                  
+                    connect(this.context.projectData.id, parameters, requestBody)
                         .then(r => this.context.refresh())
                         .then(r => {
                             this.context.setDynamic({
@@ -265,7 +300,7 @@ export class GOF{
                                     output : null
                                 }
                             });
-                        }).catch(e => console.log(e));
+                        }).catch(this.context.catchRequestError);
 
                 }else{
                     this.context.setDynamic({
@@ -281,8 +316,6 @@ export class GOF{
 
             }],
             [PanelMods.JOB_NODE, (event) => {
-
-                console.log(this.context.newJobNodeDetails);
 
                 this.context.jobNodeDetailsValidation.validate({...this.context.newJobNodeDetails})
                     .then(() => {
@@ -323,7 +356,7 @@ export class GOF{
                                         this.context.catchRequestError(e);
                                     });
                                 }).catch(e => {
-                                    console.log("Trying to handle the exception");
+                               
                                     deleteJobNode(this.context.projectData.id, response.data)
                                         .then(r => {
                                             this.context.pushNotification({

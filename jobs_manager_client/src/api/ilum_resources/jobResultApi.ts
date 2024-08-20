@@ -55,7 +55,7 @@ export function retrieveJobResults(projectId : string, jobNodeId : string, reque
 ) : Promise<AxiosResponse<JobResultSimple[]>>{
 
     const url = `/projects/${projectId}/job_nodes/${jobNodeId}/job_results?${requestParams.map(p => p.join("=")).join("&")}`;
-    console.log(url);
+
     return apiClient.get(url);
 }
 
