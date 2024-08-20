@@ -48,9 +48,9 @@ export class PlugBarElement implements GraphElement{
         const labels : string[] = Object.keys(
             this.getParent().isNull() ? 
                 (this.rightOrientation ? 
-                    this.getGof().getProjectData().outputChannels
+                    this.getGof().getContext().projectData.outputChannels
                     :
-                    this.getGof().getProjectData().inputChannels
+                    this.getGof().getContext().projectData.inputChannels
                 )
                 :
                 (this.rightOrientation ? 
@@ -76,9 +76,9 @@ export class PlugBarElement implements GraphElement{
 
         if(this.parent.isNull()){
             return <ProjectPlugBarMenu
-                projectFullData={this.getGof().getProjectData()}
+                projectFullData={this.getGof().getContext().projectData}
                 orientation={this.getOrientation()}
-                refresh={this.getGof().getRefresh()}
+                refresh={this.getGof().getContext().refresh}
             />
         }else{
             return <JobNodePlugBarMenu element={this}/>
@@ -104,7 +104,7 @@ export class PlugBarElement implements GraphElement{
     public getCoords(){
         let [barX, barY] = [0,0];
         if(this.getParent().isNull()){
-            [barX, barY] = [this.rightOrientation ? this.getGof().getCanvasConfig().width - this.config.x - this.config.width : this.config.x , this.config.y];
+            [barX, barY] = [this.rightOrientation ? this.getGof().getContext().config.width - this.config.x - this.config.width : this.config.x , this.config.y];
             
         }else{
             let [parX, parY] = (this.getParent() as JobNodeElement).getCoords();

@@ -14,9 +14,9 @@ export interface ProjectPlugArgs{
 const ProjectPlug = ({element} : ProjectPlugArgs) => {
 
     const [channelData, setChannelData] = useState<ChannelFullData>((element.getParent() as PlugBarElement).getOrientation() ?
-        element.getGof().getProjectData().outputChannels[element.getLabel()]
+        element.getGof().getContext().projectData.outputChannels[element.getLabel()]
         :
-        element.getGof().getProjectData().inputChannels[element.getLabel()]
+        element.getGof().getContext().projectData.inputChannels[element.getLabel()]
     );
 
     return (
@@ -64,16 +64,16 @@ const ProjectPlug = ({element} : ProjectPlugArgs) => {
                 roles={null}
                 moderator
                 projectPrivilegeConfig={{
-                    project: element.getGof().getProjectData(),
+                    project: element.getGof().getContext().projectData,
                     privileges: [ProjectPrivilege.ADMIN, ProjectPrivilege.ADMIN, ProjectPrivilege.ARCHITECT]
                 }}
             
             >
                 <button className="btn btn-danger" onClick={e => {
-                    removeProjectPlug(element.getGof().getProjectData().id, 
+                    removeProjectPlug(element.getGof().getContext().projectData.id, 
                         (element.getParent() as PlugBarElement).getOrientation(), 
                         element.getLabel()
-                    ).then(response => element.getGof().getRefresh()());
+                    ).then(response => element.getGof().getContext().refresh());
                 }}>Delete</button>
 
             </SecuredNode>

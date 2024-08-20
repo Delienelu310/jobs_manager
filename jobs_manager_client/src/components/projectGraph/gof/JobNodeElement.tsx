@@ -59,8 +59,8 @@ export class JobNodeElement implements GraphElement{
 
     }
     public deleteElement(): Promise<AxiosResponse<void>> | null {
-        return deleteJobNode(this.getGof().getProjectData().id, this.data.id).then(response => {
-            return updateProjectGraph(this.getGof().getProjectData().id);
+        return deleteJobNode(this.getGof().getContext().projectData.id, this.data.id).then(response => {
+            return updateProjectGraph(this.getGof().getContext().projectData.id);
         });
     }
 
@@ -107,7 +107,7 @@ export class JobNodeElement implements GraphElement{
     public getCoords() : [number, number]{
         let [x, y] = [this.vertice.x, this.vertice.y];
         
-        let elemOffset = this.gof.getDynamic().elemOffset[this.getGofId()];
+        let elemOffset = this.gof.getContext().dynamic.elemOffset[this.getGofId()];
         if(!elemOffset) elemOffset = {x : 0, y : 0}
         x += elemOffset.x;
         y += elemOffset.y;

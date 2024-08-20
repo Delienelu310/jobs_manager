@@ -1,14 +1,16 @@
 import { connect } from "../../../api/abstraction/channelApi";
-import { createJobNode } from "../../../api/abstraction/jobNodeApi";
-import { ChannelDetails, ChannelTypes, JobNodeDetails, ProjectFullData } from "../../../api/abstraction/projectApi";
+import { createJobNode, deleteJobNode } from "../../../api/abstraction/jobNodeApi";
+import { ChannelDetails, ProjectFullData } from "../../../api/abstraction/projectApi";
 import { ProjectGraph, updateJobNodeVertice, updateProjectGraph } from "../../../api/ui/projectGraphApi";
+import { NotificationType } from "../../notifications/Notificator";
+import { ProjectGraphComponentContext } from "../ProjectGraph";
 import { PanelMods } from "./eventHandlers/PanelMods";
 import { GraphElement } from "./GraphElement";
 import { JobNodeElement } from "./JobNodeElement";
 import { NullGraphElement } from "./NullGraphElement";
-import { PlugBarElement, StaticPlugBarConfig } from "./PlugBarElement";
+import { PlugBarElement } from "./PlugBarElement";
 import { PlugElement } from "./PlugElement";
-
+import * as Yup from 'yup';
 
 export interface StaticCanvasConfig{
     width : number,
@@ -48,84 +50,29 @@ export class GOF{
 
 
     private children : GraphElement[] = [];
-    private projectData : ProjectFullData;
-    private projectGraph : ProjectGraph;
-    private config : StaticCanvasConfig;
 
-    private dynamic : DynamicCanvasConfig;
-    private setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>;
-    private setMenu : React.Dispatch<React.SetStateAction<JSX.Element>>;
-    private mod : PanelMods;
-    private refresh : () => void;
-    private newChannelDetails : ChannelDetails;
-    private newJobNodeDetails : JobNodeDetails;
-    
+    private context : ProjectGraphComponentContext;
 
     public constructor(
-        config : StaticCanvasConfig, 
-        projectData : ProjectFullData, 
-        projectGraph : ProjectGraph,
-        dynamic : DynamicCanvasConfig,
-        setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>,
-        setMenu : React.Dispatch<React.SetStateAction<JSX.Element>>,
-        mod : PanelMods,
-        refresh : () => void,
-        newChannelDetails : ChannelDetails,
-        newJobNodeDetails : JobNodeDetails
+        projectGraphComponentContext : ProjectGraphComponentContext
+
     ){
-        this.config = config;
-        this.projectData = projectData;
-        this.projectGraph = projectGraph;
-        this.dynamic = dynamic;
-        this.setDynamic = setDynamic;
-        this.setMenu = setMenu;
-        this.mod = mod;
-        this.refresh = refresh;
-        this.newChannelDetails = newChannelDetails;
-        this.newJobNodeDetails = newJobNodeDetails;
+
+        this.context = projectGraphComponentContext;
 
     }
 
-    public getSetDynamic(){
-        return this.setDynamic;
+    public getContext() : ProjectGraphComponentContext{
+        return this.context;
     }
 
-    public getNewChannelDetails() : ChannelDetails{
-        return this.newChannelDetails;
-    }
-
-    public getProjectGraph() : ProjectGraph{
-        return this.projectGraph;
-    }
-
-    public getMod() : PanelMods{
-        return this.mod;
-    }
-
-    public getRefresh() : () => void {
-        return this.refresh;
-    }
-
-    public setMod(mod : PanelMods) : void{
-        this.mod = mod;
-    }
-
-    public getProjectData() : ProjectFullData{
-        return this.projectData;
-    }
-    public getCanvasConfig() : StaticCanvasConfig{
-        return this.config;
-    }
+    
 
     public getOffsets() : [number, number]{
         return [
-            this.dynamic.offset.x,
-            this.dynamic.offset.y 
+            this.context.dynamic.offset.x,
+            this.context.dynamic.offset.y 
         ]
-    }
-
-    public getDynamic() : DynamicCanvasConfig{
-        return this.dynamic;
     }
 
     public findById(id : string) : GraphElement {
@@ -150,15 +97,15 @@ export class GOF{
     
     public handleMouseDown = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => {
 
-        if(this.mod != PanelMods.CURSOR) return;
+        if(this.context.mod != PanelMods.CURSOR) return;
 
         const [dx, dy] = this.getOffsets();
         const [x, y] = [event.clientX - dx, event.clientY - dy];
 
         let target = this.findClickTarget(x, y);
         
-        this.setDynamic({
-            ...this.dynamic,
+        this.context.setDynamic({
+            ...this.context.dynamic,
             dragData: {
                 isDragging : true,
                 start : {
@@ -173,17 +120,17 @@ export class GOF{
 
     public handleMouseMove  = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => {
 
-        if(this.mod != PanelMods.CURSOR) return;
+        if(this.context.mod != PanelMods.CURSOR) return;
 
-        if(!this.dynamic.dragData.isDragging) return;
+        if(!this.context.dynamic.dragData.isDragging) return;
 
-        if(!this.dynamic.dragData.start) return;
+        if(!this.context.dynamic.dragData.start) return;
 
-        if(this.dynamic.dragData.elem.isNull()){
-            this.setDynamic({
-                ...this.dynamic,
+        if(this.context.dynamic.dragData.elem.isNull()){
+            this.context.setDynamic({
+                ...this.context.dynamic,
                 dragData : {
-                    ...this.dynamic.dragData,
+                    ...this.context.dynamic.dragData,
                     start :{
                         x : event.clientX,
                         y : event.clientY
@@ -191,17 +138,17 @@ export class GOF{
 
                 },
                 offset: {
-                    x : this.dynamic.offset.x + event.clientX - this.dynamic.dragData.start.x,
-                    y:  this.dynamic.offset.y + event.clientY - this.dynamic.dragData.start.y
+                    x : this.context.dynamic.offset.x + event.clientX - this.context.dynamic.dragData.start.x,
+                    y:  this.context.dynamic.offset.y + event.clientY - this.context.dynamic.dragData.start.y
                 }   
             });
         }else{
-            let id = this.dynamic.dragData.elem.getGofId();
-            let elemOffset = this.dynamic.elemOffset[id] ?? {x : 0, y : 0}
-            this.setDynamic({
-                ...this.dynamic,
+            let id = this.context.dynamic.dragData.elem.getGofId();
+            let elemOffset = this.context.dynamic.elemOffset[id] ?? {x : 0, y : 0}
+            this.context.setDynamic({
+                ...this.context.dynamic,
                 dragData : {
-                    ...this.dynamic.dragData,
+                    ...this.context.dynamic.dragData,
                     start :{
                         x : event.clientX,
                         y : event.clientY
@@ -209,10 +156,10 @@ export class GOF{
 
                 },
                 elemOffset: {
-                    ...this.dynamic.elemOffset,
-                    [this.dynamic.dragData.elem.getGofId()] : {
-                        x : elemOffset.x + event.clientX - this.dynamic.dragData.start.x,
-                        y : elemOffset.y + event.clientY - this.dynamic.dragData.start.y,
+                    ...this.context.dynamic.elemOffset,
+                    [this.context.dynamic.dragData.elem.getGofId()] : {
+                        x : elemOffset.x + event.clientX - this.context.dynamic.dragData.start.x,
+                        y : elemOffset.y + event.clientY - this.context.dynamic.dragData.start.y,
                     }
                 }
             })
@@ -223,11 +170,11 @@ export class GOF{
 
     public handleMouseUp = (event : React.MouseEvent<HTMLCanvasElement, MouseEvent>, mod : PanelMods) => {
 
-        if(this.mod != PanelMods.CURSOR) return;
-        this.setDynamic({
-            ...this.dynamic,
+        if(this.context.mod != PanelMods.CURSOR) return;
+        this.context.setDynamic({
+            ...this.context.dynamic,
             dragData: {
-                ...this.dynamic.dragData,
+                ...this.context.dynamic.dragData,
                 isDragging : false
             }
         })
@@ -242,7 +189,7 @@ export class GOF{
                 let elem = this.findClickTarget(event.clientX - dx, event.clientY - dy);
                 if(elem.isNull()) return;
                 
-                this.setMenu(elem.getMenuComponent());
+                this.context.setMenu(elem.getMenuComponent());
 
             }],
             [PanelMods.DELETE, (event) => {
@@ -250,7 +197,7 @@ export class GOF{
 
                 let elem = this.findClickTarget(event.clientX - dx, event.clientY - dy);
                 elem.deleteElement()
-                    ?.then(r => this.refresh())
+                    ?.then(r => this.context.refresh())
                     .catch(e => console.log(e))
                 ;
             }],
@@ -265,7 +212,7 @@ export class GOF{
                 let rightOrientation = (plug.getParent() as PlugBarElement).getOrientation();
                 let isOfProject = (plug.getParent().getParent().isNull());
 
-                let newConnectMod = {...this.dynamic.connectMod};
+                let newConnectMod = {...this.context.dynamic.connectMod};
 
                 if(rightOrientation && isOfProject || (!rightOrientation && !isOfProject)){
                     if(newConnectMod.output != plug){
@@ -307,13 +254,13 @@ export class GOF{
                         parameters.push(`input_job_node_id=${jobId}`);
                     }
 
-                    connect(this.getProjectData().id, parameters, this.newChannelDetails)
-                        .then(r => this.refresh())
+                    connect(this.context.projectData.id, parameters, this.context.newChannelDetails)
+                        .then(r => this.context.refresh())
                         .then(r => {
-                            this.setDynamic({
-                                ...this.dynamic,
+                            this.context.setDynamic({
+                                ...this.context.dynamic,
                                 connectMod: {
-                                    ...this.dynamic.connectMod,
+                                    ...this.context.dynamic.connectMod,
                                     input : null,
                                     output : null
                                 }
@@ -321,26 +268,97 @@ export class GOF{
                         }).catch(e => console.log(e));
 
                 }else{
-                    this.setDynamic({...this.dynamic, connectMod : {...this.dynamic.connectMod, input : newConnectMod.input, output : newConnectMod.output}});
+                    this.context.setDynamic({
+                        ...this.context.dynamic, 
+                        connectMod : {
+                            ...this.context.dynamic.connectMod, 
+                            input : newConnectMod.input, 
+                            output : newConnectMod.output
+                        }
+                    });
                 }
 
 
             }],
             [PanelMods.JOB_NODE, (event) => {
-                const [dx, dy] = this.getOffsets();
 
-                createJobNode(this.projectData.id, this.newJobNodeDetails)
-                    .then(response => {
-                        return updateProjectGraph(this.projectData.id).then(response2 => {
-                            return updateJobNodeVertice(this.projectData.id, response.data, {
-                                x : event.clientX - dx, 
-                                y : event.clientY - dy
-                            });
-                        });
-                    }).then(response => {
-                        this.refresh();
-                    })
-                    .catch(e => console.log(e))
+                console.log(this.context.newJobNodeDetails);
+
+                this.context.jobNodeDetailsValidation.validate({...this.context.newJobNodeDetails})
+                    .then(() => {
+                        const [dx, dy] = this.getOffsets();
+
+                        createJobNode(this.context.projectData.id, this.context.newJobNodeDetails)
+                            .then(response => {
+                                updateProjectGraph(this.context.projectData.id).then(response2 => {
+                                    updateJobNodeVertice(this.context.projectData.id, response.data, {
+                                        x : event.clientX - dx, 
+                                        y : event.clientY - dy
+                                    }).then(response => {
+                                        this.context.refresh();
+                                        this.context.pushNotification({
+                                            message: "Job Node was created successfully",
+                                            time: 5,
+                                            type: NotificationType.INFO
+                                        })
+                                    }).catch(e => {
+
+                                        deleteJobNode(this.context.projectData.id, response.data)
+                                            .then(r => {
+                                                return updateProjectGraph(this.context.projectData.id)
+                                            }).then(r => {
+                                                this.context.pushNotification({
+                                                    message: "Error while updating job node vertice: the jobnode was deleted",
+                                                    time: 5,
+                                                    type: NotificationType.ERROR
+                                                });
+                                            }).catch(e =>{
+                                                this.context.pushNotification({
+                                                    message: "Error while updating job node vertice: impossible to delete jobnode",
+                                                    time: 5,
+                                                    type: NotificationType.ERROR
+                                                })
+                                            });
+
+                                        this.context.catchRequestError(e);
+                                    });
+                                }).catch(e => {
+                                    console.log("Trying to handle the exception");
+                                    deleteJobNode(this.context.projectData.id, response.data)
+                                        .then(r => {
+                                            this.context.pushNotification({
+                                                message: "Error while updating job node vertice: the jobnode was deleted",
+                                                time: 5,
+                                                type: NotificationType.ERROR
+                                            });
+                                        }).catch(e =>{
+                                            this.context.pushNotification({
+                                                message: "Error while updating job node vertice: impossible to delete jobnode",
+                                                time: 5,
+                                                type: NotificationType.ERROR
+                                            })
+                                        });
+
+                                    this.context.catchRequestError(e);
+                                });
+                            }).catch( this.context.catchRequestError);
+                    }).catch(e => {
+                        if(e instanceof Yup.ValidationError){
+                            this.context.pushNotification({
+                                message: (e as Yup.ValidationError).message,
+                                time: 5,
+                                type: NotificationType.ERROR
+                            })
+                        }else{
+                            this.context.pushNotification({
+                                message: "Unexpected validation Error",
+                                time: 5,
+                                type: NotificationType.ERROR
+                            })
+                        }
+                    });
+
+               
             }]
         ]);
     

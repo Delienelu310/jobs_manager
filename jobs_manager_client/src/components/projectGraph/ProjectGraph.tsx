@@ -10,7 +10,10 @@ import { ChannelElement, StaticChannelConfig } from "./gof/ChannelElement";
 import { PanelMods } from "./gof/eventHandlers/PanelMods";
 import SecuredNode from "../../authentication/SecuredNode";
 import { ProjectPrivilege } from "../../api/authorization/privilegesApi";
-import { Formik } from "formik";
+
+import * as Yup from 'yup';
+import { NotificationConfig, NotificationType, useNotificator } from "../notifications/Notificator";
+import { AxiosError } from "axios";
 
 interface StaticGraphCanvasConfig{
     
@@ -30,7 +33,32 @@ interface ProjectGraphComponent{
 
 }
 
+
+export interface ProjectGraphComponentContext{
+    readonly projectData : ProjectFullData;
+    readonly projectGraph : ProjectGraph;
+    readonly config : StaticCanvasConfig;
+    readonly dynamic : DynamicCanvasConfig;
+
+
+    readonly setDynamic : React.Dispatch<React.SetStateAction<DynamicCanvasConfig>>;
+    readonly setMenu : React.Dispatch<React.SetStateAction<JSX.Element>>;
+    readonly mod : PanelMods;
+    readonly refresh : () => void
+
+
+    readonly newChannelDetails : ChannelDetails;
+    readonly newJobNodeDetails : JobNodeDetails;
+    readonly jobNodeDetailsValidation : Yup.AnyObjectSchema;
+
+    readonly pushNotification : (config : NotificationConfig) => void;
+    readonly catchRequestError: (e : AxiosError<string>) => void;
+}
+
 const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, setProjectGraph, refresh} : ProjectGraphComponent) => {
+
+
+    const {pushNotification, catchRequestError} = useNotificator();
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [mod, setMod] = useState<PanelMods>(PanelMods.CURSOR);
@@ -59,38 +87,72 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
     });
     const [newHeader, setNewHeader] = useState<string>("");
 
+
+
     const [newJobNodeDetails, setNewJobNodeDetails] = useState<JobNodeDetails>({
-            name : "",
-            description: ""
-        });
-        
-    const [gof, setGof] = useState<GOF>(new GOF(
-        staticConfig.canvas,
-        projectFullData,
+        name : "",
+        description: null
+    });
+
+    interface JobNodeDetailsErrors{
+        name : string | null,
+        description : string | null
+    }
+
+    const [newJobNodeDetailsErrors, setNewJobNodeDetailsErrors] = useState<JobNodeDetailsErrors>({
+        name : null,
+        description : null
+    });
+
+    const jobNodeDetailsSchema = Yup.object({
+        name : Yup.string()
+            .min(3, "Job Node Name length must be 3 to 50")
+            .max(50, "Job Node Name length must be 3 to 50")
+            .nonNullable("Job Node Name must not be blank")
+            .required("Job Node Name must be specified"),
+        description: Yup.string()
+            .notRequired()
+            .min(3, "Job Node Description length must be 3 to 500")
+            .max(500, "Job Node Description length must be 3 to 500")
+    });
+
+
+
+    
+    const [gof, setGof] = useState<GOF>(new GOF({
+    
+        config: staticConfig.canvas,
+        projectData: projectFullData,
         projectGraph,
-        dynamicConfig,
-        setDynamicConfig,
+        dynamic: dynamicConfig,
+        setDynamic: setDynamicConfig,
         setMenu,
         mod,
         refresh,
         newChannelDetails,
-        newJobNodeDetails
-    ));
+        newJobNodeDetails,
+        jobNodeDetailsValidation: jobNodeDetailsSchema,
+        pushNotification,
+        catchRequestError
+    }));
 
     function prepareGof(){
 
-        let newGof : GOF = new GOF( 
-            staticConfig.canvas,
-            projectFullData,
+        let newGof : GOF = new GOF({
+            config: staticConfig.canvas,
+            projectData: projectFullData,
             projectGraph,
-            dynamicConfig,
-            setDynamicConfig,
+            dynamic: dynamicConfig,
+            setDynamic: setDynamicConfig,
             setMenu,
             mod,
             refresh,
             newChannelDetails,
-            newJobNodeDetails
-        );
+            newJobNodeDetails,
+            jobNodeDetailsValidation: jobNodeDetailsSchema,
+            pushNotification,
+            catchRequestError
+        });
 
         //1. prepare job nodes
         //2. prepare project plugs
@@ -236,7 +298,7 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
 
                 />
                 <div>
-                    <h5>Mod : {PanelMods[gof.getMod()]}</h5>
+                    <h5>Mod : {PanelMods[gof.getContext().mod]}</h5>
                     <h5>Also Mod : {PanelMods[mod]}</h5>
                     <button onClick={e => setMod(PanelMods.CURSOR)}>Cursor</button>
                     <SecuredNode
@@ -270,25 +332,90 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
                                  privileges : [ProjectPrivilege.ADMIN, ProjectPrivilege.ARCHITECT, ProjectPrivilege.MODERATOR]
                              }}
                         >   
-                        <div style={{
-                            margin: "20px 20%"
-                        }}>
-                            <h5>Job Node Panel</h5>
-                            <strong>Name:</strong>
-                            <input className=" form-control m-2" value={newJobNodeDetails.name} onChange={e => setNewJobNodeDetails(
-                                {
-                                    ...newJobNodeDetails,
-                                    name : e.target.value
-                                }
-                            )}/>
-                            <strong>Description:</strong>
-                            <textarea className=" form-control m-2" value={newJobNodeDetails.description} onChange={e => setNewJobNodeDetails(
-                                {
-                                    ...newJobNodeDetails,
-                                    description : e.target.value
-                                }
-                            )}/>
-                        </div>
+                            <div style={{
+                                margin: "20px 20%"
+                            }}>
+                            
+                                <h5>Job Node Panel</h5>
+                                <div className="m-2">
+                                    <strong>Name:</strong>
+                                    <input className=" form-control m-2" value={newJobNodeDetails.name} onChange={async e => {
+                                        setNewJobNodeDetails({
+                                            ...newJobNodeDetails,
+                                            name : e.target.value
+                                        })
+                                        try {
+                                            // Validate the specific field using Yup.reach
+                                            await jobNodeDetailsSchema.validateAt("name", {name : e.target.value});
+                                    
+                                            setNewJobNodeDetailsErrors((prevErrors) => ({
+                                            ...prevErrors,
+                                                name: null,
+                                            }));
+                                        }catch (error) {
+
+                                            if(error instanceof Yup.ValidationError){
+                                                setNewJobNodeDetailsErrors((prevErrors) => ({
+                                                    ...prevErrors,
+                                                    name: (error as Yup.ValidationError).message,
+                                                }));
+                                            }else{
+                                                pushNotification({
+                                                    message : "Unexpected validation Error",
+                                                    type: NotificationType.ERROR,
+                                                    time: 5
+                                                })
+                                            }
+                                            
+                                        }
+                                    
+                                        
+                                    }}/>
+                                    {newJobNodeDetailsErrors.name && <div className="text-danger m-2">{newJobNodeDetailsErrors.name}</div>}
+                                </div>
+
+                                <div className="m-2">
+                                    <strong>Description:</strong>
+                                    <textarea className=" form-control m-2" value={newJobNodeDetails.description || ''} onChange={async e => {
+                                        setNewJobNodeDetails(
+                                        {
+                                            ...newJobNodeDetails,
+                                            description : e.target.value || null
+                                        })
+                                        
+                                        try {
+                                            // Validate the specific field using Yup.reach
+                                            await jobNodeDetailsSchema.validateAt("description", {description : e.target.value || undefined});
+                                    
+                                            setNewJobNodeDetailsErrors((prevErrors) => ({
+                                                ...prevErrors,
+                                                description: null,
+                                            }));
+                                        }catch (error) {
+
+                                            if(error instanceof Yup.ValidationError){
+                                                setNewJobNodeDetailsErrors((prevErrors) => ({
+                                                    ...prevErrors,
+                                                    description: (error as Yup.ValidationError).message,
+                                                }));
+                                            }else{
+                                                pushNotification({
+                                                    message : "Unexpected validation Error",
+                                                    type: NotificationType.ERROR,
+                                                    time: 5
+                                                })
+                                            }
+                                            
+                                        }
+                                    
+                                        
+                                        
+                                    }}/>
+                                    {newJobNodeDetailsErrors.description && <div className="text-danger m-2">{newJobNodeDetailsErrors.description}</div>}
+                                </div>
+                                
+                            
+                            </div>
                             
                         </SecuredNode>
                        

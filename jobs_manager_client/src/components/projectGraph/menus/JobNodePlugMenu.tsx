@@ -64,16 +64,16 @@ const JobNodePlugMenu = ({
                     privileges: [JobNodePrivilege.MANAGER]
                 }}
                 projectPrivilegeConfig={{
-                    project : element.getGof().getProjectData(),
+                    project : element.getGof().getContext().projectData,
                     privileges : [ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT]
                 }}
             >
                 <button className="btn btn-danger" onClick={e => {
-                    removeJobNodePlug(element.getGof().getProjectData().id, 
+                    removeJobNodePlug(element.getGof().getContext().projectData.id, 
                         (element.getParent().getParent() as JobNodeElement).getData().id,
                         (element.getParent() as PlugBarElement).getOrientation(), 
                         element.getLabel()
-                    ).then(response => element.getGof().getRefresh()());
+                    ).then(response => element.getGof().getContext().refresh());
                 }}>Delete</button>
 
             </SecuredNode>

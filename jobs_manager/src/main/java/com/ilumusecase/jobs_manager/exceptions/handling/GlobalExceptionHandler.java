@@ -13,6 +13,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(Exception.class)
+    @ResponseBody
+    public ResponseEntity<String> handleInternalExceptions(Exception ex){
+        return new ResponseEntity<>("Internal server error: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseBody

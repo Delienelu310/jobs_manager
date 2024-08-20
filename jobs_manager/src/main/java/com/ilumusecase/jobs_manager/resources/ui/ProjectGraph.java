@@ -53,7 +53,6 @@ public class ProjectGraph {
     @DBRef(lazy = true)
     @JsonFilter("project_graph_project")
     @NotNull
-    @Valid
     private Project project;
 
 

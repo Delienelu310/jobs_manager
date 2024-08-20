@@ -38,31 +38,21 @@ public class Project {
 
     @DBRef(lazy=true)
     @JsonFilter("plug-channel")
-    @NotNull
-    @Valid
     private List<Channel> channels = new ArrayList<>();
 
     @DBRef(lazy=true)
     @JsonFilter("plug-jobNode")
-    @NotNull
-    @Valid
     private List<JobNode> jobNodes = new ArrayList<>(); 
 
     @DBRef(lazy=true)
     @JsonFilter("plug-channel")
-    @NotNull
-    @Valid
     private Map<String, Channel> inputChannels = new HashMap<>();
 
     @DBRef(lazy=true)
     @JsonFilter("plug-channel")
-    @NotNull
-    @Valid
     private Map<String, Channel> outputChannels = new HashMap<>();
 
     @DBRef(lazy = true)
-    @NotNull
-    @Valid
     private Map<String, PrivilegeList<ProjectPrivilege>> privileges = new HashMap<>();
 
     @Override

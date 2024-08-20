@@ -10,7 +10,7 @@ export interface ChannelList{
 
 export interface JobNodeDetails{
     name : string
-    description : string
+    description : string | null
 }
 
 export interface JobNodeFullData{

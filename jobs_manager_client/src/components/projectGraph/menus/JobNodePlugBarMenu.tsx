@@ -32,7 +32,7 @@ const JobNodePlugBarMenu = ({element} : JobNodePlugBarMenu) => {
                 roles={null}
                 moderator
                 projectPrivilegeConfig={{
-                    project: element.getGof().getProjectData(),
+                    project: element.getGof().getContext().projectData,
                     privileges: [ProjectPrivilege.ADMIN, ProjectPrivilege.ARCHITECT, ProjectPrivilege.MODERATOR]
                 }}
                 jobNodePrivilegeConfig={{
@@ -49,11 +49,11 @@ const JobNodePlugBarMenu = ({element} : JobNodePlugBarMenu) => {
 
 
                             <button className="btn btn-success m-2" onClick={e => {
-                                addJobNodePlug(element.getGof().getProjectData().id, 
+                                addJobNodePlug(element.getGof().getContext().projectData.id, 
                                     (element.getParent() as JobNodeElement ).getData().id, 
                                     element.getOrientation(), 
                                     newPlugLabel
-                                ).then(respone => element.getGof().getRefresh()()).catch(e => console.log(e))
+                                ).then(respone => element.getGof().getContext().refresh()).catch(e => console.log(e))
                             }}>Add plug</button>
                         </div>
                     }

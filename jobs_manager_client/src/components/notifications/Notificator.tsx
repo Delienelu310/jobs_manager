@@ -48,36 +48,42 @@ const Notificator = ({children} : {children : ReactNode}) => {
 
     const [counter, setCounter] = useState<number>(0);
 
-    function generateNotificationId() : number{
-        const result = counter;
-        setCounter(counter + 1);
-        return result;
-    }
-
+ 
     function pushNotification(config : NotificationConfig) : void{
         
-        const id = generateNotificationId();
+        setCounter(oldCounter => {
 
-        if(config.time != null && config.time< 0.5) config.time = 0.5;
+            if(config.time != null && config.time< 0.5) config.time = 0.5;
 
-        const data : NotificationData = {
-            id : id,
-            config : config
-        }
+            const data : NotificationData = {
+                id : oldCounter,
+                config : config
+            }
 
-        const newMap = new Map<number, NotificationData>(notifications);
-        newMap.set(id, data);
-        setNotifications(newMap);
-
-        if(config.time != null){
-            const timeOutId = setTimeout(() => {
-                deleteById(id);
-            }, 1000 * config.time);
             
-            const newTimers = new Map<number, NodeJS.Timeout>(timers);
-            newTimers.set(id, timeOutId);
-            setTimers(newTimers);
-        }
+            setNotifications(oldMap => {
+                const newMap = new Map<number, NotificationData>(oldMap);
+                newMap.set(oldCounter, data);
+                return newMap;
+            });
+
+            if(config.time != null){
+                const timeOutId = setTimeout(() => {
+                    deleteById(oldCounter);
+                }, 1000 * config.time);
+                
+                
+                setTimers(oldTimers => {
+                    const newTimers = new Map<number, NodeJS.Timeout>(oldTimers);
+                    newTimers.set(oldCounter, timeOutId);
+                    return newTimers
+                });
+            }
+
+            return oldCounter + 1;
+        })
+
+        
 
     }
 
@@ -112,12 +118,14 @@ const Notificator = ({children} : {children : ReactNode}) => {
 
     function clearNotifications() : void{
         //clear notification map
-        setNotifications(new Map<number, NotificationData>());
+        setNotifications(old => new Map<number, NotificationData>());
     
         //cancel all the timers
-        timers.forEach(timer => clearTimeout(timer));
-
-        setTimers(new Map<number, NodeJS.Timeout>())
+      
+        setTimers(old => {
+            old.forEach(timer => clearTimeout(timer));
+            return new Map<number, NodeJS.Timeout>()
+        })
 
     }
 

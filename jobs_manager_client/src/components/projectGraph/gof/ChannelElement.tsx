@@ -39,7 +39,7 @@ export class ChannelElement implements GraphElement{
 
     }
     public deleteElement(): Promise<AxiosResponse<void>> | null {
-        return deleteChannel(this.getGof().getProjectData().id, this.channelData.id);
+        return deleteChannel(this.getGof().getContext().projectData.id, this.channelData.id);
     }
     public getMenuComponent() : JSX.Element{
         return <ChannelMenu element={this}/>

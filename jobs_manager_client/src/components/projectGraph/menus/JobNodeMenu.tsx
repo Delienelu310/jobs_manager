@@ -29,7 +29,7 @@ const JobNodeMenu = ({element} : JobNodeMenuArgs) => {
                     privileges : null
                 }}
             >
-                <button className="btn btn-primary m-3" onClick={() => navigate(`/projects/${element.getGof().getProjectData().id}/job_nodes/${element.getData().id}`)}>More</button>
+                <button className="btn btn-primary m-3" onClick={() => navigate(`/projects/${element.getGof().getContext().projectData.id}/job_nodes/${element.getData().id}`)}>More</button>
             </SecuredNode>
 
         </div>

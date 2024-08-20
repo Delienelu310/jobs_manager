@@ -32,9 +32,9 @@ export class PlugElement implements GraphElement{
 
     public deleteElement(): Promise<AxiosResponse<void>> | null  {
         if(this.parent.getParent().isNull()){
-            return removeProjectPlug(this.getGof().getProjectData().id, this.parent.getOrientation(), this.label);
+            return removeProjectPlug(this.getGof().getContext().projectData.id, this.parent.getOrientation(), this.label);
         }else{
-            return removeJobNodePlug(this.getGof().getProjectData().id, (this.parent.getParent() as JobNodeElement).getData().id, this.parent.getOrientation(), this.label);
+            return removeJobNodePlug(this.getGof().getContext().projectData.id, (this.parent.getParent() as JobNodeElement).getData().id, this.parent.getOrientation(), this.label);
         }
         
     }

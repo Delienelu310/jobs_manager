@@ -24,6 +24,7 @@ import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.Auth
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 @RestController
@@ -92,19 +93,21 @@ public class ProjectGraphController {
 
     }
 
+    private record JobNodeVerticeCoords(@NotNull Integer x, @NotNull Integer y){}
+
 
     @PutMapping("/projects/{project_id}/job_nodes/{job_node_id}/graph")
     @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
     public void updateJobNodeVertice(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @RequestBody @NotNull  JobNodeVertice jobNodeVertice
+        @RequestBody @Valid @NotNull  JobNodeVerticeCoords jobNodeVertice
     ){
 
         JobNodeVertice jobNodeVerticeActual = repositoryFactory.getJobNodeVerticeRepository().retrieveByJobNodeId(jobNodeId).orElseThrow();
 
-        jobNodeVerticeActual.setX(jobNodeVertice.getX());
-        jobNodeVerticeActual.setY(jobNodeVertice.getY());
+        jobNodeVerticeActual.setX(jobNodeVertice.x());
+        jobNodeVerticeActual.setY(jobNodeVertice.y());
 
         repositoryFactory.getJobNodeVerticeRepository().updateJobNodeVertice(jobNodeVerticeActual);
     }
