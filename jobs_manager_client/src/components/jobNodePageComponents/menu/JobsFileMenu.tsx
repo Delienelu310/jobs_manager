@@ -4,7 +4,9 @@ import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../../../pages/
 import OpenerComponent from "../../OpenerComponent";
 import SecuredNode from "../../../authentication/SecuredNode";
 import { JobNodePrivilege } from "../../../api/authorization/privilegesApi";
-
+import { ErrorMessage, Field, Form, Formik } from "formik";
+import { NotificationType, useNotificator } from "../../notifications/Notificator";
+import * as Yup from 'yup';
 
 
 export interface JobsFileMenuContext{
@@ -16,15 +18,27 @@ export interface JobsFileMenuArgs{
     context : JobsFileMenuContext
 }
 
+
+const UpdateDetailsValidationSchema = Yup.object({
+    name : Yup.string()
+        .min(3)
+        .max(50)
+        .required()
+    ,
+    description : Yup.string()
+        .nullable()
+        .min(3)
+        .max(500)
+        
+});
+
 const JobsFileMenu = ({data, context} : JobsFileMenuArgs) => {
 
 
+    const {pushNotification, catchRequestError} = useNotificator();
+
     const [fullData, setFullData] = useState<JobsFileSimple | null>(null);
 
-    const [newJobsFileDetails, setNewJobsFileDetails] = useState<JobsFileDetails>({
-        name : "",
-        description: ""
-    });
     
     const [newFile, setNewFile] = useState<File | null>(null);
     const [newExtension, setNewExtension] = useState<string>(JobsFileExtension.JAR);
@@ -33,7 +47,7 @@ const JobsFileMenu = ({data, context} : JobsFileMenuArgs) => {
     function refresh(){
         retrieveJobsFile(data.project.id, data.jobNode.id, data.id)
             .then(response => setFullData(response.data))
-            .catch(e => console.log(e));
+            .catch(catchRequestError);
     }
 
     function checkState(){
@@ -42,7 +56,7 @@ const JobsFileMenu = ({data, context} : JobsFileMenuArgs) => {
                 console.log(response.data);
                 setState(response.data)
             })
-            .catch(e => console.log(e));
+            .catch(catchRequestError);
     }
 
     function deleteJob(){
@@ -55,12 +69,18 @@ const JobsFileMenu = ({data, context} : JobsFileMenuArgs) => {
                 ){
                     context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random());
                 }
+                pushNotification({
+                    message: "Jobs File was deleted",
+                    time : 5,
+                    type: NotificationType.INFO
+                })
+                context.jobNodePageRefresh.setMenu(null);
                 
             })
-            .catch(e => console.log(e));
+            .catch(catchRequestError);
     }
 
-    function updateDetails(){
+    function updateDetails(newJobsFileDetails : JobsFileDetails){
         updateJobsFileDetails(data.project.id, data.jobNode.id, data.id, newJobsFileDetails)
             .then(response => {
                 refresh();
@@ -70,7 +90,12 @@ const JobsFileMenu = ({data, context} : JobsFileMenuArgs) => {
                 ){
                     context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random());
                 }
-                            }).catch(e => console.log(e));
+                pushNotification({
+                    message: "Jobs File details was updated",
+                    time : 5,
+                    type: NotificationType.INFO
+                })
+            }).catch(catchRequestError);
     }
 
     function updateFile(){
@@ -85,7 +110,13 @@ const JobsFileMenu = ({data, context} : JobsFileMenuArgs) => {
                 ){
                     context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random());
                 }
-            }).catch(e => console.log(e));
+
+                pushNotification({
+                    message: "Jobs File was updated",
+                    time : 5,
+                    type: NotificationType.INFO
+                })
+            }).catch(catchRequestError);
     }
 
 
@@ -156,15 +187,36 @@ const JobsFileMenu = ({data, context} : JobsFileMenuArgs) => {
 
                         <hr/>
 
-                        <strong>Name:</strong>
-                        <input className="form-control m-2" value={newJobsFileDetails.name} onChange={e => setNewJobsFileDetails({...newJobsFileDetails, name : e.target.value})}/>
+                        <Formik
+                            initialValues={{
+                                name : "",
+                                description : null as (null | "")
+                            }}
+                            validationSchema={UpdateDetailsValidationSchema}
+                            onSubmit={updateDetails}
+                        >
+                            {() => (
+                                <Form>
+                                    <div>
+                                        <strong><label htmlFor="name">Name:</label></strong>
+                                        <Field name="name" id="name" className="form-control m-2"/>
+                                        <ErrorMessage component="div" name="name" className="text-danger"/>
+                                    </div>
+                                    <div>
+                                        <strong><label htmlFor="description">Description:</label></strong>
+                                        <Field name="description" id="description" className="form-control m-2" as="textarea"/>
+                                        <ErrorMessage component="div" name="description" className="text-danger"/>
 
+                                    </div>
 
-                        <strong>Description:</strong>
-                        <input className="form-control m-2" value={newJobsFileDetails.description} onChange={e => setNewJobsFileDetails({...newJobsFileDetails, description : e.target.value})}/>
+                                   
 
+                                    <button type="submit" className="btn btn-success m-3">Update details</button>
+                                    
+                                </Form>
+                            )}
+                        </Formik>
 
-                        <button className="btn btn-success m-3" onClick={e => updateDetails()}>Update details</button>
                         <hr/>
                         <button className="btn btn-danger m-3" onClick={e => deleteJob()}>Delete</button>
 

@@ -6,7 +6,7 @@ import { JobNodeDetails, ProjectDetails } from "../abstraction/projectApi"
 
 export interface JobsFileDetails{
     name : string,
-    description : string
+    description : string | null
 }
 
 export enum JobsFileExtension{

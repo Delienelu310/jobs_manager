@@ -1,4 +1,5 @@
 import apiClient, { convertSourceArgsToRequestParams, convertSourceCountArgsToRequestParams } from "../../api/ApiClient"
+import { useNotificator } from "../notifications/Notificator"
 import List, { Field, SourceArg, SourceCountArg, WrapperProps } from "./List"
 
 
@@ -25,12 +26,18 @@ const ServerBoundList = <Data,Context>(
     props : ServerBoundListProps<Data, Context>
 ) => {
 
+    const {catchRequestError} = useNotificator();
+
     async function sourceData(arg : SourceArg) : Promise<Data[]>{
-        return apiClient.get(props.endpoint.resourse + convertSourceArgsToRequestParams(arg)).then( response=> response.data);
+        return apiClient.get(props.endpoint.resourse + convertSourceArgsToRequestParams(arg))
+            .then( response=> response.data)
+            .catch(catchRequestError);
     }
 
     async function sourceCount(arg: SourceCountArg) : Promise<number>{
-        return apiClient.get(props.endpoint.count + convertSourceCountArgsToRequestParams(arg)).then(response => response.data)
+        return apiClient.get(props.endpoint.count + convertSourceCountArgsToRequestParams(arg))
+            .then(response => response.data)
+            .catch(catchRequestError)
     }
 
     return (
