@@ -10,7 +10,10 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
+import com.ilumusecase.jobs_manager.validation.annotations.JsonString;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -26,20 +29,30 @@ public class JobEntity {
 
     @DBRef(lazy = true)
     @JsonFilter("job_entity_job_script")
+    @NotNull
     private JobScript jobScript;
+
+    @JsonString
+    @NotNull
     private String configuration;
+    
+    @NotNull
+    @Valid
     private JobEntityDetails jobEntityDetails;
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_publisher")
+    @NotNull
     private AppUser author; 
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_job_node_reference")
+    @NotNull
     private JobNode jobNode;
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_project_reference")
+    @NotNull
     private Project project;
 
 

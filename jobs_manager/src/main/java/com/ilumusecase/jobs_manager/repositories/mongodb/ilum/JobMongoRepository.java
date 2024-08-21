@@ -2,6 +2,7 @@ package com.ilumusecase.jobs_manager.repositories.mongodb.ilum;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -29,8 +30,8 @@ public class JobMongoRepository implements JobRepository{
     private MongoTemplate mongoTemplate;
 
     @Override
-    public JobEntity retrieveJobEntity(String id) {
-        return mongoJobEntity.findById(id).get();
+    public Optional<JobEntity> retrieveJobEntity(String id) {
+        return mongoJobEntity.findById(id);
     }
 
     @Override

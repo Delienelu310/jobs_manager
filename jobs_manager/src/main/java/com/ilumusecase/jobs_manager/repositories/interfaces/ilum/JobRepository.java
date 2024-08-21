@@ -2,6 +2,7 @@ package com.ilumusecase.jobs_manager.repositories.interfaces.ilum;
 
 
 import java.util.List;
+import java.util.Optional;
 
 import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
 
@@ -20,7 +21,7 @@ public interface JobRepository {
         String jobNodeId, String queueType, String jobEntityName, String author
     );
 
-    public JobEntity retrieveJobEntity(String id);
+    public Optional<JobEntity> retrieveJobEntity(String id);
     public void deleteJob(String id);
     public JobEntity updateJobFull(JobEntity jobEntity);
 

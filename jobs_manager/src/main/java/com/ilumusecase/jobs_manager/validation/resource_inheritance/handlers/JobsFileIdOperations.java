@@ -15,6 +15,7 @@ import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 import com.ilumusecase.jobs_manager.resources.ilum.JobsFile;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
+import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 import com.ilumusecase.jobs_manager.validation.resource_inheritance.ResourceIdsOperationsInstance;
 import com.ilumusecase.jobs_manager.validation.resource_inheritance.annotations.JobsFileId;
 
@@ -41,7 +42,7 @@ public class JobsFileIdOperations implements ResourceIdsOperationsInstance {
                     throw new WrongResourcesInheritanceInUrlException(JobNode.class.getSimpleName(), JobsFile.class.getSimpleName());
             }
 
-            for(String projectId : ids.getOrDefault(Project.class, new ArrayList<>())){
+            for(String projectId : ids.getOrDefault(ProjectId.class, new ArrayList<>())){
                 if(!jobsFile.getProject().getId().equals(projectId))
                     throw new WrongResourcesInheritanceInUrlException(Project.class.getSimpleName(), JobsFile.class.getSimpleName());
             }

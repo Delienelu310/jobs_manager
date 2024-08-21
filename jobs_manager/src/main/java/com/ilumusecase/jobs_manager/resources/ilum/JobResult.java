@@ -50,12 +50,10 @@ public class JobResult {
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_project_reference")
     @NotNull
-    @Valid
     private Project project;
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_job_node_reference")
     @NotNull
-    @Valid
     private JobNode jobNode;
 
     @Override

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ilumusecase.jobs_manager.exceptions.GeneralResponseException;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
@@ -27,8 +28,13 @@ import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.Auth
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
+import com.ilumusecase.jobs_manager.validation.annotations.JsonString;
+import com.ilumusecase.jobs_manager.validation.resource_inheritance.annotations.JobEntityId;
+import com.ilumusecase.jobs_manager.validation.resource_inheritance.annotations.JobScriptId;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 @RestController
 public class JobNodeQueueController {
@@ -98,11 +104,6 @@ public class JobNodeQueueController {
         @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
         @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber        
     ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
-            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        if(!jobNode.getProject().getId().equals(projectId)) throw new RuntimeException();
-
-
         return repositoryFactory.getJobRepository().retrieveQueue(jobNodeId, queueType, query, author, pageSize, pageNumber);
     }
 
@@ -116,16 +117,14 @@ public class JobNodeQueueController {
         @RequestParam(name="author", required = false, defaultValue = "") String author,
         @RequestParam(name="query", required = false, defaultValue = "") String query      
     ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
-            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        if(!jobNode.getProject().getId().equals(projectId)) throw new RuntimeException();
-
-
         return repositoryFactory.getJobRepository().retrieveQueueCount(jobNodeId, queueType, query, author);
     }
 
 
-    private record JobEntityPost(JobEntityDetails details, String configuration){
+    private record JobEntityPost(
+        @Valid @NotNull JobEntityDetails details, 
+        @JsonString @NotNull String configuration
+    ){
 
     }
 
@@ -136,22 +135,23 @@ public class JobNodeQueueController {
         Authentication authentication,
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("job_script_id") String jobScriptId,
+        @JobScriptId @PathVariable("job_script_id") String jobScriptId,
         @PathVariable("queue_type") String queueType,
-        @RequestBody JobEntityPost jobEntityPost
+        @Valid @RequestBody JobEntityPost jobEntityPost
     ){
 
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
+
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        JobScript jobScript = repositoryFactory.getJobScriptRepository().retrieveJobScriptById(jobScriptId).orElseThrow(RuntimeException::new);
+
+        JobScript jobScript = repositoryFactory.getJobScriptRepository().retrieveJobScriptById(jobScriptId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobScript.class.getSimpleName(), jobScriptId));
+
         AppUser author = repositoryFactory.getUserDetailsManager().findByUsername(authentication.getName());
 
-
-        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
-        if(!jobScript.getJobNode().getId().equals(jobNodeId)) throw new RuntimeException();
-
-        if(!checkJarsCompatibility(jobNode, jobScript)) throw new RuntimeException();
+        if(!checkJarsCompatibility(jobNode, jobScript)) 
+            throw new GeneralResponseException("Jar Files of Script are not compatible with " + queueType + " queue");
 
         JobEntity jobEntity = new JobEntity();
         jobEntity.setConfiguration(jobEntityPost.configuration());
@@ -168,7 +168,7 @@ public class JobNodeQueueController {
         }else if(queueType.equals("testingJobs")){
             jobNode.getTestingJobs().add(jobEntity);
         }else {
-            throw new RuntimeException();
+            throw new GeneralResponseException("Invalid queue type");
         }
         
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
@@ -183,32 +183,31 @@ public class JobNodeQueueController {
     public void removeJobEntityFromQueue(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("job_entity_id") String jobEntityId,
+        @JobEntityId @PathVariable("job_entity_id") String jobEntityId,
         @PathVariable("queue_type") String queueType
     ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        JobEntity jobEntity = repositoryFactory.getJobRepository().retrieveJobEntity(jobEntityId);
-        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
-        if(!jobNodeId.equals(jobEntity.getJobNode().getId())) throw new RuntimeException();
-
-
+        JobEntity jobEntity = repositoryFactory.getJobRepository().retrieveJobEntity(jobEntityId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobEntity.class.getSimpleName(), jobEntityId))
+        ;
+  
         if(queueType.equals("jobsQueue")){
             if(jobNode.getJobsQueue().contains(jobEntity)){
                 jobNode.getJobsQueue().remove(jobEntity);
             }else{
-               throw new RuntimeException();
+               throw new GeneralResponseException("Job Entity does not belong to this queue" + queueType);
             }
     
         }else if(queueType.equals("testingJobs")){
             if(jobNode.getTestingJobs().contains(jobEntity)){
                 jobNode.getTestingJobs().remove(jobEntity);
             }else{
-                throw new RuntimeException();
+                throw new GeneralResponseException("Job Entity does not belong to this queue: " + queueType);
             }
     
         }else{
-            throw new RuntimeException("Invalid job_queue path variable value");
+            throw new GeneralResponseException("Invalid job_queue path variable value");
         }
 
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
