@@ -4,8 +4,13 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.exceptions.ResponseException;
 
+import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,9 +19,15 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+
+    private Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
+
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public ResponseEntity<String> handleInternalExceptions(Exception ex){
+
+        logger.error("Internal exception:", ex.getMessage(), ex);
+        
         return new ResponseEntity<>("Internal server error: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

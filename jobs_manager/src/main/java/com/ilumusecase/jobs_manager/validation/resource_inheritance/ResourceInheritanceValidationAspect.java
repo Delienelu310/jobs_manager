@@ -7,6 +7,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+
 @Aspect
 @Component
 public class ResourceInheritanceValidationAspect {
@@ -20,6 +21,7 @@ public class ResourceInheritanceValidationAspect {
 
     @Before("allControllersPointcut()")
     public void validateResourceInheritance(JoinPoint joinPoint){
+
 
         resourceIdsOperationsFactory.applyValidations(resourceIdsOperationsFactory.extractIds(joinPoint));
     }

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ilumusecase.jobs_manager.exceptions.GeneralResponseException;
 import com.ilumusecase.jobs_manager.files_validators.FilesValidatorFactory;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
@@ -33,10 +34,12 @@ import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.Auth
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
+import com.ilumusecase.jobs_manager.validation.resource_inheritance.annotations.JobsFileId;
 
 import io.minio.StatObjectResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 @RestController
 public class JobsFileController {
@@ -62,15 +65,8 @@ public class JobsFileController {
         @RequestParam(name = "publisher", defaultValue = "", required = false) String publisher,
         @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
         @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber
-
-
     ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
-            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-
-        if( ! projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
-
-
+ 
         return repositoryFactory.getJobsFileRepositoryInterface()
             .retrieveJobsFilesOfJobNode(jobNodeId, query, extension, className, publisher, pageSize, pageNumber);
     }
@@ -88,11 +84,7 @@ public class JobsFileController {
         @RequestParam(name = "classname", defaultValue = "", required = false) String className,
         @RequestParam(name = "publisher", defaultValue = "", required = false) String publisher
     ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
-            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-
-        if( ! projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
-
+  
         return repositoryFactory.getJobsFileRepositoryInterface().countJobsFilesOfJobNode(jobNodeId, query, extension, className, publisher);
     }
 
@@ -105,14 +97,11 @@ public class JobsFileController {
     public Object retrieveJobsFileById(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("jobs_file_id") String jobsFileId
+        @JobsFileId @PathVariable("jobs_file_id") String jobsFileId
     ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
-            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId);
 
-        if( ! projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
-        if( ! jobNodeId.equals(jobsFile.getJobNode().getId())) throw new RuntimeException(); 
+        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobsFile.class.getSimpleName(), jobsFileId));
 
         return jobsFile;
     }
@@ -123,17 +112,11 @@ public class JobsFileController {
     public JobsFileState retrieveJobsFileState(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("jobs_file_id") String jobsFileId
+        @JobsFileId @PathVariable("jobs_file_id") String jobsFileId
     ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
-            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-
             
-        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId);
-
-        if( ! projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
-        if( ! jobNodeId.equals(jobsFile.getJobNode().getId())) throw new RuntimeException(); 
-   
+        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobsFile.class.getSimpleName(), jobsFileId));
 
         Optional<StatObjectResponse> metadata = s3ClientFactory.getJobS3Client().getMetadata(jobsFile);
         
@@ -153,15 +136,13 @@ public class JobsFileController {
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @RequestParam("files") MultipartFile file,
         @RequestParam("extension") String extension,
-        @RequestPart("jobs_details") JobsFileDetails jobsFileDetails
+        @RequestPart("jobs_details") @Valid @NotNull JobsFileDetails jobsFileDetails
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
 
         AppUser appUser = repositoryFactory.getUserDetailsManager().findByUsername(authentication.getName());
-
-        // if(!project.getId().equals(jobNode.getId())) throw new RuntimeException();
 
 
         //set the fields of jobs_file objects
@@ -170,7 +151,7 @@ public class JobsFileController {
         jobsFile.setExtension(extension);
         jobsFile.setAllClasses(
             filesValidatorFactory.getValidator(jobsFile.getExtension())
-                .orElseThrow(RuntimeException::new)
+                .orElseThrow(() -> new GeneralResponseException("Extension is not supported : " + extension))
                 .retrieveFileClasses(file)
         );
         jobsFile.setPublisher(appUser);
@@ -201,16 +182,17 @@ public class JobsFileController {
     public void deleteJobsFile(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("jobs_file_id") String jobsFileId
+        @JobsFileId @PathVariable("jobs_file_id") String jobsFileId
     ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
 
-        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId);
+        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobsFile.class.getSimpleName(), jobsFileId));
 
 
         if( ! repositoryFactory.getJobScriptRepository().retrieveJobScriptsByJobsFileId(jobsFileId).isEmpty()){
-            throw new RuntimeException("The job scripts are now using this jar");
+            throw new GeneralResponseException("The job scripts are now using this jar");
         }
     
         jobNode.getJobsFiles().remove(jobsFile);
@@ -228,17 +210,12 @@ public class JobsFileController {
     public void updateJobsFileDetails(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("jobs_file_id") String jobsFileId,
-        @Valid @RequestBody JobsFileDetails jobsFileDetails
+        @JobsFileId @PathVariable("jobs_file_id") String jobsFileId,
+        @Valid @NotNull @RequestBody JobsFileDetails jobsFileDetails
     ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
-            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-
-        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId);
-
-        if( ! projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
-        if( ! jobNodeId.equals(jobsFile.getJobNode().getId())) throw new RuntimeException(); 
-   
+ 
+        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobsFile.class.getSimpleName(), jobsFileId));
 
         jobsFile.setJobDetails(jobsFileDetails);
 
@@ -255,18 +232,15 @@ public class JobsFileController {
     public void updateJobsFileFile(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("jobs_file_id") String jobsFileId,
+        @JobsFileId @PathVariable("jobs_file_id") String jobsFileId,
         @RequestParam("files") MultipartFile file,
         @RequestParam("extension") String extension
     ){
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
-            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
+  
+        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId)
+            .orElseThrow(() -> new ResourceNotFoundException(JobsFile.class.getSimpleName(), jobsFileId));
 
-        JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId);
-
-        if( ! projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
-        if( ! jobNodeId.equals(jobsFile.getJobNode().getId())) throw new RuntimeException(); 
-   
+    
         //1. check state
         JobsFileState state = retrieveJobsFileState(projectId, jobNodeId, jobsFileId);
         //delete if jobsFile state is ok
@@ -278,7 +252,7 @@ public class JobsFileController {
         jobsFile.setExtension(extension);
         jobsFile.setAllClasses(
             filesValidatorFactory.getValidator(jobsFile.getExtension())
-                .orElseThrow(RuntimeException::new)
+                .orElseThrow(() -> new GeneralResponseException("Extension is not supported: " + jobsFile.getExtension()))
                 .retrieveFileClasses(file)
         );
         repositoryFactory.getJobsFileRepositoryInterface().updateJobsFileFull(jobsFile);

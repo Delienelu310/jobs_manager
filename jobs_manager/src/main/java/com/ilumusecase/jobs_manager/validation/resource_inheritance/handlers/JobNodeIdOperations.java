@@ -1,10 +1,12 @@
 package com.ilumusecase.jobs_manager.validation.resource_inheritance.handlers;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.ilumusecase.jobs_manager.exceptions.ResourceNotFoundException;
 import com.ilumusecase.jobs_manager.exceptions.WrongResourcesInheritanceInUrlException;
@@ -15,6 +17,7 @@ import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobN
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 import com.ilumusecase.jobs_manager.validation.resource_inheritance.ResourceIdsOperationsInstance;
 
+@Component
 public class JobNodeIdOperations implements ResourceIdsOperationsInstance{
 
     @Autowired
@@ -28,13 +31,15 @@ public class JobNodeIdOperations implements ResourceIdsOperationsInstance{
     @Override
     public void validateResourceInheritance(Map<Class<? extends Annotation>, List<String>> ids) {
         
-        for(String jobNodeId : ids.get(JobNodeId.class)){
+        for(String jobNodeId : ids.getOrDefault(JobNodeId.class, new ArrayList<>())){
             JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId).orElseThrow(() -> 
                 new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
 
-            for(String projectId : ids.get(ProjectId.class)){
-                if(!jobNode.getProject().getId().equals(projectId)) 
+            for(String projectId : ids.getOrDefault(ProjectId.class, new ArrayList<>())){
+        
+                if(!jobNode.getProject().getId().equals(projectId)){
                     throw new WrongResourcesInheritanceInUrlException(Project.class.getSimpleName(), JobNode.class.getSimpleName());
+                }
             }
         }
         

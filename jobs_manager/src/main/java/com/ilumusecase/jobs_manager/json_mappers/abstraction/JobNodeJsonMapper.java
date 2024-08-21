@@ -16,6 +16,7 @@ public class JobNodeJsonMapper implements ResourceJsonMapper {
     private final FilterProvider ilumGroupInformationFilter = new SimpleFilterProvider()
         .addFilter("node-plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
         .addFilter("project-reference", SimpleBeanPropertyFilter.serializeAll())
+        .addFilter("project", SimpleBeanPropertyFilter.filterOutAll())
         .addFilter("plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
         .addFilter("plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
 
@@ -38,6 +39,7 @@ public class JobNodeJsonMapper implements ResourceJsonMapper {
     private final FilterProvider fullJobNodeFilter = new SimpleFilterProvider()
         .addFilter("node-plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
         .addFilter("project-reference", SimpleBeanPropertyFilter.serializeAll())
+        .addFilter("project", SimpleBeanPropertyFilter.filterOutAll())
         .addFilter("plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
         .addFilter("plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
 

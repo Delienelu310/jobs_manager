@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ilumusecase.jobs_manager.exceptions.GeneralResponseException;
 import com.ilumusecase.jobs_manager.exceptions.ResourceNotFoundException;
-import com.ilumusecase.jobs_manager.exceptions.WrongResourcesInheritanceInUrlException;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.Channel;
@@ -105,11 +104,7 @@ public class JobsNodeController {
         @JobNodeId @PathVariable("job_node_id") String jobNodeId, 
         @RequestBody @Valid @NotNull JobNodeDetails jobNodeDetails
     ){
-        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
-        if(!project.getJobNodes().stream().anyMatch(jn -> jn.getId().equals(jobNodeId))){
-            throw new WrongResourcesInheritanceInUrlException(Project.class.getSimpleName(), JobNode.class.getSimpleName());
-        }
-        
+       
         repositoryFactory.getJobNodesRepository().updateJobNode(jobNodeId, jobNodeDetails);
         
     }
@@ -124,9 +119,7 @@ public class JobsNodeController {
     ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        if( !jobNode.getProject().getId().equals(projectId)){
-            throw new WrongResourcesInheritanceInUrlException(Project.class.getSimpleName(), JobNode.class.getSimpleName());
-        }
+    
 
         if( jobNode.getInput().containsKey(label)){
             throw new GeneralResponseException("Exception: input with label \"" + label +  "\" already exists");
@@ -147,9 +140,7 @@ public class JobsNodeController {
     ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        if( !jobNode.getProject().getId().equals(projectId)){
-            throw new WrongResourcesInheritanceInUrlException(Project.class.getSimpleName(), JobNode.class.getSimpleName());
-        }
+    
 
         if( jobNode.getOutput().containsKey(label)){
             throw new GeneralResponseException("Exception: output with label \"" + label +  "\" already exists");
@@ -173,10 +164,7 @@ public class JobsNodeController {
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        if( !jobNode.getProject().getId().equals(projectId)){
-            throw new WrongResourcesInheritanceInUrlException(Project.class.getSimpleName(), JobNode.class.getSimpleName());
-        }
-
+ 
         if( !jobNode.getInput().containsKey(label)){
             throw new GeneralResponseException("Label " + label + " does not exist");
         }  
@@ -229,10 +217,7 @@ public class JobsNodeController {
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        if( !jobNode.getProject().getId().equals(projectId)){
-            throw new WrongResourcesInheritanceInUrlException(Project.class.getSimpleName(), JobNode.class.getSimpleName());
-        }
-
+     
         if( !jobNode.getOutput().containsKey(label)){
             throw new GeneralResponseException("Label " + label + " does not exist");
         }  
@@ -401,11 +386,6 @@ public class JobsNodeController {
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-
-        if( !jobNode.getProject().getId().equals(projectId) ){
-            throw new WrongResourcesInheritanceInUrlException(Project.class.getSimpleName(), JobNode.class.getSimpleName());
-        }
-
 
         // remove the channels, that where connecting to project input/output, but dont delete them
         for(String label : jobNode.getInput().keySet()){

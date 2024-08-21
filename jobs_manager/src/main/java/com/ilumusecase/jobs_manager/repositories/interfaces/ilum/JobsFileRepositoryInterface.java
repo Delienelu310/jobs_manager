@@ -1,6 +1,7 @@
 package com.ilumusecase.jobs_manager.repositories.interfaces.ilum;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.ilumusecase.jobs_manager.resources.ilum.JobsFile;
 
@@ -25,7 +26,7 @@ public interface JobsFileRepositoryInterface {
         String publisher
     );
     
-    public JobsFile retrieveJobsFileById(String id);
+    public Optional<JobsFile> retrieveJobsFileById(String id);
     public List<JobsFile> retrieveJobsFilesByAuthorUsername(String username);
     public List<JobsFile> retrieveJobsFilesByJobNodeId(String id);
     public JobsFile updateJobsFileFull(JobsFile jobsFile);

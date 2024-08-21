@@ -8,8 +8,8 @@ export class NullGraphElement implements GraphElement{
     public deleteElement(): Promise<AxiosResponse<void>> | null  {
         return null;
     }
-    public getMenuComponent(): JSX.Element {
-        throw new Error("Null graph element cannot return menu.");
+    public getMenuComponent(): JSX.Element | null{
+        return null;
     }
 
 

@@ -21,7 +21,7 @@ export interface GraphElement{
     getEventHandler() : GraphElementEventHandler;
 
 
-    getMenuComponent() : JSX.Element;
+    getMenuComponent() : JSX.Element | null;
 
     deleteElement() : Promise<AxiosResponse<void>> | null;
 

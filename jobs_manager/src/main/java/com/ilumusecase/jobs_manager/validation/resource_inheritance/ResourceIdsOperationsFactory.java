@@ -16,6 +16,7 @@ import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
+
 @Component
 public class ResourceIdsOperationsFactory {
 
@@ -58,10 +59,10 @@ public class ResourceIdsOperationsFactory {
 
                 if(!isString) throw new RuntimeException("Reource Id Annotation must not be applied to parameter of non-string type: " + parameter.getName());
             
-                if(!result.containsKey(annotation.getClass())){
-                    result.put(annotation.getClass(), new LinkedList<>());
+                if(!result.containsKey(annotation.annotationType())){
+                    result.put(annotation.annotationType(), new LinkedList<>());
                 }
-                result.get(annotation.getClass()).add((String)joinPoint.getArgs()[index]);
+                result.get(annotation.annotationType()).add((String)joinPoint.getArgs()[index]);
             
             }
 

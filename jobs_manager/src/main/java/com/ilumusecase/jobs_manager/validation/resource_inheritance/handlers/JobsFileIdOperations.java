@@ -1,10 +1,13 @@
 package com.ilumusecase.jobs_manager.validation.resource_inheritance.handlers;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.ilumusecase.jobs_manager.exceptions.WrongResourcesInheritanceInUrlException;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
@@ -15,6 +18,7 @@ import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobN
 import com.ilumusecase.jobs_manager.validation.resource_inheritance.ResourceIdsOperationsInstance;
 import com.ilumusecase.jobs_manager.validation.resource_inheritance.annotations.JobsFileId;
 
+@Component
 public class JobsFileIdOperations implements ResourceIdsOperationsInstance {
 
     @Autowired 
@@ -28,15 +32,16 @@ public class JobsFileIdOperations implements ResourceIdsOperationsInstance {
     @Override
     public void validateResourceInheritance(Map<Class<? extends Annotation>, List<String>> ids) {
 
-        for(String jobsFileId : ids.get(getOperationsTarget())){
-            JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId);
+        for(String jobsFileId : ids.getOrDefault(getOperationsTarget(), new ArrayList<>())){
+            JobsFile jobsFile = repositoryFactory.getJobsFileRepositoryInterface().retrieveJobsFileById(jobsFileId)
+                .orElseThrow(() -> new ResourceNotFoundException(JobsFile.class.getSimpleName(), jobsFileId));
 
-            for(String jobNodeId : ids.get(JobNodeId.class)){
+            for(String jobNodeId : ids.getOrDefault(JobNodeId.class, new ArrayList<>())){
                 if(!jobsFile.getJobNode().getId().equals(jobNodeId))
                     throw new WrongResourcesInheritanceInUrlException(JobNode.class.getSimpleName(), JobsFile.class.getSimpleName());
             }
 
-            for(String projectId : ids.get(Project.class)){
+            for(String projectId : ids.getOrDefault(Project.class, new ArrayList<>())){
                 if(!jobsFile.getProject().getId().equals(projectId))
                     throw new WrongResourcesInheritanceInUrlException(Project.class.getSimpleName(), JobsFile.class.getSimpleName());
             }

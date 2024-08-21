@@ -1,6 +1,7 @@
 package com.ilumusecase.jobs_manager.repositories.mongodb.ilum;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -18,8 +19,8 @@ public class JobsFileMongo implements JobsFileRepositoryInterface {
     private MongoJobsFile mongoJobsFile;
 
     @Override
-    public JobsFile retrieveJobsFileById(String id) {
-        return mongoJobsFile.findById(id).get();
+    public Optional<JobsFile> retrieveJobsFileById(String id) {
+        return mongoJobsFile.findById(id);
     }
 
     @Override
