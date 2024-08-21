@@ -35,6 +35,7 @@ import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobN
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
 import io.minio.StatObjectResponse;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 
 @RestController
@@ -228,7 +229,7 @@ public class JobsFileController {
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("jobs_file_id") String jobsFileId,
-        @RequestBody JobsFileDetails jobsFileDetails
+        @Valid @RequestBody JobsFileDetails jobsFileDetails
     ){
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));

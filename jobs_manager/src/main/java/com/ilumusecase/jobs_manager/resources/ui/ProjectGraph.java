@@ -10,7 +10,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.ilumusecase.jobs_manager.resources.abstraction.Project;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -59,6 +58,5 @@ public class ProjectGraph {
     @DBRef(lazy = true)
     @JsonFilter("project_graph_vertices")
     @NotNull
-    @Valid
     private Set<JobNodeVertice> vertices = new HashSet<>();
 }

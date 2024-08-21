@@ -35,10 +35,9 @@ public class JobNode {
     private JobNodeDetails jobNodeDetails;
 
 
-    @DBRef
+    @DBRef(lazy = true)
     @JsonFilter("project-reference")
     @NotNull
-    @Valid
     private Project project;
     
     @DBRef(lazy = true)
@@ -77,7 +76,6 @@ public class JobNode {
 
     @DBRef(lazy = true)
     @JsonFilter("job_node_ilum_groups")
-    @Valid
     private IlumGroup ilumGroup = null;
 
     @Override
