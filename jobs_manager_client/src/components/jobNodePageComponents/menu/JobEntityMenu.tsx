@@ -5,6 +5,7 @@ import { QueueTypes, removeJobEntityFromQueue } from "../../../api/ilum_resource
 import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../../../pages/JobNodePage";
 import SecuredNode from "../../../authentication/SecuredNode";
 import { JobNodePrivilege } from "../../../api/authorization/privilegesApi";
+import { NotificationType, useNotificator } from "../../notifications/Notificator";
 
 
 export interface JobEntityMenuContext{
@@ -20,6 +21,9 @@ export interface JobEntityMenuArgs{
 
 const JobEntityMenu = ({context, jobEntityId} : JobEntityMenuArgs) => {
     
+
+    const {catchRequestError, pushNotification} = useNotificator();
+
     const [actualData, setActualData] = useState<JobEntitySimple | null>(null);
     
     function retrieve(){
@@ -27,7 +31,7 @@ const JobEntityMenu = ({context, jobEntityId} : JobEntityMenuArgs) => {
             .then(response => {
                 setActualData(response.data);
             })
-            .catch(e => console.log(e));
+            .catch(catchRequestError);
     }
 
     function deleteJob(){
@@ -49,9 +53,14 @@ const JobEntityMenu = ({context, jobEntityId} : JobEntityMenuArgs) => {
                 }
 
                 context.jobNodePageRefresh.setMenu(null);
+
+                pushNotification({
+                    message: "Job entity was removed successfully",
+                    time : 5,
+                    type : NotificationType.INFO
+                });
                 
-            })
-            .catch(e => console.log(e))
+            }).catch(catchRequestError)
         ;
     }
 

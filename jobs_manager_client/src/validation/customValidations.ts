@@ -34,3 +34,21 @@ export const validatePassword = (value : string) : undefined | string => {
 
     return undefined;
 }
+
+
+
+export const validateJsonString  = (value : string) : undefined | string => {
+    if(value == "") return undefined;
+
+    try{
+        let parsed = JSON.parse(value);
+        
+        return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed) ? 
+            undefined 
+            :
+            "Not JSON object or empty string";
+
+    }catch(e){
+       return  "Not JSON object or empty string";
+    }
+}

@@ -1,8 +1,7 @@
 package com.ilumusecase.jobs_manager.resources.ilum;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,11 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class JobEntityDetails {
 
-    @Min(3)
-    @Max(50)
+    @Size(min = 3, max = 50)
     @NotBlank
     private String name;
-    @Min(3)
-    @Max(500)
+    @Size(min = 3, max = 500)
     private String description;
 }

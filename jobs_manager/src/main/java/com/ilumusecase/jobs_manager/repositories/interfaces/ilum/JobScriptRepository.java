@@ -3,8 +3,14 @@ package com.ilumusecase.jobs_manager.repositories.interfaces.ilum;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.validation.annotation.Validated;
+
 import com.ilumusecase.jobs_manager.resources.ilum.JobScript;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+
+@Validated
 public interface JobScriptRepository {
 
     public List<JobScript> retrieveJobScriptsOfJobNode(
@@ -12,8 +18,8 @@ public interface JobScriptRepository {
         String query, 
         String extenstion, 
         String publisher, 
-        Integer pageSize, 
-        Integer pageNumber
+        @Min(1) Integer pageSize, 
+        @Min(0) Integer pageNumber
     );
 
     public long countJobScriptsOfJobNode(
@@ -25,7 +31,7 @@ public interface JobScriptRepository {
     
     public List<JobScript> retrieveAllJobScripts();
     public Optional<JobScript> retrieveJobScriptById(String id);
-    public JobScript updateFullJobScript(JobScript jobScript);
+    public JobScript updateFullJobScript(@Valid JobScript jobScript);
     public void deleteJobScript(String id);
     
     public List<JobScript> retrieveJobScriptsByJobsFileId(String jobsFileId);

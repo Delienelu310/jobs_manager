@@ -6,7 +6,7 @@ import { JobScriptSimple } from "./jobScriptsApi";
 
 export interface JobEntityDetails{
     name : string,
-    description : string
+    description : string | null
 }
 
 export interface JobEntitySimple{
