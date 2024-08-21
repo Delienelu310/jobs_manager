@@ -26,7 +26,9 @@ public class IlumGroup {
     private String ilumId;
 
     @Valid
+    @NotNull
     private IlumGroupConfiguraion ilumGroupConfiguraion;
+    @Valid
     @NotNull
     private IlumGroupDetails ilumGroupDetails;
 
@@ -44,13 +46,11 @@ public class IlumGroup {
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_project_reference")
     @NotNull
-    @Valid
     private Project project;
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_job_node_reference")
     @NotNull
-    @Valid
     private JobNode jobNode;
 
     

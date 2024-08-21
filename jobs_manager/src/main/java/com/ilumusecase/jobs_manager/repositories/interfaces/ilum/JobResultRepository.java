@@ -2,11 +2,20 @@ package com.ilumusecase.jobs_manager.repositories.interfaces.ilum;
 
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.ilumusecase.jobs_manager.resources.ilum.JobResult;
 import com.ilumusecase.jobs_manager.resources.ilum.JobScript;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
 import com.ilumusecase.jobs_manager.controllers.ilum_controllers.resources_controllers.JobResultsController.IlumGroupData;
 
 
+@Validated
 public interface JobResultRepository {
 
 
@@ -18,7 +27,7 @@ public interface JobResultRepository {
     public Optional<JobResult> retrieveByIlumId(String ilumId);
 
     public void deleteJobResultById(String id);
-    public String updateJobResultFull(JobResult jobResult );
+    public String updateJobResultFull(@Valid @NotNull JobResult jobResult );
 
     public List<JobResult> retrieveJobResults(
         String jobNodeId,
@@ -38,12 +47,12 @@ public interface JobResultRepository {
         String testerClass,
         String testerId,
 
-        Long from,
-        Long to,
+        @Min(0) Long from,
+        @Min(0) Long to,
 
         String sortMetric,
-        Integer pageSize,
-        Integer pageNumber
+        @Min(1) Integer pageSize,
+        @Min(0) Integer pageNumber
 
     );
     public Long retrieveJobResultsCount(
@@ -64,24 +73,24 @@ public interface JobResultRepository {
         String testerClass,
         String testerId,
 
-        Long from,
-        Long to
+        @Min(0) Long from,
+        @Min(0) Long to
     );
 
     public List<IlumGroupData> retrieveIlumGroupsOfJobResults(
         String jobNodeId,
         String query,
-        Long from,
-        Long to,
-        Integer pageSize,
-        Integer pageNumber
+        @Min(0) Long from,
+        @Min(0)Long to,
+        @Min(1)Integer pageSize,
+        @Min(0)Integer pageNumber
     );
 
     public Long retrieveIlumGroupsOfJobResultsCount(
         String jobNodeId,
         String query,
-        Long from,
-        Long to
+        @Min(0) Long from,
+        @Min(0) Long to
     );
 
 
@@ -93,11 +102,10 @@ public interface JobResultRepository {
 
         String ilumGroupId,
 
-        Long from,
-        Long to,
-
-        Integer pageSize,
-        Integer pageNumber
+        @Min(0) Long from,
+        @Min(0) Long to,
+        @Min(1) Integer pageSize,
+        @Min(0) Integer pageNumber
     );
 
     public Long retrieveTesterOfJobResultsCount(
@@ -108,8 +116,8 @@ public interface JobResultRepository {
 
         String ilumGroupId,
 
-        Long from,
-        Long to
+        @Min(0) Long from,
+        @Min(0) Long to
     );
 
     public List<String> retrieveTesterMetrics(
@@ -117,8 +125,8 @@ public interface JobResultRepository {
         String testerId,
         String query,
         String ilumGroupId,
-        Integer pageSize,
-        Integer pageNumber
+        @Min(1) Integer pageSize,
+        @Min(0) Integer pageNumber
     );
 
     public Long retrieveTesterMetricsCount(

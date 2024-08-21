@@ -1,26 +1,32 @@
 package com.ilumusecase.jobs_manager.controllers.ilum_controllers.resources_controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ilumusecase.jobs_manager.exceptions.ResourceNotFoundException;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
 import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroupDetails;
+import com.ilumusecase.jobs_manager.resources.ilum.JobResult;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeJobRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
+import com.ilumusecase.jobs_manager.validation.resource_inheritance.annotations.JobResultId;
+import com.ilumusecase.jobs_manager.validation.resource_inheritance.annotations.JobScriptId;
 
 import java.util.List;
 import jakarta.validation.constraints.Min;
 
 @RestController
+@Validated
 public class JobResultsController {
 
 
@@ -92,8 +98,8 @@ public class JobResultsController {
         @RequestParam(name = "target_classname", defaultValue = "", required = false) String targetClass,
         @RequestParam(name = "target_id", defaultValue = "", required = false) String targetId,
 
-        @RequestParam(name = "from", defaultValue = "0", required = false) Long from,
-        @RequestParam(name = "to", required = false) Long to
+        @Min(0) @RequestParam(name = "from", defaultValue = "0", required = false) Long from,
+        @Min(0) @RequestParam(name = "to", required = false) Long to
 
     ){
         return repositoryFactory.getJobResultRepository().retrieveJobResultsCount(jobNodeId, ilumGroupId, targetNameQuery, 
@@ -113,8 +119,8 @@ public class JobResultsController {
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @RequestParam(name = "query", defaultValue = "", required = false) String query,
-        @RequestParam(name = "from", defaultValue = "0", required = false) Long from,
-        @RequestParam(name = "to", required = false) Long to,
+        @RequestParam(name = "from", defaultValue = "0", required = false) @Min(0) Long from,
+        @RequestParam(name = "to", required = false) @Min(0) Long to,
         @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
         @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber  
     ){
@@ -128,8 +134,8 @@ public class JobResultsController {
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @RequestParam(name = "query", defaultValue = "", required = false) String query,
-        @RequestParam(name = "from", defaultValue = "0", required = false) Long from,
-        @RequestParam(name = "to", required = false) Long to
+        @RequestParam(name = "from", defaultValue = "0", required = false) @Min(0) Long from,
+        @RequestParam(name = "to", required = false) @Min(0) Long to
     ){
         return repositoryFactory.getJobResultRepository().retrieveIlumGroupsOfJobResultsCount(jobNodeId, query, from, to);
 
@@ -150,8 +156,8 @@ public class JobResultsController {
 
         @RequestParam(name = "ilum_group_id", defaultValue = "", required = false) String ilumGroupId,
 
-        @RequestParam(name = "from", defaultValue = "0", required = false) Long from,
-        @RequestParam(name = "to", required = false) Long to,
+        @RequestParam(name = "from", defaultValue = "0", required = false) @Min(0) Long from,
+        @RequestParam(name = "to", required = false) @Min(0) Long to,
 
         @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
         @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber  
@@ -176,8 +182,8 @@ public class JobResultsController {
 
         @RequestParam(name = "ilum_group_id", defaultValue = "", required = false) String ilumGroupId,
 
-        @RequestParam(name = "from", defaultValue = "0", required = false) Long from,
-        @RequestParam(name = "to", required = false) Long to
+        @RequestParam(name = "from", defaultValue = "0", required = false) @Min(0) Long from,
+        @RequestParam(name = "to", required = false) @Min(0) Long to
     ){
         return repositoryFactory.getJobResultRepository().retrieveTesterOfJobResultsCount(
             jobNodeId, testerNameQuery, testerAuthor, testerClass, 
@@ -192,7 +198,7 @@ public class JobResultsController {
     public List<String> retrieveMetricsOfTester(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("job_script_id") String testerId,
+        @JobScriptId @PathVariable("job_script_id") String testerId,
 
 
         @RequestParam(name = "query", defaultValue = "", required = false) String query,
@@ -210,7 +216,7 @@ public class JobResultsController {
     public Long retrieveMetricsOfTesterCount(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("job_script_id") String testerId,
+        @JobScriptId @PathVariable("job_script_id") String testerId,
 
         @RequestParam(name = "query", defaultValue = "", required = false) String query,
         @RequestParam(name = "ilum_group_id", defaultValue = "", required = false) String ilumGroupId
@@ -226,9 +232,10 @@ public class JobResultsController {
     public Object retrieveJobResultById(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("job_result_id") String jobResultId
+        @JobResultId @PathVariable("job_result_id") String jobResultId
     ){
-        return repositoryFactory.getJobResultRepository().retrieveById(jobResultId).orElseThrow();
+        return repositoryFactory.getJobResultRepository().retrieveById(jobResultId).orElseThrow(() -> 
+            new ResourceNotFoundException(JobResult.class.getSimpleName(), jobResultId));
     }
 
 
@@ -238,12 +245,9 @@ public class JobResultsController {
     public void deleteResult(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @PathVariable("job_result_id") String jobResultId
+        @JobResultId @PathVariable("job_result_id") String jobResultId
     
     ){
-        //todo: check if job result is of job node, and if job node is of project
-        //todo: delete the job result also on the ilum core server
-
         repositoryFactory.getJobResultRepository().deleteJobResultById(jobResultId);
     }
 

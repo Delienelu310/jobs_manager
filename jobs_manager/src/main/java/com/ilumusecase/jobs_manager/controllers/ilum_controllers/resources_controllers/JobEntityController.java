@@ -2,6 +2,7 @@ package com.ilumusecase.jobs_manager.controllers.ilum_controllers.resources_cont
 
 import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +18,7 @@ import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.Proj
 import com.ilumusecase.jobs_manager.validation.resource_inheritance.annotations.JobEntityId;
 
 @RestController
+@Validated
 public class JobEntityController {
     
     @Autowired

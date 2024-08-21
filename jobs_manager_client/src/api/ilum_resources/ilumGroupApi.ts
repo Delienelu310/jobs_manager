@@ -12,7 +12,7 @@ export interface IlumGroupOfJobResultData{
 
 export interface IlumGroupDetails{
     name : string,
-    description : string,
+    description : string | null,
     startTime : number | null
 }
 

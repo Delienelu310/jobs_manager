@@ -5,6 +5,7 @@ import OpenerComponent from "../../OpenerComponent";
 import JobScriptMenu from "./JobScriptMenu";
 import SecuredNode from "../../../authentication/SecuredNode";
 import { JobNodePrivilege } from "../../../api/authorization/privilegesApi";
+import { NotificationType, useNotificator } from "../../notifications/Notificator";
 
 export interface JobErrorResultMenuContext{
     jobNodePageRefresh : JobNodePageRefresh
@@ -17,12 +18,14 @@ export interface JobErrorResultMenuAgs{
 
 const JobErrorResultMenu = ({data, context} : JobErrorResultMenuAgs) => {
 
+    const {catchRequestError, pushNotification} = useNotificator();
+
     const [actualData, setActualData] = useState<JobResultSimple | null>(null);
 
     function getActualData (){
         retrieveJobResultById(context.jobNodePageRefresh.projectId, context.jobNodePageRefresh.jobNodeId, data.id)
             .then(data => setActualData(data.data))
-            .catch(e => console.log(e))
+            .catch(catchRequestError)
         ;
     
     }
@@ -34,7 +37,13 @@ const JobErrorResultMenu = ({data, context} : JobErrorResultMenuAgs) => {
                 if(context.jobNodePageRefresh.chosenResourceList?.label == JobNodeResourceListsMembers.JOB_RESULTS_ERRORS){
                     context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random());
                 }
-            })
+
+                pushNotification({
+                    message: "Job Result was deleted",
+                    type : NotificationType.INFO,
+                    time : 5
+                })
+            }).catch(catchRequestError)
         ;
     }
 

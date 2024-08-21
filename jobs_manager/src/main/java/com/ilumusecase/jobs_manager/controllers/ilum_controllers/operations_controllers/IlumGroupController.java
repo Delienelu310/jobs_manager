@@ -6,9 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.kafka.common.errors.ResourceNotFoundException;
+import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ilumusecase.jobs_manager.JobsManagerApplication;
+import com.ilumusecase.jobs_manager.exceptions.GeneralResponseException;
 import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
@@ -31,7 +34,11 @@ import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.Auth
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.ProjectId;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
 @RestController
+@Validated
 public class IlumGroupController {
 
 
@@ -45,7 +52,10 @@ public class IlumGroupController {
     private JobEntityScheduler jobEntityScheduler;
 
 
-    record IlumGroupDTO(IlumGroupConfiguraion ilumGroupConfiguration, IlumGroupDetails ilumGroupDetails){
+    record IlumGroupDTO(
+        @Valid @NotNull IlumGroupConfiguraion ilumGroupConfiguration, 
+        @Valid @NotNull IlumGroupDetails ilumGroupDetails
+    ){
 
     }
 
@@ -55,14 +65,13 @@ public class IlumGroupController {
     public void startJobNode(
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
-        @RequestBody IlumGroupDTO ilumGroupDTO
+        @RequestBody @Valid @NotNull IlumGroupDTO ilumGroupDTO
     ){
         //step 0 : validation
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        if(!projectId.equals(jobNode.getProject().getId())) throw new RuntimeException();
-
+     
         if(jobNode.getJobsQueue().size() == 0){
             throw new RuntimeException("The queue is empty");
         }
@@ -116,8 +125,8 @@ public class IlumGroupController {
 
         try{
             jobEntityScheduler.startIlumGroupLifecycle(ilumGroup);
-        }catch(Exception e){
-            throw new RuntimeException();
+        }catch(SchedulerException e){
+            throw new RuntimeException("Shceduler exception when starting ilum group lifecycle");
         }
 
     }
@@ -135,33 +144,24 @@ public class IlumGroupController {
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));;
         if(jobNode.getIlumGroup() == null){
-            throw new RuntimeException();
+            throw new GeneralResponseException("Job Node is not running and cannot be stopped");
         }
         IlumGroup ilumGroup = jobNode.getIlumGroup();
         
         //step 1: stop the lifecycle
         try{
             jobEntityScheduler.stopIlumGroupLifecycle(ilumGroup);
-        }catch(Exception e){
-            logger.info(e.getMessage());
-            // throw new RuntimeException();
+        }catch(SchedulerException e){
+            throw new RuntimeException("Shceduler exceptoin when stopping ilum group lifecycle");
         }
 
         //step 2: stop current job
-        try{
-            manager.stopJob(ilumGroup.getCurrentJob());
+        manager.stopJob(ilumGroup.getCurrentJob());
 
-            //step 3: delete ilum group in ilum-core
-            manager.stopGroup(ilumGroup);
-            manager.deleteGroup(ilumGroup);
-        }catch(Exception e){
-            logger.info(e.getMessage());
-        }
-        
-
-        
-        
-
+        //step 3: delete ilum group in ilum-core
+        manager.stopGroup(ilumGroup);
+        manager.deleteGroup(ilumGroup);
+       
         //step 4: delete ilum group metadata
         jobNode.setIlumGroup(null);
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);

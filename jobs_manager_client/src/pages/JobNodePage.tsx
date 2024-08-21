@@ -16,6 +16,9 @@ import JobEntityMenu from "../components/jobNodePageComponents/menu/JobEntityMen
 import SecuredNode from "../authentication/SecuredNode";
 import { JobNodeFullData } from "../api/abstraction/projectApi";
 import { JobNodePrivilege } from "../api/authorization/privilegesApi";
+import { NotificationType, useNotificator } from "../components/notifications/Notificator";
+import { ErrorMessage, Field, Form, Formik } from "formik";
+import * as Yup from 'yup'
 
 
 export enum JobNodeResourceListsMembers{
@@ -47,6 +50,8 @@ export interface JobNodePageInterface{
 const JobNodePage = ({} : JobNodePageInterface) => {
     
     const {jobNodeId, projectId} = useParams();
+
+    const {catchRequestError, pushNotification} = useNotificator();
     
 
     //context
@@ -70,23 +75,13 @@ const JobNodePage = ({} : JobNodePageInterface) => {
     const [[jobsCount, testCount], setCount] = useState<[number, number]>([0, 0]);
 
 
-    //user input
-    const [ilumGroupConfig, setIlumGroupConfig] = useState<IlumGroupConfiguration>({
-        maxJobDuration : 60
-    });
-    const [ilumGroupDetails, setIlumGroupDetails] = useState<IlumGroupDetails>({
-        name : "",
-        description : "",
-        startTime: null
-    });
-
     function getJobNodeData(){
         if(!(projectId && jobNodeId)) return;
         retrieveJobNodeWithIlumGroup(projectId, jobNodeId)
             .then(response => {
                 setJobNodeData(response.data);
             })
-            .catch(e => console.log(e))
+            .catch(catchRequestError)
         ;
 
         retrieveQueueSize(projectId, jobNodeId, QueueTypes.JOBS_QUEUE)
@@ -95,16 +90,21 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                 retrieveQueueSize(projectId, jobNodeId, QueueTypes.TESTING_JOBS)
                     .then(r2 => {
                         setCount([r.data, r2.data])
-                    });
-            }).catch(e => console.log(e));
+                    }).catch(catchRequestError);
+            }).catch(catchRequestError);
     }
 
-    function start(){
+    function start(ilumGroupConfig : IlumGroupConfiguration, ilumGroupDetails : IlumGroupDetails){
         if(!(projectId && jobNodeId)) return;
         startJobNode(projectId, jobNodeId, {ilumGroupConfiguration:  ilumGroupConfig, ilumGroupDetails : ilumGroupDetails})
             .then(response => {
                 getJobNodeData();
-            }).catch(e => console.log(e));
+                pushNotification({
+                    message: "The Ilum Group is created and lifecycle is started",
+                    type: NotificationType.INFO,
+                    time : 5
+                })
+            }).catch(catchRequestError);
 
     }
 
@@ -113,7 +113,12 @@ const JobNodePage = ({} : JobNodePageInterface) => {
         stopJobNode(projectId, jobNodeId)
             .then(response => {
                 getJobNodeData();
-            }).catch(e => console.log(e));
+                pushNotification({
+                    message: "The Ilum Group is Stopped and deleted",
+                    time: 5,
+                    type: NotificationType.INFO
+                });
+            }).catch(catchRequestError);
 
     }
 
@@ -236,28 +241,72 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                                             privileges: [JobNodePrivilege.MANAGER]
                                         }}
                                     >
+                                        <Formik
+                                            initialValues={{
+                                                name : "",
+                                                description : null as ( null | string),
+                                                maxJobDuration : 60
+                                            }}
 
-                                         <hr/>
+                                            onSubmit={values => {
+                                                start(
+                                                    {maxJobDuration : values.maxJobDuration}, 
+                                                    {name : values.name, description : values.description, startTime: null}
+                                                )
+                                            }}
+                                            validationSchema={Yup.object({
+                                                name : Yup.string()
+                                                    .min(3)
+                                                    .max(50)
+                                                    .required()
+                                                    .nonNullable()
+                                                ,
+                                                description : Yup.string()
+                                                    .notRequired()
+                                                    .nullable()
+                                                    .min(3)
+                                                    .max(500)
+                                                ,
+                                                maxJobDuration : Yup.number()
+                                                    .min(1)
+                                                    .required()
+                                            })}
+                                        >
+                                            {() => (
+                                                <Form>
+                                                    
+                                                    <h5>Details:</h5>
 
-                                        <h5>Details:</h5>
-                                        <strong>Name: </strong>
-                                        <input className="form-control m-2" value={ilumGroupDetails.name} 
-                                            onChange={e => setIlumGroupDetails({...ilumGroupDetails, name : e.target.value})}/>
+                                                    <div>
+                                                        <strong><label htmlFor="name">Name:</label> </strong>
+                                                        <Field className="form-control m-2" name="name" id="name"/>
+                                                        <ErrorMessage name="name" component="div" className="text-danger"/>
+                                                    </div>
+
+                                                    <div>
+                                                        <strong><label htmlFor="description">Description:</label> </strong>
+                                                        <Field className="form-control m-2" name="description" id="description" as="textarea"/>
+                                                        <ErrorMessage name="description" component="div" className="text-danger"/>
+                                                    </div>
+
+                                                    <hr/>
+
+                                                    <h5>Configuration: </h5>
+                                                    <div>
+                                                        <strong><label htmlFor="maxJobDuration">Description:</label> </strong>
+                                                        <Field type="number" className="form-control m-2" name="maxJobDuration" id="maxJobDuration"/>
+                                                        <ErrorMessage name="maxJobDuration" component="div" className="text-danger"/>
+                                                    </div>
+                                                    
+                                                    <button className="btn btn-primary m-2" type="submit">Start</button>
+
+
+                                                </Form>
+                                            )}
+                                        </Formik>
+
+                          
                                         
-                                        <strong>Description: </strong>
-                                        <textarea className="form-control m-2" value={ilumGroupDetails.description} 
-                                            onChange={e => setIlumGroupDetails({...ilumGroupDetails, description : e.target.value})}/>
-                                    
-                                        <hr/>
-
-                                        <h5>Configuration: </h5>
-                                    
-                                        <strong>Max Job Duration: </strong>
-                                        <input className="form-control m-2" type="number" value={ilumGroupConfig.maxJobDuration} onChange={e => 
-                                            setIlumGroupConfig({...ilumGroupConfig, maxJobDuration : Number(e.target.value)})
-                                        }/>
-
-                                        <button className="btn btn-primary m-2" onClick={start}>Start</button>
                                     </SecuredNode>
                                    
                                 </div>

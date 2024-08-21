@@ -3,6 +3,7 @@ import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../../../pages/
 import { AppUserSimple, retrieveUser } from "../../../api/authorization/usersApi";
 import { addPrivilegeToJobNodeUser, JobNodePrivilege, removePrivilegeFromJobNodeUser, removeUserFromJobNode, retrieveJobNodeUserPrivileges } from "../../../api/authorization/privilegesApi";
 import SecuredNode from "../../../authentication/SecuredNode";
+import { NotificationType, useNotificator } from "../../notifications/Notificator";
 
 
 export interface AppUserJobNodeMenuContext{
@@ -16,6 +17,9 @@ export interface AppUserJobNodeMenuArgs{
 
 const AppUserJobNodeMenu = ({username, context} :AppUserJobNodeMenuArgs ) => {
     
+
+    const {catchRequestError, pushNotification} = useNotificator();
+
     const [data, setData] = useState<AppUserSimple | null>(null);
     const [privileges, setPrivileges] = useState<JobNodePrivilege[]>([]);
 
@@ -24,7 +28,7 @@ const AppUserJobNodeMenu = ({username, context} :AppUserJobNodeMenuArgs ) => {
         retrieveUser(username)
             .then(response => {
                 setData(response.data);
-            }).catch(e => console.log(e));
+            }).catch(catchRequestError);
     }
 
     function getPrivileges(){
@@ -34,7 +38,7 @@ const AppUserJobNodeMenu = ({username, context} :AppUserJobNodeMenuArgs ) => {
             username
         ).then(response => {
             setPrivileges(response.data);
-        }).catch(e => console.log(e));
+        }).catch(catchRequestError);
     }
 
     function removePrivilege(privilege : string){
@@ -45,7 +49,7 @@ const AppUserJobNodeMenu = ({username, context} :AppUserJobNodeMenuArgs ) => {
             privilege
         ).then(r => {
             getPrivileges();
-        }).catch(e => console.log(e));
+        }).catch(catchRequestError);
     }
 
     function addPrivilege(privilege : string){
@@ -56,7 +60,7 @@ const AppUserJobNodeMenu = ({username, context} :AppUserJobNodeMenuArgs ) => {
             privilege
         ).then(r => {
             getPrivileges();
-        }).catch(e => console.log(e));
+        }).catch(catchRequestError);
     }
 
     function removeUser(){
@@ -66,7 +70,14 @@ const AppUserJobNodeMenu = ({username, context} :AppUserJobNodeMenuArgs ) => {
                 if(context.jobNodePageRefresh.chosenResourceList 
                     && context.jobNodePageRefresh.chosenResourceList.label == JobNodeResourceListsMembers.PRIVILLEGES 
                 ) context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random());
-            }).catch(e => console.log(e));
+
+                pushNotification({
+                    message : "The user was removed successfully",
+                    type : NotificationType.INFO,
+                    time : 5
+                });
+
+            }).catch(catchRequestError);
         ;
     }
 

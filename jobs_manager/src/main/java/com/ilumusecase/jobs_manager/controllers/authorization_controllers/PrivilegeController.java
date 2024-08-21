@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ilumusecase.jobs_manager.exceptions.GeneralResponseException;
 import com.ilumusecase.jobs_manager.json_mappers.JsonMapperRequest;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
@@ -20,7 +21,6 @@ import com.ilumusecase.jobs_manager.resources.authorities.AppUser;
 import com.ilumusecase.jobs_manager.resources.authorities.JobNodePrivilege;
 import com.ilumusecase.jobs_manager.resources.authorities.PrivilegeList;
 import com.ilumusecase.jobs_manager.resources.authorities.ProjectPrivilege;
-import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthAdminRoleOnly;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeJobRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.AuthorizeProjectRoles;
 import com.ilumusecase.jobs_manager.security.authorizationAspectAnnotations.JobNodeId;
@@ -87,12 +87,6 @@ public class PrivilegeController {
         @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
         @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber
     ){
-
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
-            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        if(!jobNode.getProject().getId().equals(projectId)) throw new RuntimeException();
-
-
         return repositoryFactory.getUserDetailsManager().retrieveJobNodePrivileges(
             jobNodeId, 
             query, 
@@ -112,11 +106,6 @@ public class PrivilegeController {
         @RequestParam(name = "query", defaultValue = "", required = false) @Size(max = 50)  String query,
         @RequestParam(name = "jobNodePrivileges", defaultValue = "", required = false) @Size(max = 20) List<JobNodePrivilege> jobNodePrivileges
     ){
-
-        JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
-            .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        if(!jobNode.getProject().getId().equals(projectId)) throw new RuntimeException();
-
         return repositoryFactory.getUserDetailsManager().retrieveJobNodePrivilegesCount(
             jobNodeId, 
             query, 
@@ -147,8 +136,7 @@ public class PrivilegeController {
 
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        if(!jobNode.getProject().getId().equals(projectId)) throw new RuntimeException();
-
+  
         return jobNode.getPrivileges().getOrDefault(username, new PrivilegeList<>()).getList();
     }
 
@@ -162,11 +150,9 @@ public class PrivilegeController {
         @PathVariable("user_id") @Username String userId,
         @PathVariable("privilege") @NotNull JobNodePrivilege privilege
     ){
-        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        if( !project.getId().equals(jobNode.getProject().getId())) throw new RuntimeException();
-
+     
         AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(userId);
 
         if(!jobNode.getPrivileges().containsKey(appUser.getUsername())){
@@ -190,14 +176,13 @@ public class PrivilegeController {
         @PathVariable("user_id") @Username String userId,
         @PathVariable("privilege") @NotNull JobNodePrivilege privilege
     ){
-        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        if( !project.getId().equals(jobNode.getProject().getId())) throw new RuntimeException();
-
+       
         AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(userId);
 
-        if( !jobNode.getPrivileges().containsKey(appUser.getUsername())) throw new RuntimeException();
+        if( !jobNode.getPrivileges().containsKey(appUser.getUsername())) 
+            throw new GeneralResponseException("User does not have privileges in this job node");
 
         jobNode.getPrivileges().get(appUser.getUsername()).getList().remove(privilege);
 
@@ -212,14 +197,14 @@ public class PrivilegeController {
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @PathVariable("user_id") @Username String userId
     ){
-        Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
         JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(jobNodeId)
             .orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), jobNodeId));
-        if( !project.getId().equals(jobNode.getProject().getId())) throw new RuntimeException();
-
+       
         AppUser appUser = repositoryFactory.getUserDetailsManager().retrieveUserById(userId);
 
-        if( !jobNode.getPrivileges().containsKey(appUser.getUsername())) throw new RuntimeException();
+        if( !jobNode.getPrivileges().containsKey(appUser.getUsername())) 
+            throw new GeneralResponseException("User does not have privileges in this job node");
+
 
         repositoryFactory.getJobNodePrivilegeList().delete(jobNode.getPrivileges().get(userId).getId());
         jobNode.getPrivileges().remove(userId);
@@ -235,7 +220,7 @@ public class PrivilegeController {
     ){
 
         if(privilege == ProjectPrivilege.MODERATOR){
-            throw new RuntimeException();
+            throw new GeneralResponseException("Endpoint cannot be used to add moderators");
         }
 
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
@@ -262,7 +247,7 @@ public class PrivilegeController {
         @PathVariable("privilege") @NotNull ProjectPrivilege privilege
     ){
         if(privilege == ProjectPrivilege.MODERATOR){
-            throw new RuntimeException();
+            throw new GeneralResponseException("Endpoint cannot be used to delete moderators");
         }
 
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
@@ -284,10 +269,12 @@ public class PrivilegeController {
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
 
         if(!project.getPrivileges().containsKey(userId)){
-            throw new RuntimeException();
+            throw new GeneralResponseException("User does not have privileges in the project");
         }
-        if(project.getPrivileges().get(userId).getList().contains(ProjectPrivilege.ADMIN)) throw new RuntimeException();
-        if(project.getPrivileges().get(userId).getList().contains(ProjectPrivilege.MODERATOR)) throw new RuntimeException();
+        if(project.getPrivileges().get(userId).getList().contains(ProjectPrivilege.ADMIN)) 
+            throw new GeneralResponseException("Admin cannot be removed from the proejct");
+        if(project.getPrivileges().get(userId).getList().contains(ProjectPrivilege.MODERATOR)) 
+            throw new GeneralResponseException("This endpoint cannot be used to delete moderator");
 
         
         repositoryFactory.getProjectPrivilegeList().delete(project.getPrivileges().get(userId).getId());
@@ -295,18 +282,20 @@ public class PrivilegeController {
         repositoryFactory.getProjectRepository().updateProjectFull(project);
     }
     @DeleteMapping("/projects/{project_id}/privileges/moderators/{user_id}")
-    @AuthAdminRoleOnly
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN})
     public void removeModeratorFromProject( 
-        @PathVariable("project_id") String projectId,
+        @ProjectId @PathVariable("project_id") String projectId,
         @PathVariable("user_id") @Username String userId
     ){
         Project project = repositoryFactory.getProjectRepository().retrieveProjectById(projectId);
 
         if(!project.getPrivileges().containsKey(userId)){
-            throw new RuntimeException();
+            throw new GeneralResponseException("User does not have privileges in this project");
         }
-        if(project.getPrivileges().get(userId).getList().contains(ProjectPrivilege.ADMIN)) throw new RuntimeException();
-        if(!project.getPrivileges().get(userId).getList().contains(ProjectPrivilege.MODERATOR)) throw new RuntimeException();
+        if(project.getPrivileges().get(userId).getList().contains(ProjectPrivilege.ADMIN)) 
+            throw new GeneralResponseException("Admin cannot be deleted from the project");
+        if(!project.getPrivileges().get(userId).getList().contains(ProjectPrivilege.MODERATOR)) 
+            throw new GeneralResponseException("This endpoint can be used only for deletion of moderators.");
 
         
         repositoryFactory.getProjectPrivilegeList().delete(project.getPrivileges().get(userId).getId());
