@@ -6,7 +6,8 @@ import { JobsFileExtension, JobsFileSimple } from "./jobsFilesApi";
 
 
 export interface JobScriptDetails{
-    name : string
+    name : string,
+    description: string | null
 }
 
 export interface JobScriptSimple{

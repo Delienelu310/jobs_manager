@@ -7,12 +7,13 @@ import { FieldType } from "../../lists/Filter";
 import ServerBoundList from "../../lists/ServerBoundList";
 import JobsFileAddElement, { JobsFileAddElementContext } from "./JobsFileAddElement";
 import JobEntityCreator from "./JobEntityCreator";
-import { QueueTypes } from "../../../api/ilum_resources/queueOperationsApi";
 import { JobNodePageRefresh, JobNodeResourceListsMembers } from "../../../pages/JobNodePage";
 import OpenerComponent from "../../OpenerComponent";
 import SecuredNode from "../../../authentication/SecuredNode";
 import { JobNodePrivilege } from "../../../api/authorization/privilegesApi";
-
+import { ErrorMessage, Field, Form, Formik } from "formik";
+import * as Yup from 'yup';
+import { NotificationType, useNotificator } from "../../notifications/Notificator";
 
 export interface JobScriptMenuContext{
     jobNodePageRefresh : JobNodePageRefresh,
@@ -28,19 +29,19 @@ const JobScriptMenu = ({
     data, 
     context
 } : JobScriptMenu) => {
+
+
+    const {pushNotification, catchRequestError} = useNotificator();
     
     const [actualData, setActualData] = useState<JobScriptSimple | null>(null);
     
-    const [newDetails, setNewDetails] = useState<JobScriptDetails>({
-        name : ""
-    });
-
+  
     function refresh(){
         retreiveJobScript(context.jobNodePageRefresh.projectId, context.jobNodePageRefresh.jobNodeId, data)
             .then(response => {
                 setActualData(response.data);
             })
-            .catch(e => console.log(e));
+            .catch(catchRequestError);
     }
 
     function deleteJobScriptElement(){
@@ -53,11 +54,16 @@ const JobScriptMenu = ({
                 ){
                     context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random);
                 }
+                pushNotification({
+                    message: "Job Script was deleted successfully",
+                    time : 5,
+                    type : NotificationType.INFO
+                })
                 
-            }).catch(e => console.log(e));   
+            }).catch(catchRequestError);   
     }
 
-    function updateDetails(){
+    function updateDetails(newDetails : JobScriptDetails){
         updateJobScriptDetails(context.jobNodePageRefresh.projectId, context.jobNodePageRefresh.jobNodeId, data, newDetails)
             .then(r => {
                 refresh();
@@ -67,8 +73,14 @@ const JobScriptMenu = ({
                 ){
                     context.jobNodePageRefresh.chosenResourceList.setDependency(Math.random);
                 }
+
+                pushNotification({
+                    message: "Job Script was updated successfully",
+                    time : 5,
+                    type : NotificationType.INFO
+                })
             })
-            .catch(e => console.log(e));
+            .catch(catchRequestError);
 
     }
 
@@ -141,6 +153,8 @@ const JobScriptMenu = ({
 
                         <strong>Name:</strong> {actualData.jobScriptDetails.name}
                         <br/>
+                        <strong>Description:</strong>
+                        <p>{actualData.jobScriptDetails.description || "Description is not specified"}</p>
                         <strong>ID: {actualData.id}</strong>
                         <br/>
                         <strong>Author : </strong>{actualData.author.username}
@@ -197,13 +211,49 @@ const JobScriptMenu = ({
                             privileges: [JobNodePrivilege.MANAGER, JobNodePrivilege.SCRIPTER, JobNodePrivilege.TESTER]
                         }}
                     >
-                        <div>
-                            <strong>New name:</strong>
-                            <input className="form-control m-2" value={newDetails.name} onChange={e => setNewDetails({...newDetails, name : e.target.value})}/>
-                            
-                            <button className="btn btn-success m-2" onClick={updateDetails}>Update details</button>
+                        <Formik
+                            initialValues={{
+                                name: actualData.jobScriptDetails.name,
+                                description : actualData.jobScriptDetails.description || null
+                            }}
+                            onSubmit={values => updateDetails({name : values.name, description : values.description})}
+                            validationSchema={Yup.object({
+                                name : Yup.string()
+                                    .min(3)
+                                    .max(50)
+                                    .required()
+                                    .nonNullable(),
+                                description: Yup.string()
+                                    .min(3)
+                                    .max(500)
+                                    .nullable()
+                            })}
+
+                        >
+                            {() => (
+                                <Form>
+                                    <div>
+                                        <strong><label htmlFor="name">Name: </label></strong>
+                                        <Field name="name" id="name" className="form-control m-2" />
+                                        <ErrorMessage name="name" component="div" className="text-danger"/>
+
+                                    </div>
+
+                                    
+
+                                    <div>
+                                        <strong><label htmlFor="description">Desciprtion: </label></strong>
+                                        <Field name="description" id="description" className="form-control m-2" as="textarea"/>
+                                        <ErrorMessage name="description" component="div" className="text-danger"/>
+
+                                    </div>
+
+                                    <button className="btn btn-success m-2" type="submit">Update details</button>
+                                </Form>
+                            )}
+                           
                     
-                        </div>
+                        </Formik>
 
                         <hr/>
 

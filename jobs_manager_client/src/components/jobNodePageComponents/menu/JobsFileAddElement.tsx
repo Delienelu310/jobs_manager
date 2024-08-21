@@ -3,6 +3,7 @@ import { addJobsFileToJobScript, JobScriptSimple, removeJobsFileFromJobScript } 
 import { JobsFileSimple } from "../../../api/ilum_resources/jobsFilesApi";
 import SecuredNode from "../../../authentication/SecuredNode";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
+import { useNotificator } from "../../notifications/Notificator";
 import JobsFileMenu from "./JobsFileMenu";
 
 
@@ -19,19 +20,20 @@ export interface JobsFileAddElementArgs{
 
 const JobsFileAddElement = ({data, context} : JobsFileAddElementArgs) => {
 
+    const {catchRequestError} = useNotificator();
 
     function removeJobsFile(){
         removeJobsFileFromJobScript(data.project.id, data.jobNode.id, context.jobScript.id, data.id)
             .then(r => {
                 context.refreshJobScript();
-            }).catch(e => console.log(e));
+            }).catch(catchRequestError);
     }
 
     function addJobsFile(){
         addJobsFileToJobScript(data.project.id, data.jobNode.id, context.jobScript.id, data.id)
             .then(r => {
                 context.refreshJobScript();
-            }).catch(e => console.log(e));
+            }).catch(catchRequestError);
         ;
 
     }

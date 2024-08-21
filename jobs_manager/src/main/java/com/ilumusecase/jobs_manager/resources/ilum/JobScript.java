@@ -40,24 +40,21 @@ public class JobScript {
     @DBRef(lazy = true)
     @JsonFilter("job_script_jobs_files")
     @NotNull
-    @Valid
     private List<JobsFile> jobsFiles = new LinkedList<>();
     
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_project_reference")
     @NotNull
-    @Valid
     private Project project;
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_job_node_reference")
     @NotNull
-    @Valid
     private JobNode jobNode;
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_publisher")
-    @Valid
+    @NotNull
     private AppUser author;
 
     @Override

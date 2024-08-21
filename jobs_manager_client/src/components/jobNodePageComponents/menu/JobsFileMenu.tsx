@@ -189,8 +189,8 @@ const JobsFileMenu = ({data, context} : JobsFileMenuArgs) => {
 
                         <Formik
                             initialValues={{
-                                name : "",
-                                description : null as (null | "")
+                                name : data.jobDetails.name,
+                                description : data.jobDetails.description || null 
                             }}
                             validationSchema={UpdateDetailsValidationSchema}
                             onSubmit={updateDetails}
