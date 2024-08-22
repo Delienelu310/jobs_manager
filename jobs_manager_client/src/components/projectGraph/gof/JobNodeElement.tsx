@@ -96,7 +96,7 @@ export class JobNodeElement implements GraphElement{
         const leftCorner = {x : coords[0], y : coords[1]};
 
         const width = this.config.width;
-        const height = this.config.height;
+        const height = Math.max(this.config.height, this.children[0].getHeight(), this.children[1].getHeight());
 
         return x >= leftCorner.x && x <= leftCorner.x + width 
             &&
