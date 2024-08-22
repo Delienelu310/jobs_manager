@@ -34,19 +34,17 @@ public class JobsFile {
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_project_reference")
-    @Valid
     @NotNull
     private Project project;
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_job_node_reference")
-    @Valid
     @NotNull
     private JobNode jobNode;
 
     @DBRef(lazy = true)
     @JsonFilter("ilum_resource_publisher")
-    @Valid
+    @NotNull
     private AppUser publisher;
     
     @NotNull

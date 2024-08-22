@@ -28,20 +28,17 @@ public class Channel {
     @DBRef
     @JsonFilter("project-reference")
     @NotNull
-    @Valid
     private Project project;
 
 
     @DBRef
     @JsonFilter("channel-plug-jobNode")
     @NotNull
-    @Valid
     private List<JobNode> inputJobs = new ArrayList<>();
     
     @DBRef
     @JsonFilter("channel-plug-jobNode")
     @NotNull
-    @Valid
     private List<JobNode> outputJobs = new ArrayList<>();
 
     @Override

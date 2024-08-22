@@ -25,8 +25,8 @@ public class TestJobProcessor {
     
     private Map<String, ChannelProcessor> channelProcessors= new HashMap<>();
     {
-        channelProcessors.put("kafka", new KafkaChannelProcessor());  
-        channelProcessors.put("minio", new MinioChannelProcessor());  
+        channelProcessors.put("KAFKA", new KafkaChannelProcessor());  
+        channelProcessors.put("MINIO", new MinioChannelProcessor());  
     }
 
     private JobNodeDTO jobNodeDTO;

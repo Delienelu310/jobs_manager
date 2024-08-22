@@ -16,6 +16,5 @@ public class IlumGroupDetails {
     private String description;
     
     @Min(0)
-    @NotNull
     private Long startTime;
 }

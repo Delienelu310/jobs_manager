@@ -148,12 +148,7 @@ public class IlumGroupController {
         }
         IlumGroup ilumGroup = jobNode.getIlumGroup();
         
-        //step 1: stop the lifecycle
-        try{
-            jobEntityScheduler.stopIlumGroupLifecycle(ilumGroup);
-        }catch(SchedulerException e){
-            throw new RuntimeException("Shceduler exceptoin when stopping ilum group lifecycle");
-        }
+        
 
         //step 2: stop current job
         manager.stopJob(ilumGroup.getCurrentJob());
@@ -166,6 +161,13 @@ public class IlumGroupController {
         jobNode.setIlumGroup(null);
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
         repositoryFactory.getIlumGroupRepository().deleteById(ilumGroup.getId());
+        
+        //step 1: stop the lifecycle
+        try{
+            jobEntityScheduler.stopIlumGroupLifecycle(ilumGroup);
+        }catch(SchedulerException e){
+            throw new GeneralResponseException("Shceduler exceptoin when stopping ilum group lifecycle");
+        }
 
         
     }

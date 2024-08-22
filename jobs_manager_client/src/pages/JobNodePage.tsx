@@ -161,6 +161,7 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                             <hr/>
 
                             <h5>State:</h5>
+                            <button className="btn btn-primary m-2" onClick={getJobNodeData}>Refersh</button>
                             {jobNodeData.ilumGroup ? 
                                 <div>
                                     <h5>Job is running</h5>
@@ -293,7 +294,7 @@ const JobNodePage = ({} : JobNodePageInterface) => {
 
                                                     <h5>Configuration: </h5>
                                                     <div>
-                                                        <strong><label htmlFor="maxJobDuration">Description:</label> </strong>
+                                                        <strong><label htmlFor="maxJobDuration">Max Job Duration Time:</label> </strong>
                                                         <Field type="number" className="form-control m-2" name="maxJobDuration" id="maxJobDuration"/>
                                                         <ErrorMessage name="maxJobDuration" component="div" className="text-danger"/>
                                                     </div>

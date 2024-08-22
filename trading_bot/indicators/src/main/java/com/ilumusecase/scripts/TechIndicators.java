@@ -29,34 +29,36 @@ public final class TechIndicators implements Job{
     private Dataset<Row> calculateATR(Integer n, SparkSession session, Dataset<Row> source){
         source.createOrReplaceTempView("calculateATR_source");
 
+        // source.show();
+
         final String calcMetrics = String.format(
             "SELECT " +
             "Date, Close, " +
-            "ABS(High - Low) AS `H-L`, " +
-            "ABS(High - LAG(Adj_Close, 1) OVER (ORDER BY Date)) AS `H-PC`, " +
-            "ABS(Low - LAG(Adj_Close, 1) OVER (ORDER BY Date)) AS `L-PC`, " +
+            "ABS(High - Low) AS `HL`, " +
+            "ABS(High - LAG('Adj Close', 1) OVER (ORDER BY Date)) AS `HPC`, " +
+            "ABS(Low - LAG('Adj Close', 1) OVER (ORDER BY Date)) AS `LPC` " +
             "FROM calculateATR_source"
         );
 
         Dataset<Row> tradesHisotryWithMetrics = session.sql(calcMetrics);
-        tradesHisotryWithMetrics.createOrReplaceTempView("calculateATR_source");
+        tradesHisotryWithMetrics.createOrReplaceTempView("calculateATR_before_tr");
 
 
-        final String calcTRQuery = "SELECT Date, Close, GREATEST( H-L, H-PC, L-POC ) as TR FROM calculateATR_source";
+        final String calcTRQuery = "SELECT Date, Close, GREATEST( HL, HPC, LPC ) as TR FROM calculateATR_before_tr";
 
         Dataset<Row> tradesHisotryWithTR = session.sql(calcTRQuery);
-        tradesHisotryWithTR.createOrReplaceTempView("calculateATR_source");
+        tradesHisotryWithTR.createOrReplaceTempView("calculateATR_true_range");
 
 
         final String calcATRQuery = String.format("Select Date, Close, " + 
-            "AVG(TR) OVER (ORDER BY Date ROWS BETWEEN %d PRECEDING AND CURRENT ROW) AS ATR" + 
-            "FROM calculateATR_source",
+            "AVG(TR) OVER (ORDER BY Date ROWS BETWEEN %d PRECEDING AND CURRENT ROW) AS ATR " + 
+            "FROM calculateATR_true_range",
             n-1
         );
         Dataset<Row> tradeHistoryWithATR = session.sql(calcATRQuery);
-        tradesHisotryWithTR.createOrReplaceTempView("calculateATR_source");
+        tradeHistoryWithATR.createOrReplaceTempView("calculateATR_atr");
 
-        tradeHistoryWithATR = session.sql("SELECT Date, ATR FROM calculateATR_source");
+        tradeHistoryWithATR = session.sql("SELECT Date, ATR FROM calculateATR_atr");
 
         return tradeHistoryWithATR;
     }
