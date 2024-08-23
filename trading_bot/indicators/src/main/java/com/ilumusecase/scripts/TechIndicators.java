@@ -45,6 +45,9 @@ public final class TechIndicators implements Job{
     @OutputChannel(label = "RenkoChart")
     static public Dataset<Row> RenkoChart;
 
+    @OutputChannel(label = "ADX")
+    static public Dataset<Row> ADX;
+
 
     private static class EWMFunction implements Function<Row, Row>{
 
@@ -281,9 +284,10 @@ public final class TechIndicators implements Job{
             if(openPrice == null) openPrice = currentPrice;
 
             if(up && currentPrice > openPrice || !up && currentPrice < openPrice){
+                double difference = Math.abs(currentPrice - openPrice);
 
-                brickNumber += Math.floor((currentPrice - openPrice) / size);
-                openPrice += (up ? (+1) : (-1)) *  Math.floor((currentPrice - openPrice) / size) * size;
+                brickNumber += (int)Math.floor(difference / size);
+                openPrice += (up ? (+1) : (-1)) *  Math.floor(difference / size) * size;
 
                 
             }else{
@@ -330,6 +334,57 @@ public final class TechIndicators implements Job{
     
     }
 
+    private Dataset<Row> calculateADX(SparkSession session, Dataset<Row> source, Integer n){
+        
+        
+
+        Dataset<Row> atr = calculateATR(n, session, source);   
+        source.createOrReplaceTempView("source");
+
+        Dataset<Row> upDown =  session.sql("Select Date, " + 
+            " (High - (Lag(High, 1) Over (Order By Date)) ) as up, " + 
+            " ( (Lag(Low, 1) Over (Order By Date))  - Low ) as down " + 
+            " From source"
+        );
+
+        upDown = upDown.join(atr, "Date");
+        upDown.createOrReplaceTempView("upDown");
+        
+   
+        
+        Dataset<Row> di = session.sql("Select Date, " +
+            " (Case When up > down and up > 0 Then up / ATR Else 0 End) as positive_dx, " + 
+            "  (Case When up < down and down > 0 Then down / ATR Else 0 End) as negative_dx " +
+            " FROM upDown"
+        );
+
+      
+
+        di = calculateExponentialWeight(session, di, 1.0 / n , "positive_dx", "positive_di", "Date");
+        di = calculateExponentialWeight(session, di, 1.0 / n , "negative_dx", "negative_di", "Date");
+
+        di.createOrReplaceTempView("WithDI");
+
+
+        Dataset<Row> result = session.sql("Select Date, " + 
+            " (Case When (positive_di + negative_di) > 0 " + 
+                " Then (100 * ( positive_di - negative_di ) / (positive_di + negative_di)) Else 0 " + 
+            " End) as Pre_ADX " +
+
+            " From WithDI"
+        );
+  
+        result = calculateExponentialWeight(session, result, 1.0 / n, "Pre_ADX", "ADX", "Date");
+        result.createOrReplaceTempView("result");
+
+        result =  session.sql("Select Date, ADX FROM result");
+
+    
+
+
+        return result;
+    }
+
 
     @Override
     public Option<String> run(SparkSession sparkSession, scala.collection.immutable.Map<String, Object> config) {
@@ -353,6 +408,8 @@ public final class TechIndicators implements Job{
 
         TechIndicators.RenkoChart = calculateRenkoChart(sparkSession, source, brickSize);
 
+
+        TechIndicators.ADX = calculateADX(sparkSession, TechIndicators.source, 20);
 
         jobProcessor.finish();
 
