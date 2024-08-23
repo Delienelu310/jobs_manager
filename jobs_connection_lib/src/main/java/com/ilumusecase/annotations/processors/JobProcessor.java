@@ -86,7 +86,11 @@ public class JobProcessor {
 
             
         
-            for(ChannelDTO channel : jobNodeDTO.input.get(inputChannel.label()).channelList){
+            for(ChannelDTO channel : jobNodeDTO.input
+                .get(inputChannel
+                    .label())
+                .channelList
+            ){
 
                 System.out.println("Trying to connect to channel : " + channel.id);
 
