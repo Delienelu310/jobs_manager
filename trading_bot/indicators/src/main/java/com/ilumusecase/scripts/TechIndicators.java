@@ -368,7 +368,7 @@ public final class TechIndicators implements Job{
 
         Dataset<Row> result = session.sql("Select Date, " + 
             " (Case When (positive_di + negative_di) > 0 " + 
-                " Then (100 * ( positive_di - negative_di ) / (positive_di + negative_di)) Else 0 " + 
+                " Then (100 * Abs( positive_di - negative_di ) / (positive_di + negative_di)) Else 0 " + 
             " End) as Pre_ADX " +
 
             " From WithDI"
