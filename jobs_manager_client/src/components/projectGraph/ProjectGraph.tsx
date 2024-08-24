@@ -109,7 +109,7 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
                 if(!value.trim()) return false;
 
                 value = value.trim();
-                if(value.length < 3 || value.length > 20) return false;
+                if(value.length < 1 || value.length > 20) return false;
 
                 if((value.charAt(0) < 'a' || value.charAt(0) > 'z') && (value.charAt(0) < 'A' || value.charAt(0) > "Z")) return false;
 

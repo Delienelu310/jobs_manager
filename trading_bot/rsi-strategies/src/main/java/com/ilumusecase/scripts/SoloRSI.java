@@ -37,9 +37,9 @@ public final class SoloRSI implements Job {
         SoloRSI.RSI.createOrReplaceTempView("source");
 
         SoloRSI.signals = sparkSession.sql("Select Date, " + 
-                "( Case When RSI > 70 Then " + 
+                "( Case When Cast(RSI as Double) > 70 Then " + 
                     " 'sell' " +
-                    "Else ( Case When RSI > 40 Then " + 
+                    "Else ( Case When Cast(RSI as Double) > 40 Then " + 
                         " 'hold' " + 
                         " Else 'buy' " + 
                     " End ) " + 

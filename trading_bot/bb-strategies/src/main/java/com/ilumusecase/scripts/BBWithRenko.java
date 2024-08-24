@@ -42,8 +42,8 @@ public class BBWithRenko implements Job {
         source.createOrReplaceTempView("source");
 
         BBWithRenko.signals = sparkSession.sql("Select Date, " + 
-                " ( Case When (UB < Close AND up AND BrickNumber >= 1) Then 'buy' " +
-                    " When (LB > Close AND not up AND BrickNumber >= 1) Then 'sell' " + 
+                " ( Case When ( Cast(UB as Double) < Cast(Close as Doulbe) AND Cast(BrickNumber as Double) < 1) Then 'buy' " +
+                    " When (Cast(LB as Double) > Cast(Close as Double) AND Cast(BrickNumber as Double) < 1) Then 'sell' " + 
                     " Else 'hold' " +  
                 " End ) as Signal" + 
             " From source"

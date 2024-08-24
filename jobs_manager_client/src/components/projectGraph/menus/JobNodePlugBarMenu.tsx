@@ -17,7 +17,7 @@ export interface JobNodePlugBarMenu{
 const LabelValidation = Yup.object({
     label : Yup.string()
         .required("The label must be specified")
-        .min(3, "The length of label must be between 3 and 20")
+        .min(1, "The length of label must be between 3 and 20")
         .max(20, "The length of label must be between 3 and 20")
 });
 

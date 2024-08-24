@@ -44,9 +44,9 @@ public class MACDWithRSI implements Job{
 
         MACDWithRSI.signal = sparkSession.sql("Select Date, " +
             " ( " +
-                "Case When (BrickNumber >= 1 AND up AND MACD > signal_macd) Then " + 
+                "Case When (Cast(BrickNumber as INT) >= 1 AND Cast(up as Boolean) AND Cast(MACD as Double) > Cast(signal_macd as Double)) Then " + 
                     " 'buy' " + 
-                    " Else (Case When (  BrickNumber >= 1 AND not up AND MACD < signal_macd ) Then " + 
+                    " Else (Case When ( Cast(BrickNumber as INT) >= 1 AND not Cast(up as Boolean) AND Cast(MACD as Double) < Cast(signal_macd as Double) ) Then " + 
                         " 'sell' " + 
                         " Else 'hold' " + 
                     "End )"  + 

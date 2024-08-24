@@ -41,8 +41,8 @@ public class RSIWithADX implements Job{
 
 
         RSIWithADX.signals = sparkSession.sql("Select Date, " + 
-                "( Case When (ADX > 25 AND RSI > 70) Then 'sell' " +
-                    " Case When (ADX > 25 AND RSI < 30) Then 'buy' " + 
+                "( Case When (Cast(ADX as Double) < 25 AND Cast(RSI as Double) > 70) Then 'sell' " +
+                    " When (Cast(ADX as Double) < 25 AND Cast(RSI as Double) < 30) Then 'buy' " + 
                     " Else 'hold' " +  
                 " End ) as Signal " +
             " From source"

@@ -45,9 +45,9 @@ public class MACDWithADX implements Job{
 
 
         MACDWithADX.signal = sparkSession.sql("Select Date, " + 
-                "( Case When ADX < 25 Then " + 
+                "( Case When Cast(ADX as Double) < 25 Then " + 
                     " 'hold' " + 
-                    " Else ( Case When MACD > signal_macd Then " + 
+                    " Else ( Case When Cast(MACD as Double) > Cast(signal_macd  as Double ) Then " + 
                         " 'buy' " +
                         " Else 'sell' " +  
                     " End ) " +

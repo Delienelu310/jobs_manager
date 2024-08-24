@@ -38,8 +38,8 @@ public final class SoloBB implements Job{
         source.createOrReplaceTempView("source");
 
         SoloBB.signals = sparkSession.sql("Select Date, " + 
-                " ( Case When UB < Close Then 'buy' " +
-                    " When LB > Close Then 'sell' " + 
+                " ( Case When Cast(UB as Double) < Cast(Close as Double) Then 'buy' " +
+                    " When Cast(LB as Double) > Cast(Close as Double) Then 'sell' " + 
                     " Else 'hold' " +  
                 " End ) as Signal" + 
             " From source"

@@ -42,8 +42,8 @@ public class BBWithADX implements Job {
         source.createOrReplaceTempView("source");
 
         BBWithADX.signals = sparkSession.sql("Select Date, " + 
-                " ( Case When (UB < Close AND ADX > 25) Then 'buy' " +
-                    " When (LB > Close AND ADX > 25 ) Then 'sell' " + 
+                " ( Case When (Cast(UB as Double) < Cast(Close as Double) AND Cast(ADX as Double) < 25) Then 'buy' " +
+                    " When ( Cast(LB as Double) > Cast(Close as Double) AND Cast(ADX as Double) < 25 ) Then 'sell' " + 
                     " Else 'hold' " +  
                 " End ) as Signal" + 
             " From source"

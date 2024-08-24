@@ -39,9 +39,9 @@ public final class SoloMACD implements Job{
 
         SoloMACD.signal = sparkSession.sql("Select Date, " + 
             "(" + 
-                " Case When (MACD > signal_macd AND MACD < 0) Then " + 
+                " Case When (Cast(MACD as Double) > Cast(signal_macd as Double) AND Cast(MACD as Double) < 0) Then " + 
                     " 'buy' " + 
-                " Else ( Case When (MACD < signal_macd AND MACD > 0 ) Then " + 
+                " Else ( Case When (Cast(MACD as Double) < Cast(signal_macd as Double) AND Cast(MACD as Double) > 0 ) Then " + 
                     " 'sell' " + 
                     "Else 'hold'" + 
                 " End )" +

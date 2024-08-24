@@ -40,8 +40,8 @@ public class RSIWithRenko implements Job{
         source.createOrReplaceTempView("source");
 
         RSIWithRenko.signals = sparkSession.sql("Select Date, " + 
-                "( Case When (BrickNumber >= 1 AND not up AND RSI > 70) Then 'sell' " +
-                    " When (BrickNumber >= 1 AND up AND RSI < 30) Then 'buy' " + 
+                "( Case When (Cast(BrickNumber as INT) < 1 AND Cast(RSI as Double) > 70) Then 'sell' " +
+                    " When ( Cast(BrickNumber as INT) < 1  AND Cast(RSI as Double) < 30) Then 'buy' " + 
                     " Else 'hold' " +  
                 " End ) as Signal " +
             " From source"
