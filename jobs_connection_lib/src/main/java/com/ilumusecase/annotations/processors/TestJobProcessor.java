@@ -13,6 +13,7 @@ import org.apache.spark.sql.SparkSession;
 import com.ilumusecase.annotations.processors.channel_processors.ChannelProcessor;
 import com.ilumusecase.annotations.processors.channel_processors.KafkaChannelProcessor;
 import com.ilumusecase.annotations.processors.channel_processors.MinioChannelProcessor;
+import com.ilumusecase.annotations.resources.InputChannel;
 import com.ilumusecase.annotations.resources.JobNodeMod;
 import com.ilumusecase.annotations.resources.OutputChannelTestDataset;
 import com.ilumusecase.annotations.resources.TestJob;
@@ -70,6 +71,8 @@ public class TestJobProcessor {
     public void start(){
         
         Field[] fields = clazz.getDeclaredFields();
+
+        //output channels:
         for(Field field : fields){
             if( ! field.isAnnotationPresent(OutputChannelTestDataset.class)){
                 continue;
@@ -103,6 +106,50 @@ public class TestJobProcessor {
 
 
             System.out.println("Prepared dataset " + outputChannel.label());
+
+            field.setAccessible(true);
+            try{
+                field.set(this.clazz, finalDatasetCopy);
+            }catch(IllegalAccessException e){
+                //do nothing
+            }
+
+        }
+
+        //input channels:
+        for(Field field : fields){
+            if( ! field.isAnnotationPresent(InputChannel.class)){
+                continue;
+            }
+
+            InputChannel inputChannel = field.getAnnotation(InputChannel.class);
+            
+            List<Dataset<Row>> datasets = new ArrayList<>();
+
+            
+        
+            for(ChannelDTO channel : jobNodeDTO.input.get(inputChannel.label()).channelList){
+
+                System.out.println("Trying to connect to channel : " + channel.id);
+
+                ChannelProcessor channelProcessor = channelProcessors.get(channel.channelDetails.type);
+                Dataset<Row> dataset = channelProcessor.retrieveInputDataSet(channel, this.sparkSession, config);
+            
+                datasets.add(dataset);
+
+                System.out.println("Added dataset: " + channel.id);
+            }
+
+            Dataset<Row> finalDataset = datasets.stream().reduce( (ds1, ds2) -> ds1.union(ds2) ).get();
+            
+            Dataset<Row> finalDatasetCopy = finalDataset.select("*");
+
+            //clear cache: 
+            datasets.stream().forEach(df -> df.unpersist());
+            finalDataset.unpersist();
+
+
+            System.out.println("Prepared dataset " + inputChannel.label());
 
             field.setAccessible(true);
             try{

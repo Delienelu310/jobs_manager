@@ -12,7 +12,7 @@ import com.ilumusecase.annotations.resources.OutputChannel;
 import cloud.ilum.job.Job;
 import scala.Option;
 import scala.Some;
-import scala.Tuple3;
+import scala.Tuple2;
 import scala.Tuple5;
 import scala.collection.JavaConverters;
 
@@ -127,7 +127,7 @@ public final class OptimalSignals implements Job{
                 currentSignal = row._5();
                 startDate = row._4();
 
-                return Row.fromTuple(new Tuple3<String, String, Double>(row._1(), "hold", row._3()));
+                return Row.fromTuple(new Tuple2<String, String>(row._1(), "hold"));
             }
 
             if(startDate.equals(row._1())){
@@ -137,11 +137,11 @@ public final class OptimalSignals implements Job{
                 startDate = row._4();
                 currentSignal = row._5();
             
-                return Row.fromTuple(new Tuple3<String, String, Double>(row._1(), signal, row._3()));
+                return Row.fromTuple(new Tuple2<String, String>(row._1(), signal));
             
             }else{
                 
-                return Row.fromTuple(new Tuple3<String, String, Double>(row._1(), currentSignal, row._3()));
+                return Row.fromTuple(new Tuple2<String, String>(row._1(), currentSignal));
             }
 
         }
@@ -172,8 +172,7 @@ public final class OptimalSignals implements Job{
         
         StructType schema = new StructType(new StructField[]{
             DataTypes.createStructField("Date", DataTypes.StringType, false),
-            DataTypes.createStructField("Signal", DataTypes.StringType, false),
-            DataTypes.createStructField("Profit", DataTypes.DoubleType, false)
+            DataTypes.createStructField("Signal", DataTypes.StringType, false)
         });
         OptimalSignals.signals = sparkSession.createDataFrame(resultRDD, schema);
 

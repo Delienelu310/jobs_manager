@@ -60,8 +60,8 @@ const ProjectPage = () => {
                         projectFullData={allProjectData.projectFullData}
                         staticConfig={{
                             canvas : {
-                                width : 900,
-                                height : 500, 
+                                width : 1200,
+                                height : 700, 
                                 padding : {
                                     x : 0,
                                     y : 0
