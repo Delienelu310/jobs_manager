@@ -167,8 +167,8 @@ const JobNodePage = ({} : JobNodePageInterface) => {
                                     <h5>Job is running</h5>
                                     <strong>Mod {jobNodeData.ilumGroup.mod}</strong>
                                     <br/>
-                                    <strong>Jobs Progress:</strong><i>{jobNodeData.ilumGroup.currentIndex + 1}/{jobsCount}</i><br/>
-                                    <strong>Tests Progress:</strong><i>{jobNodeData.ilumGroup.currentTestingIndex + 1}/{testCount}</i><br/>
+                                    <strong>Jobs Progress:</strong><i>{jobNodeData.ilumGroup.currentIndex}/{jobsCount}</i><br/>
+                                    <strong>Tests Progress:</strong><i>{jobNodeData.ilumGroup.currentTestingIndex}/{testCount}</i><br/>
                                     
                                     <hr/>
                                     <h5>Current Job Entity</h5>

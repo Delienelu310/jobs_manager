@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.manager.Manager;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
+import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.ilum.IlumGroup;
 import com.ilumusecase.jobs_manager.resources.ilum.JobEntity;
 import com.ilumusecase.jobs_manager.resources.ilum.JobResult;
@@ -255,6 +256,23 @@ public class IlumGroupLifecycle implements Job{
             ilumGroup.getCurrentTestingIndex() >= testingJobsCount - 1 &&
             ilumGroup.getCurrentIndex() >=jobsQueueCount - 1
         ){
+            
+            
+            
+            //1. stop and delete ilum group from ilum-core
+            manager.stopGroup(ilumGroup);
+            manager.deleteGroup(ilumGroup);
+            //2. delete ilum group from job node
+
+            JobNode jobNode = repositoryFactory.getJobNodesRepository().retrieveById(ilumGroup.getJobNode().getId())
+                .orElseThrow(RuntimeException::new);
+            jobNode.setIlumGroup(null);
+            repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
+
+            repositoryFactory.getIlumGroupRepository().deleteById(ilumGroup.getId());
+
+
+            // 3. stop the scheduled job
             try {
                 JobKey jobKey = new JobKey(ilumGroup.getId());
                 scheduler.interrupt(jobKey);
@@ -264,7 +282,6 @@ public class IlumGroupLifecycle implements Job{
             } catch (SchedulerException e) {
                 throw new RuntimeException(e);
             }
-
             return;
 
         }else if(
