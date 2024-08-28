@@ -70,3 +70,14 @@ export function deleteJobResult(projectId : string, jobNodeId : string, jobResul
 ) : Promise<AxiosResponse<void>>{
     return apiClient.delete(`/projects/${projectId}/job_nodes/${jobNodeId}/job_results/${jobResultId}`);
 }
+
+export function clearJobResults(projectId : string, jobNodeId : string, ilumGroupId : string | null, testerId : string | null, 
+    includeSuccessfull : boolean, includeJobErrors : boolean, includeTesterErrors : boolean 
+) : Promise<AxiosResponse<void>>{
+    return apiClient.delete(`/projects/${projectId}/job_nodes/${jobNodeId}/job_results?` + 
+        `include_successfull=${includeSuccessfull ? "true" : "false"}&include_job_errors=${includeJobErrors ? "true" : false}` + 
+        `&include_tester_errors=${includeTesterErrors ? "true" : "false"}` + 
+        `${ilumGroupId ? `&ilum_group_id=${ilumGroupId}` : ""}` + 
+        `${testerId ? `&tester_id=${testerId}` : ""}`
+    );
+}

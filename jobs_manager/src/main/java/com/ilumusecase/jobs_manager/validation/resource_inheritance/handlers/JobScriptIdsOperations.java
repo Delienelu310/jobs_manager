@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.ilumusecase.jobs_manager.exceptions.ResourceNotFoundException;
 import com.ilumusecase.jobs_manager.exceptions.WrongResourcesInheritanceInUrlException;
 import com.ilumusecase.jobs_manager.repositories.interfaces.RepositoryFactory;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;

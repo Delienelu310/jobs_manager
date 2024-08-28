@@ -2,10 +2,11 @@
 import {  IlumGroupOfJobResultData } from "../../../api/ilum_resources/ilumGroupApi";
 import List, { SourceArg, SourceCountArg } from "../../lists/List";
 import JobResultErrorElement, { JobResultErrorElementContext } from "./JobResultErrorElement";
-import { JobResultSimple, retrieveJobResults, retrieveJobResultsCount } from "../../../api/ilum_resources/jobResultApi";
+import { clearJobResults, JobResultSimple, retrieveJobResults, retrieveJobResultsCount } from "../../../api/ilum_resources/jobResultApi";
 import { JobNodePageRefresh } from "../../../pages/JobNodePage";
 import { FieldType } from "../../lists/Filter";
 import OpenerComponent from "../../OpenerComponent";
+import { useNotificator } from "../../notifications/Notificator";
 
 export interface IlumGroupErrorsContext{
     jobNodePageRefresh : JobNodePageRefresh
@@ -18,6 +19,9 @@ export interface IlumGroupErrorsArgs{
 
 
 const IlumGroupErrorsList = ({data, context} : IlumGroupErrorsArgs) => {
+
+
+    const {catchRequestError} = useNotificator();
     
     function getJobErrors(arg : SourceArg) : Promise<JobResultSimple[]>{
 
@@ -53,6 +57,16 @@ const IlumGroupErrorsList = ({data, context} : IlumGroupErrorsArgs) => {
         ).then(r => r.data);
     }
 
+    function clearIlumGroup(){
+        console.log(data.ilumGroupId);
+        clearJobResults(context.jobNodePageRefresh.projectId, context.jobNodePageRefresh.jobNodeId, data.ilumGroupId, null, 
+            false, true, true
+        ).then(r => {
+            console.log(r);
+            context.jobNodePageRefresh.chosenResourceList?.setDependency(Math.random());
+        }).catch(catchRequestError)
+    }
+
     
     return (
         <div style={{paddingBottom: "10px", borderBottom: "1px solid black"}}>
@@ -67,6 +81,7 @@ const IlumGroupErrorsList = ({data, context} : IlumGroupErrorsArgs) => {
                             new Date(Number(data.ilumGroupDetails.startTime)).toUTCString()
                             : "undefined"
                         }</i>
+                        <button className="btn btn-danger m-2" onClick={clearIlumGroup}>Clear</button>
                     </div>
                 }
                 openedElement={
@@ -81,10 +96,12 @@ const IlumGroupErrorsList = ({data, context} : IlumGroupErrorsArgs) => {
                                 : "undefined"
                             }</i>
                             <br/>
+            
                             <strong>Description: </strong>
                             <p>
                                 {data.ilumGroupDetails.description || "No description"}
                             </p>
+                            <button className="btn btn-danger m-2" onClick={clearIlumGroup}>Clear</button>
                         </div>
 
                         <List<JobResultSimple, JobResultErrorElementContext>

@@ -4,6 +4,8 @@ import { JobNodePageRefresh } from "../../../pages/JobNodePage";
 import MetricsJobResultList, { MetricsJobResultListContext } from "./MetricsJobResultsList";
 import ServerBoundList from "../../lists/ServerBoundList";
 import OpenerComponent from "../../OpenerComponent";
+import { useNotificator } from "../../notifications/Notificator";
+import { clearJobResults } from "../../../api/ilum_resources/jobResultApi";
 
 
 export interface TesterMetricsListContext{
@@ -18,6 +20,16 @@ export interface TesterMetricsListArgs{
 
 const TesterMetricsList = ({context, data} : TesterMetricsListArgs) => {
     
+    const {catchRequestError} = useNotificator();
+
+
+    function clearTesterResutls(){
+        clearJobResults(context.jobNodePageRefresh.projectId, context.jobNodePageRefresh.jobNodeId, context.ilumGroupId, data.id,
+            true, false, false
+        ).then(r => {
+            context.jobNodePageRefresh.chosenResourceList?.setDependency(Math.random());
+        }).catch(catchRequestError);
+    }
 
     return (
         <div className="m-5">
@@ -27,13 +39,15 @@ const TesterMetricsList = ({context, data} : TesterMetricsListArgs) => {
                     <div>
                         <h3>{data.jobScriptDetails.name}</h3>
                         <strong>{data.classFullName}</strong>
+                        <button className="btn btn-danger m-2" onClick={clearTesterResutls}>Clear</button>
                     </div>
                 }
                 openedElement={
                     <div>
                         <div>
                             <h3>{data.jobScriptDetails.name}</h3>
-                            <strong>{data.classFullName}</strong>
+                            <strong>{data.classFullName}</strong>                        
+                            <button className="btn btn-danger m-2" onClick={clearTesterResutls}>Clear</button>
                         </div>
 
                         <hr/>

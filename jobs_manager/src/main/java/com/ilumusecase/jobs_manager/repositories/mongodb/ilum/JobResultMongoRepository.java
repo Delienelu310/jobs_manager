@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.bson.types.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -23,14 +21,17 @@ import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.data.mongodb.core.aggregation.ReplaceRootOperation;
 import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
-import com.ilumusecase.jobs_manager.JobsManagerApplication;
 import com.ilumusecase.jobs_manager.controllers.ilum_controllers.resources_controllers.JobResultsController.IlumGroupData;
 import com.ilumusecase.jobs_manager.repositories.interfaces.ilum.JobResultRepository;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.ilum.MongoJobResult;
 import com.ilumusecase.jobs_manager.resources.ilum.JobResult;
 import com.ilumusecase.jobs_manager.resources.ilum.JobScript;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Repository
 public class JobResultMongoRepository  implements JobResultRepository{
@@ -79,9 +80,7 @@ public class JobResultMongoRepository  implements JobResultRepository{
             .and("endTime").lte(to == null ? Long.MAX_VALUE : to)
         ;
 
-        Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
-        logger.info(Boolean.toString(includeJobErrors) + " " + Boolean.toString(includeTesterErrors));
-
+        
         if(!includeSuccessfull) directMatchCriteria = directMatchCriteria.and("jobResultDetails.errorMessage").ne(null);
         if(!includeJobErrors) directMatchCriteria = directMatchCriteria.and("tester").ne(null);
         if(!includeTesterErrors) directMatchCriteria = directMatchCriteria.orOperator(
@@ -203,12 +202,27 @@ public class JobResultMongoRepository  implements JobResultRepository{
 
 
     private List<AggregationOperation> getIlumGroupsRetrievementOperations(
-        String jobNodeId, String query, Long from, Long to
+        String jobNodeId, String query, 
+        boolean includeSuccessfull, boolean includeJobErrors, boolean includeTesterErrors,
+        Long from, Long to
     ){
         List<AggregationOperation> operations = new LinkedList<>();
 
         
-        MatchOperation matchJobNodeId = Aggregation.match(Criteria.where("jobNode.$id").is(new ObjectId(jobNodeId)));
+        
+        //1. match id and includings
+        Criteria directMatchCriteria = Criteria.where("jobNode.$id").is(new ObjectId(jobNodeId));
+
+        if(!includeSuccessfull) directMatchCriteria = directMatchCriteria.and("jobResultDetails.errorMessage").ne(null);
+        if(!includeJobErrors) directMatchCriteria = directMatchCriteria.and("tester").ne(null);
+        if(!includeTesterErrors) directMatchCriteria = directMatchCriteria.orOperator(
+            Criteria.where("jobResultDetails.errorMessage").is(null), 
+            Criteria.where("tester").is(null)
+        );
+
+        MatchOperation matchJobNodeId = Aggregation.match(directMatchCriteria);
+
+
 
         ProjectionOperation projectionOperation = Aggregation.project("ilumGroupId", "ilumGroupDetails");
 
@@ -229,10 +243,14 @@ public class JobResultMongoRepository  implements JobResultRepository{
     }
 
     @Override
-    public List<IlumGroupData> retrieveIlumGroupsOfJobResults(String jobNodeId, String query, Long from, Long to, Integer pageSize,
+    public List<IlumGroupData> retrieveIlumGroupsOfJobResults(String jobNodeId, String query, 
+        boolean includeSuccessfull, boolean includeJobErrors, boolean includeTesterErrors,
+        Long from, Long to, Integer pageSize,
         Integer pageNumber
     ) {
-        List<AggregationOperation> operations = getIlumGroupsRetrievementOperations(jobNodeId, query, from, to);
+        List<AggregationOperation> operations = getIlumGroupsRetrievementOperations(jobNodeId, query, 
+            includeSuccessfull, includeJobErrors, includeTesterErrors, from, to
+        );
    
 
         operations.add(Aggregation.sort(Sort.by("ilumGroupDetails.startTime").descending()));
@@ -247,8 +265,11 @@ public class JobResultMongoRepository  implements JobResultRepository{
     }
 
     @Override
-    public Long retrieveIlumGroupsOfJobResultsCount(String jobNodeId, String query, Long from, Long to) {
-        List<AggregationOperation> operations = getIlumGroupsRetrievementOperations(jobNodeId, query, from, to);
+    public Long retrieveIlumGroupsOfJobResultsCount(String jobNodeId, String query, 
+        boolean includeSuccessfull, boolean includeJobErrors, boolean includeTesterErrors, 
+        Long from, Long to
+    ) {
+        List<AggregationOperation> operations = getIlumGroupsRetrievementOperations(jobNodeId, query, includeSuccessfull, includeJobErrors, includeTesterErrors, from, to);
         
         operations.add(Aggregation.count().as("count"));
 
@@ -409,9 +430,6 @@ public class JobResultMongoRepository  implements JobResultRepository{
 
         AggregationResults<MetricsDoc> results = mongoTemplate.aggregate(aggregation, "jobResult", MetricsDoc.class);
 
-        Logger logger = LoggerFactory.getLogger(JobsManagerApplication.class);
-        logger.info(results.getRawResults().toString());
-
         return results.getMappedResults().stream().map(metricDoc -> metricDoc.metric).toList(); 
     }
 
@@ -434,11 +452,32 @@ public class JobResultMongoRepository  implements JobResultRepository{
 
         return totalCount;
     }
+
+    @Override
+    public void clearAll(@NotBlank String jobNodeId, @NotNull String ilumGroupId, @NotNull String testerId,
+        boolean includeSuccessfull, boolean includeJobErrors, boolean includeTesterErrors
+    ) {
+       
+        Criteria deletionCriteria = Criteria.where("jobNode.$id").is(new ObjectId(jobNodeId));
+        if(!ilumGroupId.equals("")){
+            deletionCriteria = deletionCriteria.and("ilumGroupId").is(ilumGroupId);
+        }
+
+        if(!testerId.equals("")){
+            deletionCriteria = deletionCriteria.and("tester.$id").is(new ObjectId(testerId));
+        }
+
+        if(!includeSuccessfull) deletionCriteria = deletionCriteria.and("jobResultDetails.errorMessage").ne(null);
+        if(!includeJobErrors) deletionCriteria = deletionCriteria.and("tester").ne(null);
+        if(!includeTesterErrors) deletionCriteria = deletionCriteria.orOperator(
+            Criteria.where("jobResultDetails.errorMessage").is(null), 
+            Criteria.where("tester").is(null)
+        );
+
+        Query query = new Query().addCriteria(deletionCriteria);
     
+        mongoTemplate.remove(query, JobResult.class);
 
-    
-
-
-
+    }
 
 }

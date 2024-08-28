@@ -119,12 +119,21 @@ public class JobResultsController {
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @RequestParam(name = "query", defaultValue = "", required = false) String query,
+
+        @RequestParam(name = "include_successfull", required = false, defaultValue = "true") boolean includeSuccessfull,
+        @RequestParam(name = "include_job_errors", required = false, defaultValue = "false") boolean includeJobErrors,
+        @RequestParam(name = "include_tester_errors", required = false, defaultValue = "false") boolean includeTesterErrors,
+
         @RequestParam(name = "from", defaultValue = "0", required = false) @Min(0) Long from,
         @RequestParam(name = "to", required = false) @Min(0) Long to,
+
         @RequestParam(name = "pageSize", defaultValue = "10", required = false) @Min(1) Integer pageSize,
         @RequestParam(name = "pageNumber", defaultValue = "0", required = false) @Min(0) Integer pageNumber  
     ){
-        return repositoryFactory.getJobResultRepository().retrieveIlumGroupsOfJobResults(jobNodeId, query, from, to, pageSize, pageNumber);
+        return repositoryFactory.getJobResultRepository().retrieveIlumGroupsOfJobResults(jobNodeId, query, 
+            includeSuccessfull, includeJobErrors, includeTesterErrors,
+            from, to, pageSize, pageNumber
+        );
     }
 
     @GetMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results/ilum_groups/count")
@@ -134,10 +143,18 @@ public class JobResultsController {
         @ProjectId @PathVariable("project_id") String projectId,
         @JobNodeId @PathVariable("job_node_id") String jobNodeId,
         @RequestParam(name = "query", defaultValue = "", required = false) String query,
+
+        @RequestParam(name = "include_successfull", required = false, defaultValue = "true") boolean includeSuccessfull,
+        @RequestParam(name = "include_job_errors", required = false, defaultValue = "false") boolean includeJobErrors,
+        @RequestParam(name = "include_tester_errors", required = false, defaultValue = "false") boolean includeTesterErrors,
+
         @RequestParam(name = "from", defaultValue = "0", required = false) @Min(0) Long from,
         @RequestParam(name = "to", required = false) @Min(0) Long to
     ){
-        return repositoryFactory.getJobResultRepository().retrieveIlumGroupsOfJobResultsCount(jobNodeId, query, from, to);
+        return repositoryFactory.getJobResultRepository().retrieveIlumGroupsOfJobResultsCount(jobNodeId, query, 
+            includeSuccessfull, includeJobErrors, includeTesterErrors,
+            from, to
+        );
 
     }
 
@@ -249,6 +266,26 @@ public class JobResultsController {
     
     ){
         repositoryFactory.getJobResultRepository().deleteJobResultById(jobResultId);
+    }
+
+
+    @DeleteMapping("/projects/{project_id}/job_nodes/{job_node_id}/job_results")
+    @AuthorizeProjectRoles(roles = {ProjectPrivilege.ADMIN, ProjectPrivilege.MODERATOR, ProjectPrivilege.ARCHITECT})
+    @AuthorizeJobRoles(roles = {JobNodePrivilege.MANAGER})
+    public void clearAll(
+        @ProjectId @PathVariable("project_id") String projectId,
+        @JobNodeId @PathVariable("job_node_id") String jobNodeId,
+
+        @RequestParam(name = "ilum_group_id", required = false, defaultValue = "") String ilumGroupId,
+        @RequestParam(name = "tester_id", required = false, defaultValue = "") String testerId,
+
+        @RequestParam(name = "include_successfull", required = false, defaultValue = "true") boolean includeSuccessfull,
+        @RequestParam(name = "include_job_errors", required = false, defaultValue = "false") boolean includeJobErrors,
+        @RequestParam(name = "include_tester_errors", required = false, defaultValue = "false") boolean includeTesterErrors
+    ){
+        repositoryFactory.getJobResultRepository().clearAll(jobNodeId, ilumGroupId, testerId,
+            includeSuccessfull, includeJobErrors, includeTesterErrors
+        );
     }
 
 }

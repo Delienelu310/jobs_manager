@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.validation.annotation.Validated;
-
 import com.ilumusecase.jobs_manager.resources.ilum.JobResult;
 import com.ilumusecase.jobs_manager.resources.ilum.JobScript;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import com.ilumusecase.jobs_manager.controllers.ilum_controllers.resources_controllers.JobResultsController.IlumGroupData;
@@ -80,6 +80,11 @@ public interface JobResultRepository {
     public List<IlumGroupData> retrieveIlumGroupsOfJobResults(
         String jobNodeId,
         String query,
+
+        boolean includeSuccessfull,
+        boolean includeJobErrors,
+        boolean includeTesterErrors,
+
         @Min(0) Long from,
         @Min(0)Long to,
         @Min(1)Integer pageSize,
@@ -89,6 +94,11 @@ public interface JobResultRepository {
     public Long retrieveIlumGroupsOfJobResultsCount(
         String jobNodeId,
         String query,
+
+        boolean includeSuccessfull, 
+        boolean includeJobErrors, 
+        boolean includeTesterErrors,
+
         @Min(0) Long from,
         @Min(0) Long to
     );
@@ -134,6 +144,16 @@ public interface JobResultRepository {
         String testerId,
         String query,
         String ilumGroupId
+    );
+
+    public void clearAll(
+        @NotBlank String jobNodeId, 
+        @NotNull String ilumGroupId,
+        @NotNull String testerId,
+
+        boolean includeSuccessfull, 
+        boolean includeJobErrors, 
+        boolean includeTesterErrors
     );
 
 }

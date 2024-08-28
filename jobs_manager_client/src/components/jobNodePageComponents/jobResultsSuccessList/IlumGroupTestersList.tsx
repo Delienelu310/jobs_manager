@@ -6,6 +6,8 @@ import TesterMetricsList, { TesterMetricsListContext } from "./TesterMetricsList
 import { JobScriptSimple } from "../../../api/ilum_resources/jobScriptsApi";
 import { FieldType } from "../../lists/Filter";
 import OpenerComponent from "../../OpenerComponent";
+import { useNotificator } from "../../notifications/Notificator";
+import { clearJobResults } from "../../../api/ilum_resources/jobResultApi";
 
 
 
@@ -20,6 +22,16 @@ export interface  IlumGroupTestersListArgs{
 
 const IlumGroupTestersList = ({data, context} : IlumGroupTestersListArgs) => {
 
+    const {catchRequestError} = useNotificator();
+
+    function clearGroup(){
+        clearJobResults(context.jobNodePageRefresh.projectId, context.jobNodePageRefresh.jobNodeId, data.ilumGroupId, null, 
+            true, false, false
+        ).then(r => {
+            context.jobNodePageRefresh.chosenResourceList?.setDependency(Math.random())
+        }).catch(catchRequestError);
+    }
+
     return (
         <div className="m-5">
 
@@ -30,6 +42,7 @@ const IlumGroupTestersList = ({data, context} : IlumGroupTestersListArgs) => {
                         <strong>Ilum Group ID: </strong>{data.ilumGroupId}
                         <br/>
                         <strong>When started: </strong>{new Date(Number(data.ilumGroupDetails.startTime)).toUTCString()}
+                        <button className="btn btn-danger m-2" onClick={clearGroup}> Clear Group</button>
                     </div>
                 }
                 openedElement={
@@ -42,6 +55,7 @@ const IlumGroupTestersList = ({data, context} : IlumGroupTestersListArgs) => {
                             <br/>
                             <strong>Description: </strong>
                             <p>{data.ilumGroupDetails.description || "No description"}</p>
+                            <button className="btn btn-danger m-2" onClick={clearGroup}> Clear Group</button>
                         </div>
 
                         <hr/>
