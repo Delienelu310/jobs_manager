@@ -59,12 +59,6 @@ public class JobNode {
     @JsonFilter("job_node_job_scripts")
     private List<JobScript> jobScripts = new LinkedList<>();
 
-    @DBRef(lazy = true)
-    @JsonFilter("job_node_job_results")
-    private List<JobEntity> jobResults = new LinkedList<>();
-
-
-
 
     @DBRef(lazy = true)
     @JsonFilter("job_node_jobs_queue")

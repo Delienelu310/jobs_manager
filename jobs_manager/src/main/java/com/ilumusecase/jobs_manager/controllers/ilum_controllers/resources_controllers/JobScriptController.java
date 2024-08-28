@@ -208,13 +208,15 @@ public class JobScriptController {
         JobScript jobScript = repositoryFactory.getJobScriptRepository().retrieveJobScriptById(jobScriptId).orElseThrow(() -> 
             new ResourceNotFoundException(JobScript.class.getSimpleName(), jobScriptId));
  
-        if(!jobNode.getJobScripts().contains(jobScript)){
-            throw new GeneralResponseException("Job Script does not belong to the job node");
+    
+        if(!repositoryFactory.getJobRepository().retrieveByJobScriptId(jobScriptId).isEmpty()){
+            throw new GeneralResponseException("Job Script cannot be deleted, as it is used by job entity");
         }
+
         jobNode.getJobScripts().remove(jobScript);
         repositoryFactory.getJobNodesRepository().updateJobNodeFull(jobNode);
 
-        repositoryFactory.getJobScriptRepository().deleteJobScript(jobScriptId);
+        repositoryFactory.getJobScriptRepository().deleteJobScript(jobNodeId, jobScriptId);
     }
 
 

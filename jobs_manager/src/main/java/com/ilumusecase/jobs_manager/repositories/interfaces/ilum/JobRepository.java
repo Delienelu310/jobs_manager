@@ -26,8 +26,12 @@ public interface JobRepository {
         String jobNodeId, String queueType, String jobEntityName, String author
     );
 
+    public List<JobEntity> retrieveByJobScriptId(String id);
+
     public Optional<JobEntity> retrieveJobEntity(String id);
     public void deleteJob(String id);
+    public void deleteByJobNodeId(String id);
+
     public JobEntity updateJobFull(@Valid JobEntity jobEntity);
 
 }

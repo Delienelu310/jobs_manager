@@ -278,12 +278,13 @@ public class JobResultsController {
 
         @RequestParam(name = "ilum_group_id", required = false, defaultValue = "") String ilumGroupId,
         @RequestParam(name = "tester_id", required = false, defaultValue = "") String testerId,
+        @RequestParam(name = "target_id", required = false, defaultValue = "") String targetId,
 
         @RequestParam(name = "include_successfull", required = false, defaultValue = "true") boolean includeSuccessfull,
         @RequestParam(name = "include_job_errors", required = false, defaultValue = "false") boolean includeJobErrors,
         @RequestParam(name = "include_tester_errors", required = false, defaultValue = "false") boolean includeTesterErrors
     ){
-        repositoryFactory.getJobResultRepository().clearAll(jobNodeId, ilumGroupId, testerId,
+        repositoryFactory.getJobResultRepository().clearAll(jobNodeId, ilumGroupId, testerId, targetId,
             includeSuccessfull, includeJobErrors, includeTesterErrors
         );
     }

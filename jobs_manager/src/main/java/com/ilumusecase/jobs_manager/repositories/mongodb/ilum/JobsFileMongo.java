@@ -58,5 +58,10 @@ public class JobsFileMongo implements JobsFileRepositoryInterface {
     ) {
         return mongoJobsFile.countJobsFilesOfJobNode(jobNodeId, query, extenstion, className, publisher);
     }
+
+    @Override
+    public void deleteByJobNodeId(String id) {
+        mongoJobsFile.deleteByJobNodeId(id);
+    }
     
 }

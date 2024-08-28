@@ -19,6 +19,9 @@ public class JobScriptsMongoRepository implements JobScriptRepository{
     @Autowired
     private MongoJobScripts mongoJobScripts;
 
+    @Autowired
+    private JobResultMongoRepository jobResultMongoRepository;
+
     @Override
     public List<JobScript> retrieveAllJobScripts() {
         return mongoJobScripts.findAll();
@@ -35,7 +38,12 @@ public class JobScriptsMongoRepository implements JobScriptRepository{
     }
 
     @Override
-    public void deleteJobScript(String id) {
+    public void deleteJobScript(String jobNodeId, String id) {
+
+        //firstly delete all related job results
+        jobResultMongoRepository.clearAll(jobNodeId, "", id, "", true, true, true);
+        jobResultMongoRepository.clearAll(jobNodeId, "", "", id,  true, true, true);
+
         mongoJobScripts.deleteById(id);
     }
 
@@ -60,6 +68,11 @@ public class JobScriptsMongoRepository implements JobScriptRepository{
     @Override
     public long countJobScriptsOfJobNode(String jobNodeId, String query, String extenstion, String publisher) {
         return mongoJobScripts.countJobScriptsOfJobNode(jobNodeId, query, extenstion, publisher);
+    }
+
+    @Override
+    public void deleteByJobNodeId(String jobNodeId) {
+        mongoJobScripts.deleteByJobNodeId(jobNodeId);
     }
     
 }

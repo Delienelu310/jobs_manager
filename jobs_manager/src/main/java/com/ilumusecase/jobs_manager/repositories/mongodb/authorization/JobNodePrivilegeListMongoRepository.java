@@ -28,5 +28,4 @@ public class JobNodePrivilegeListMongoRepository implements PrivilegeListReposit
     public void delete(String id) {
         mongoJobNodePrivilege.deleteById(id);
     }
-    
 }

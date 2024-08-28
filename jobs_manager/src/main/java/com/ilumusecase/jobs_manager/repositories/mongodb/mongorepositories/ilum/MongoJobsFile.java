@@ -56,4 +56,6 @@ public interface MongoJobsFile extends MongoRepository<JobsFile, String> {
 
     @Query("{ 'author.username' : ?0 }")
     public List<JobsFile> findByAuthorUsername(String username);
+
+    public void deleteByJobNodeId(String jobNodeId);
 }

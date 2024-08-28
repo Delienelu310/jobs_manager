@@ -38,5 +38,6 @@ public interface JobsFileRepositoryInterface {
     public List<JobsFile> retrieveJobsFilesByJobNodeId(String id);
     public JobsFile updateJobsFileFull(@Valid JobsFile jobsFile);
     public void deleteJobsFileById(String id);
+    public void deleteByJobNodeId(String id);
 
 }

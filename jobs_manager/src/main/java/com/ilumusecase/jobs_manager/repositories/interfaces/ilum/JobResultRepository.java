@@ -150,6 +150,7 @@ public interface JobResultRepository {
         @NotBlank String jobNodeId, 
         @NotNull String ilumGroupId,
         @NotNull String testerId,
+        @NotNull String targetId,
 
         boolean includeSuccessfull, 
         boolean includeJobErrors, 

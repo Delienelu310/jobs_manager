@@ -193,6 +193,10 @@ public class JobNodeQueueController {
         JobEntity jobEntity = repositoryFactory.getJobRepository().retrieveJobEntity(jobEntityId)
             .orElseThrow(() -> new ResourceNotFoundException(JobEntity.class.getSimpleName(), jobEntityId))
         ;
+
+        if(jobNode.getIlumGroup() != null){
+            throw new GeneralResponseException("Cannot Remove Job Entity while the job node is running");
+        }
   
         if(queueType.equals("jobsQueue")){
             if(jobNode.getJobsQueue().contains(jobEntity)){

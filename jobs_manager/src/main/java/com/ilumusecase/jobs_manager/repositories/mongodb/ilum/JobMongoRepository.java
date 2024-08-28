@@ -143,5 +143,15 @@ public class JobMongoRepository implements JobRepository{
         return totalCount;
     }
 
+    @Override
+    public List<JobEntity> retrieveByJobScriptId(String id) {
+        return mongoJobEntity.retrieveByJobScriptId(id);
+    }
+
+    @Override
+    public void deleteByJobNodeId(String id) {
+        mongoJobEntity.deleteByJobNodeId(id);
+    }
+
     
 }

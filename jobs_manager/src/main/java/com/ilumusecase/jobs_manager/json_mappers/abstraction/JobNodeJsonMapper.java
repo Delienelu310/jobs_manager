@@ -22,7 +22,6 @@ public class JobNodeJsonMapper implements ResourceJsonMapper {
 
         .addFilter("job_node_jobs_files", SimpleBeanPropertyFilter.filterOutAll())
         .addFilter("job_node_job_scripts", SimpleBeanPropertyFilter.filterOutAll())
-        .addFilter("job_node_job_results", SimpleBeanPropertyFilter.filterOutAll())
         .addFilter("job_node_job_entities", SimpleBeanPropertyFilter.filterOutAll())
         .addFilter("job_node_jobs_queue", SimpleBeanPropertyFilter.filterOutAll())
 

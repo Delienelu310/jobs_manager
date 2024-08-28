@@ -6,7 +6,13 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.ilumusecase.jobs_manager.exceptions.ResourceNotFoundException;
 import com.ilumusecase.jobs_manager.repositories.interfaces.abstraction.JobNodesRepository;
+import com.ilumusecase.jobs_manager.repositories.mongodb.authorization.JobNodePrivilegeListMongoRepository;
+import com.ilumusecase.jobs_manager.repositories.mongodb.ilum.JobMongoRepository;
+import com.ilumusecase.jobs_manager.repositories.mongodb.ilum.JobResultMongoRepository;
+import com.ilumusecase.jobs_manager.repositories.mongodb.ilum.JobScriptsMongoRepository;
+import com.ilumusecase.jobs_manager.repositories.mongodb.ilum.JobsFileMongo;
 import com.ilumusecase.jobs_manager.repositories.mongodb.mongorepositories.abstraction.MongoJobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNode;
 import com.ilumusecase.jobs_manager.resources.abstraction.JobNodeDetails;
@@ -17,6 +23,17 @@ public class JobNodesMongoRepository implements JobNodesRepository{
 
     @Autowired
     private MongoJobNode mongoJobNode;
+    
+    @Autowired
+    private JobNodePrivilegeListMongoRepository jobNodePrivilegeListMongoRepository; 
+    @Autowired
+    private JobResultMongoRepository jobResultMongoRepository;
+    @Autowired 
+    private JobsFileMongo jobsFileMongo;
+    @Autowired
+    private JobScriptsMongoRepository jobScriptsMongoRepository;
+    @Autowired
+    private JobMongoRepository jobMongoRepository;
 
     @Override
     public List<JobNode> retrieveByProjectId(String projectId) {
@@ -57,6 +74,25 @@ public class JobNodesMongoRepository implements JobNodesRepository{
 
     @Override
     public void deleteJobNodeById(String id) {
+        //delete job node privilege list
+        JobNode jobNode = retrieveById(id).orElseThrow(() -> new ResourceNotFoundException(JobNode.class.getSimpleName(), id));
+        jobNode.getPrivileges().values().forEach(privilegeList -> jobNodePrivilegeListMongoRepository.delete(privilegeList.getId()));
+
+        //delete job results
+        jobResultMongoRepository.clearAll(id, "", "", "", true, true, true);
+        
+        //delete job entities
+        jobMongoRepository.deleteByJobNodeId(id);
+
+
+        //delete job scripts
+        jobScriptsMongoRepository.deleteByJobNodeId(id);
+
+        //delete job files
+
+
+        
+
         mongoJobNode.deleteById(id);
     }
 }

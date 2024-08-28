@@ -20,7 +20,7 @@ public class ProjectJsonMapper implements ResourceJsonMapper{
         .addFilter("node-plug-channel", SimpleBeanPropertyFilter.filterOutAllExcept("id", "channelDetails"))
         .addFilter("channel-plug-jobNode", SimpleBeanPropertyFilter.filterOutAllExcept("id", "jobNodeDetails"))
         .addFilter("plug-jobNode", SimpleBeanPropertyFilter.serializeAllExcept(
-            "jobsFiles", "jobScripts", "jobResults", "jobEntities", "ilumGroup", "jobsQueue", "testingJobs"
+            "jobsFiles", "jobScripts", "jobEntities", "ilumGroup", "jobsQueue", "testingJobs"
         )
     );
 

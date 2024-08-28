@@ -32,7 +32,8 @@ public interface JobScriptRepository {
     public List<JobScript> retrieveAllJobScripts();
     public Optional<JobScript> retrieveJobScriptById(String id);
     public JobScript updateFullJobScript(@Valid JobScript jobScript);
-    public void deleteJobScript(String id);
+    public void deleteJobScript(String jobNodeId, String id);
+    public void deleteByJobNodeId(String jobNodeId);
     
     public List<JobScript> retrieveJobScriptsByJobsFileId(String jobsFileId);
     public List<JobScript> retrieveJobScriptsByJobNodeId(String jobNodeId);

@@ -50,4 +50,6 @@ public interface MongoJobScripts extends MongoRepository<JobScript, String> {
 
     @Query("{ 'jobNode.id': ?0}")
     public List<JobScript> retrieveByJobNodeId(String jobNodeId);
+
+    public void deleteByJobNodeId(String jobNodeId);
 }

@@ -454,7 +454,7 @@ public class JobResultMongoRepository  implements JobResultRepository{
     }
 
     @Override
-    public void clearAll(@NotBlank String jobNodeId, @NotNull String ilumGroupId, @NotNull String testerId,
+    public void clearAll(@NotBlank String jobNodeId, @NotNull String ilumGroupId, @NotNull String testerId, @NotNull String targetId,
         boolean includeSuccessfull, boolean includeJobErrors, boolean includeTesterErrors
     ) {
        
@@ -465,6 +465,9 @@ public class JobResultMongoRepository  implements JobResultRepository{
 
         if(!testerId.equals("")){
             deletionCriteria = deletionCriteria.and("tester.$id").is(new ObjectId(testerId));
+        }
+        if(!targetId.equals("")){
+            deletionCriteria = deletionCriteria.and("target.$id").is(new ObjectId(targetId));
         }
 
         if(!includeSuccessfull) deletionCriteria = deletionCriteria.and("jobResultDetails.errorMessage").ne(null);
