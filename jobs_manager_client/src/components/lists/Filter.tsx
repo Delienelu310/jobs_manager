@@ -103,16 +103,17 @@ const Filter = ({parameters, values} : FilterProperties) => {
                         </div>
                         :
                         fieldValue.fieldType == FieldType.SingleDate ? 
-                        <div>
+                        <div key={label}>
                             <strong>{label}</strong>
+                            <button className="btn btn-danger m-1" onClick={() => fieldValue.setter([""])}>Clear</button>
                             <br/>
                             <strong>{ (values.get(label) || [""])[0] 
                                 && new Date(Number( (values.get(label) || ["0"])[0] )).toUTCString() }
                             </strong>
                             <br/>
                             Date:
-                            <input type="date" className="form-control m-2" 
-                                value={getDate((values.get(label) || [""])[0])}
+                            <input key={label + "_date"} type="date" className="form-control m-2" 
+                                value={ ((values.get(label)))}
                                 onChange={e => {
                                     fieldValue.setter([dateFormattedToStr(e.target.value)]);
                                 }}
@@ -123,11 +124,11 @@ const Filter = ({parameters, values} : FilterProperties) => {
                                 }}
                             />
                             Hours:
-                            <input disabled={!((values.get(label) || [""])[0])} type="number" min="0" max="23" className="form-control m-2"
+                            <input key={label + "_hours"} disabled={!((values.get(label) || [""])[0])} type="number" min="0" max="23" className="form-control m-2"
                                 value={new Date( Number((values.get(label) || ["0"])[0]) ).getUTCHours()}
                                 onChange={e => {
                                     const previousValue = (values.get(label) || [""])[0];
-                                    if(previousValue == "") return;
+                                    if(!previousValue ) return;
                                     const date = new Date(Number(previousValue));
 
                                     
@@ -142,7 +143,9 @@ const Filter = ({parameters, values} : FilterProperties) => {
                                 }}
                             />
                             Minutes:
-                            <input disabled={!((values.get(label) || [""])[0])} type="number" min="0" max="60" className="form-control m-2"
+                            <input key={label + "_minutes"} 
+                                disabled={!((values.get(label) || [""])[0])} 
+                                type="number" min="0" max="60" className="form-control m-2"
                                 value={new Date( Number((values.get(label) || ["0"])[0]) ).getMinutes()}
                                 onChange={e => {
                                     const previousValue = (values.get(label) || [""])[0];
@@ -159,7 +162,10 @@ const Filter = ({parameters, values} : FilterProperties) => {
                                 }}
                             />
                             Seconds:
-                            <input disabled={!((values.get(label) || [""])[0])} type="number" min="0" max="60" className="form-control m-2"
+                            <input 
+                                key={label + "_seconds"}
+                                disabled={!((values.get(label) || [""])[0])} 
+                                type="number" min="0" max="60" className="form-control m-2"
                                 value={new Date( Number((values.get(label) || ["0"])[0]) ).getSeconds()}
                                 onChange={e => {
                                     const previousValue = (values.get(label) || [""])[0];
@@ -176,7 +182,9 @@ const Filter = ({parameters, values} : FilterProperties) => {
                                 }}
                             />
                             Milliseconds:
-                            <input disabled={!((values.get(label) || [""])[0])} type="number" min="0" max="999" className="form-control m-2"
+                            <input 
+                                key={label + "_miliseconds"}
+                                disabled={!((values.get(label) || [""])[0])} type="number" min="0" max="999" className="form-control m-2"
                                 value={new Date( Number((values.get(label) || ["0"])[0]) ).getMilliseconds()}
                                 onChange={e => {
                                     const previousValue = (values.get(label) || [""])[0];

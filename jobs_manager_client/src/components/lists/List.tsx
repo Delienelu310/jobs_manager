@@ -97,9 +97,12 @@ const List = <Data, Context>({
                 additionalData: field.additionalData,
                 fieldType: field.fieldType,
                 setter: (val) => {
-                    const newMap = new Map(values);
-                    newMap.set(field.label, val);
-                    setValues(newMap);
+                    
+                    setValues(values => {
+                        const newMap = new Map(values);
+                        newMap.set(field.label, val);
+                        return newMap;
+                    });
                 }
             };
             fields.set(field.label, fieldExtended);

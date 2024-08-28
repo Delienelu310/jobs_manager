@@ -93,7 +93,7 @@ const ProjectListPage = () => {
                                     }}
                                     onSubmit={values => create({
                                         name: values.name,
-                                        description : values.description
+                                        description : values.description || null
                                     })}
                                     validationSchema={createProjectValidationSchema}
                                 >

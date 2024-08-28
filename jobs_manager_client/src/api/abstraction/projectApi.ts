@@ -47,7 +47,7 @@ export interface ChannelDetails{
 
 export interface ProjectDetails{
     name : string,
-    description : string
+    description : string | null
 }
 
 export interface ProjectFullData{
