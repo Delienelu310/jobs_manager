@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ProjectGraph } from "../../api/ui/projectGraphApi";
+import { ProjectGraph, updateJobNodeVertice } from "../../api/ui/projectGraphApi";
 import { ChannelDetails, ChannelTypes, JobNodeDetails, ProjectFullData } from "../../api/abstraction/projectApi";
 
 import { JobNodeElement, StaticJobNodeElementConfig } from "./gof/JobNodeElement";
@@ -15,6 +15,7 @@ import * as Yup from 'yup';
 import { NotificationConfig, NotificationType, useNotificator } from "../notifications/Notificator";
 import { AxiosError } from "axios";
 import { GraphElement } from "./gof/GraphElement";
+import { promises } from "dns";
 
 interface StaticGraphCanvasConfig{
     
@@ -324,9 +325,55 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
         e.clientY = y;
     }
 
+    function savePositions(){
+
+
+
+        //for each job node update its vertice
+
+        let promises = [];
+        for(let gofId of Object.keys(dynamicConfig.elemOffset)){
+            if(!gofId.startsWith("JobNodeElement_")) continue;
+
+            let offset = dynamicConfig.elemOffset[gofId];
+
+            if(offset.x == 0 && offset.y == 0) return;
+
+            let jobNodeId = gofId.replace("JobNodeElement_", "");
+            console.log(jobNodeId);
+            let {x, y} = projectGraph.vertices.filter(vertice => vertice.jobNode.id == jobNodeId)[0];
+            
+            promises.push(
+                updateJobNodeVertice(projectFullData.id, jobNodeId, {x: offset.x + x, y : offset.y + y})
+            );
+
+        
+        }
+
+        Promise.all(promises)
+            .then(r => {
+                pushNotification({
+                    message: "Successfully updated positions",
+                    time : 5,
+                    type : NotificationType.INFO
+                })
+                refresh();
+                setDynamicConfig(dynamicConfig => {
+                    return {
+                        ...dynamicConfig,
+                        elemOffset : Object.fromEntries(
+                            Object.entries(dynamicConfig.elemOffset).filter(entry => !entry[0].startsWith("JobNodeElement_"))
+                        )
+                    }
+                })
+            }).catch(catchRequestError);
+            
+    }
+
     return (
         <div>
             {projectGraph && projectFullData && gof && <>
+
                 <canvas ref={canvasRef}
                     width={staticConfig.canvas.width} 
                     height={staticConfig.canvas.height}
@@ -349,8 +396,9 @@ const ProjectGraphComponent = ({projectFullData, projectGraph, staticConfig, set
 
                 />
                 <div>
+                    <button className="btn btn-success m-2" onClick={savePositions}>Save Posititons</button>
                     <h5>Mod : {PanelMods[gof.getContext().mod]}</h5>
-                    <h5>Also Mod : {PanelMods[mod]}</h5>
+                
                     <button onClick={e => setMod(PanelMods.CURSOR)}>Cursor</button>
                     <SecuredNode
                         roles={null}

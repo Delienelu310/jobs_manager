@@ -163,14 +163,14 @@ export class ChannelElement implements GraphElement{
 
         ctx.fillStyle = "white";
         ctx.fillRect(boxX, boxY, this.config.width, this.config.height);
-        ctx.strokeStyle = "black";
+        ctx.strokeStyle = "rgba(0,0,0,0.5)";
         ctx.lineWidth = 5;
         ctx.strokeRect(boxX, boxY, this.config.width, this.config.height);
 
         let textNode : TextNode = new TextNode({
             x : boxX, 
             y : boxY + this.config.height / 2, 
-            color : "black", 
+            color : "rgba(0,0,0,0.5)", 
             font : "16px Arial", 
             maxWidth : this.config.width
         }, this.channelData.channelDetails.name);
@@ -178,8 +178,8 @@ export class ChannelElement implements GraphElement{
         textNode.draw(ctx);
 
         //draw the lines to the box
-        ctx.strokeStyle = "black";
-        ctx.lineWidth =  10;
+        ctx.strokeStyle = "rgba(0,0,0,0.5)";
+        ctx.lineWidth =  3;
 
         for(let leftPoint of leftPoints){
             ctx.beginPath();
