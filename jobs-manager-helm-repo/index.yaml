@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  jobs-manager-helm-chart:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-08-30T21:26:30.594255787+02:00"
+    description: A Helm chart for Kubernetes
+    digest: bf6f6da7221dbc3fb036597a922c33b9e2a4bf5a4e861e1d4701dc4a9761c866
+    name: jobs-manager-helm-chart
+    type: application
+    urls:
+    - https://Delienelu310.github.io/jobs_manager/jobs-manager-helm-repo/jobs-manager-helm-chart-1.0.0.tgz
+    version: 1.0.0
+generated: "2024-08-30T21:26:30.593857816+02:00"
