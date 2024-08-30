@@ -14,6 +14,10 @@ spec:
       labels:
         app: jobs-manager
     spec:
+      initContainers:
+      - name: wait-for-ilum-core
+        image: busybox
+        command: ['sh', '-c', 'until nc -z -v -w30 ilum-core 9888; do echo "Waiting for ilum-core..."; sleep 5; done']
       containers:
         - name: jobs-manager-container
           image: delienelu/jobs_manager:1.0.0
@@ -27,30 +31,47 @@ spec:
 
             - name: MINIO_ENDPOINT
               value: http://ilum-minio:9000
+
             - name: MINIO_USERNAME
-              value: minioadmin
+              valueFrom:
+                configMapKeyRef:
+                  name: jobs-manager-credentials
+                  key: minio-username
             - name: MINIO_PASSWORD
-              value: minioadmin
+              valueFrom:
+                configMapKeyRef:
+                  name: jobs-manager-credentials
+                  key: minio-password
             - name: MINIO_BUCKET
               value: ilum-files
             
 
             - name: MONGODB_HOST
-              value: my-new-mongodb-service
+              value: jobs-manager-mongodb
             - name: MONGODB_DATABASE
               value: jobs_manager_db
             - name: MONGODB_PORT
               value: '27017'
             - name : MONGODB_USERNAME
-              value : myroot
+              valueFrom:
+                configMapKeyRef:
+                  name: jobs-manager-credentials
+                  key: mongodb-username
             - name : MONGODB_PASSWORD 
-              value : mypass
+              valueFrom: 
+                configMapKeyRef:
+                  name: jobs-manager-credentials
+                  key: mongodb-password
 
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: ilum-kafka:9092
 
             - name: QUARTZ_MONGO_URI
-              value: mongodb://myroot:mypass@localhost:27017
+              valueFrom:
+                configMapKeyRef:
+                  name: jobs-manager-credentials
+                  key: mongodb-uri
+              
             - name: QUARTZ_MONGO_DATABASE
               value: jobs_manager_db
             

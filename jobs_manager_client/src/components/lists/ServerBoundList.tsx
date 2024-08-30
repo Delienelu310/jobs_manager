@@ -31,13 +31,13 @@ const ServerBoundList = <Data,Context>(
     async function sourceData(arg : SourceArg) : Promise<Data[]>{
         return apiClient.get(props.endpoint.resourse + convertSourceArgsToRequestParams(arg))
             .then( response=> response.data)
-            .catch(catchRequestError);
+   
     }
 
     async function sourceCount(arg: SourceCountArg) : Promise<number>{
         return apiClient.get(props.endpoint.count + convertSourceCountArgsToRequestParams(arg))
             .then(response => response.data)
-            .catch(catchRequestError)
+
     }
 
     return (
@@ -48,7 +48,9 @@ const ServerBoundList = <Data,Context>(
                 Wrapper={props.Wrapper}
                 source={{
                     sourceData: sourceData,
-                    sourceCount: sourceCount
+                    sourceCount: sourceCount,
+                    catchCount : catchRequestError,
+                    catchData : catchRequestError
                 }}
                 context={props.context}
                 dependencies={props.dependencies}

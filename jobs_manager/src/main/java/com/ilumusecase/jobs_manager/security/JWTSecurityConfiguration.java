@@ -3,6 +3,7 @@ package com.ilumusecase.jobs_manager.security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -57,7 +58,14 @@ public class JWTSecurityConfiguration {
     }
 
     // to manage the users
+    @Value("${jobs_manager.admin.username}")
+    private String adminUsername;
 
+    @Value("${jobs_manager.admin.password}")
+    private String adminPassword;
+
+    @Value("${jobs_manager.admin.fullname}")
+    private String adminFullName;
 
     @Bean
     public UserDetailsManager getUserDetailsManager(){
@@ -69,8 +77,8 @@ public class JWTSecurityConfiguration {
         // WORKER - cannot create projects, but can update projects, if the MANAGER has granted him with privileges
 
         UserDetails adminUser = User
-            .withUsername("admin")
-            .password("admin")
+            .withUsername(adminUsername)
+            .password(adminPassword)
             .passwordEncoder(str -> passwordEncoder.encode(str))
             .roles("ADMIN")
             .build()
@@ -78,9 +86,9 @@ public class JWTSecurityConfiguration {
 
         repositoryFactory.getUserDetailsManager().createUser(adminUser);
 
-        AppUser user = repositoryFactory.getUserDetailsManager().findByUsername("admin");
+        AppUser user = repositoryFactory.getUserDetailsManager().findByUsername(adminUsername);
         AppUserDetails appUserDetails = new AppUserDetails();
-        appUserDetails.setFullname("somefullname");
+        appUserDetails.setFullname(adminFullName);
         user.setAppUserDetails(appUserDetails);
         repositoryFactory.getUserDetailsManager().saveAppUser(user);
 

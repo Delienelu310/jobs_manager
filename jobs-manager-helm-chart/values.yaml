@@ -1,0 +1,16 @@
+jobs_manager:
+  admin: 
+    username: admin
+    password: admin
+    fullname: null
+
+mongodb:
+  admin:
+    username: mongoadmin
+    password: mongoadmin
+  uri: "mongodb://mongoadmin:mongoadmin@jobs-manager-mongodb:27017"
+
+minio:
+  admin:
+    username: minioadmin
+    password: minioadmin

@@ -313,12 +313,15 @@ public class IlumGroupLifecycle implements Job{
 
         repositoryFactory.getIlumGroupRepository().updageGroupFull(ilumGroup);
 
+        String jobsManagerEndpoint = jobDataMap.getString("jobs-manager-endpoint");
+        String jobsManagerToken = jobDataMap.getString("jobs-manager-token");
+
         Map<String, String> config = new HashMap<>();
         config.put("projectId", ilumGroup.getProject().getId());
         config.put("jobNodeId", ilumGroup.getJobNode().getId());
         config.put("mod", ilumGroup.getMod());
-        config.put("prefix", "http://jobs-manager:8080");
-        config.put("token", "Basic YWRtaW46YWRtaW4=");
+        config.put("prefix", jobsManagerEndpoint);
+        config.put("token", jobsManagerToken);
         
         String ilumId = manager.submitJob(ilumGroup, ilumGroup.getCurrentJob(), config);
         ilumGroup.getCurrentJob().setIlumId(ilumId);

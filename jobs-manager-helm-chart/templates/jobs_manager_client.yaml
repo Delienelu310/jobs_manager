@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jobs-manager-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jobs-manager-client
+  template:
+    metadata:
+      labels:
+        app: jobs-manager-client
+    spec:
+      initContainers:
+      - name: wait-for-jobs-manager
+        image: busybox
+        command: ['sh', '-c', 'until nc -z -v -w30 jobs-manager 8080; do echo "Waiting for jobs-manager..."; sleep 5; done']
+      containers:
+      - name: jobs-manager-client
+        image: delienelu/jobs_manager_client:1.0.0
+        ports:
+        - containerPort: 80 
+        env:
+        - name: REACT_APP_JOBS_MANAGER_API
+          value: http://jobs-manager:8080 
+        

@@ -2,7 +2,7 @@ import axios from "axios";
 import { SourceArg, SourceCountArg } from "../components/lists/List";
 
 const apiClient = axios.create({
-    baseURL: "http://localhost:8080"
+    baseURL: process.env.REACT_APP_JOBS_MANAGER_API || "http://localhost:8080"
 });
 
 

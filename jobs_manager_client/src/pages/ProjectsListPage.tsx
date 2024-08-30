@@ -5,7 +5,7 @@ import { FieldType } from "../components/lists/Filter";
 import ProjectElement from "../components/projectListPageComponents/ProjectElement";
 import ServerBoundList from "../components/lists/ServerBoundList";
 import { createProject, deleteProject, ProjectDetails } from "../api/abstraction/projectApi";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { updateProjectGraph } from "../api/ui/projectGraphApi";
 import OpenerComponent from "../components/OpenerComponent";
 import { useAuth } from "../authentication/AuthContext";
@@ -70,6 +70,8 @@ const ProjectListPage = () => {
             }).catch(catchRequestError);
         ;
     }
+
+    if(authentication == null) return <Navigate to ="/login"/>
     
     return (
         <div>

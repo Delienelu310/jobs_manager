@@ -4,7 +4,7 @@ import React from "react";
 import { jwtDecode } from "jwt-decode";
 import { Authentication } from "./AuthContext";
 
-interface JwtPayload{
+export interface JwtPayload{
     scope : string,
     sub : string
 }
@@ -16,9 +16,10 @@ export interface ClientData{
 
 export function login(
     {username, password} : ClientData, 
-    {setAuthentication, setRequestInjector} : {
+    {setAuthentication, setRequestInjector, setCookie} : {
         setAuthentication : React.Dispatch<React.SetStateAction<Authentication | null>>,
         setRequestInjector : React.Dispatch<React.SetStateAction<number | null>>,
+        setCookie : (name : string, value : string) => void
     }
 ) : Promise<AxiosResponse<string>>{
 
@@ -40,6 +41,8 @@ export function login(
             config.headers.Authorization=token
             return config;
         }));
+
+        setCookie("authentication-token", response.data);
 
         return response;
     });

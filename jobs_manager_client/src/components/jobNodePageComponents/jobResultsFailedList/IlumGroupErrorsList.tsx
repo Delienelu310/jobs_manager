@@ -120,7 +120,9 @@ const IlumGroupErrorsList = ({data, context} : IlumGroupErrorsArgs) => {
                             ]}}
                             source={{
                                 sourceData: getJobErrors,
-                                sourceCount : getJobErrorsCount
+                                sourceCount : getJobErrorsCount,
+                                catchCount: e => console.log(e),
+                                catchData : e => console.log(e)
                             }}
                         
                         />

@@ -49,7 +49,9 @@ export interface ListProperties<Data, Context>{
 
     source : {
         sourceCount : (sourceCountArg : SourceCountArg) => Promise<number>,
-        sourceData : (sourceArg : SourceArg) => Promise<Data[]>
+        sourceData : (sourceArg : SourceArg) => Promise<Data[]>,
+        catchCount : (e : any) => void
+        catchData : (e : any) => void
     }
     Wrapper : React.FC<WrapperProps<Data, Context>>,
     context : Context,
@@ -62,7 +64,7 @@ export interface ListProperties<Data, Context>{
 const List = <Data, Context>({
     pager : {defaultPageSize},
     filter: {parameters},
-    source: {sourceCount, sourceData},
+    source: {sourceCount, sourceData, catchCount,catchData},
     Wrapper,
     context,
     dependencies
@@ -129,9 +131,7 @@ const List = <Data, Context>({
         }).then(elementsCount => {
             setElementsCount(elementsCount);
             setPageChosen(0);
-        }).catch(e => {
-            console.log(e);
-        });
+        }).catch(catchCount);
     }
 
     function search(){
@@ -147,9 +147,7 @@ const List = <Data, Context>({
             }
         }).then(data => {
             setData(data);
-        }).catch(e => {
-            console.log(e);
-        });
+        }).catch(catchData);
     }
 
     useEffect(() => {

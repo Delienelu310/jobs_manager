@@ -107,7 +107,9 @@ const MetricsJobResultList = ({data, context } : MetricsJobResultListArgs) => {
                             pager={{defaultPageSize : 10}}
                             source={{
                                 sourceData: sourceData,
-                                sourceCount: sourceCount
+                                sourceCount: sourceCount,
+                                catchCount : e => console.log(e),
+                                catchData: e => console.log(e)
                             }}   
                         />
 

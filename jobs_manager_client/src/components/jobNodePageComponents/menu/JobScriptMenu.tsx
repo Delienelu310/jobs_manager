@@ -179,7 +179,9 @@ const JobScriptMenu = ({
                                         pager={{defaultPageSize : 10}}
                                         source={{
                                             sourceData: getJobsFilesUsedList,
-                                            sourceCount: getJobsFilesUsedCount
+                                            sourceCount: getJobsFilesUsedCount,
+                                            catchCount : e => console.log(e),
+                                            catchData: e => console.log(e)
                                             
                                         }}
                                         context={{

@@ -1,8 +1,10 @@
-import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { ClientData, login } from "./authenticationApi";
-import { AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import { AxiosResponse } from "axios";
 import apiClient from "../api/ApiClient";
-
+import { useCookies } from 'react-cookie';
+import { jwtDecode } from "jwt-decode";
+import { JwtPayload } from "./authenticationApi";
 
 export interface Authentication{
     username : string,
@@ -32,13 +34,31 @@ export default function AuthProvider({children} : {children : ReactNode})  {
     const [authentication, setAuthentication] = useState<Authentication | null>(null);
     const [requestInjector, setRequestInjector] = useState<number | null>(null);
 
-    // useEffect(() => {
-    //     setRequestInjector(apiClient.interceptors.request.use((config) => {
-    //         config.headers.Authorization="Basic YWRtaW46YWRtaW4="
-    //         return config;
-    //     }));
-    //     setAuthentication({username: "admin", roles: ["ROLE_ADMIN"]})
-    // }, []);
+    const [cookies, setCookie, removeCookie] = useCookies(); 
+
+    useEffect(() => {
+
+        const token : string | undefined = cookies['authentication-token'];
+
+        if(!token) return;
+
+        
+        try{
+            const payload : JwtPayload = jwtDecode<JwtPayload>(token);
+            setAuthentication({username : payload.sub, roles: payload.scope.split(" ")});
+            
+            setRequestInjector(apiClient.interceptors.request.use((config) => {
+                config.headers.Authorization=`Bearer ${token}`
+                return config;
+            }));
+
+        }catch(e){
+            removeCookie("authentication-token");
+        }
+
+        
+
+    }, []);
     
 
     function logout() : void{
@@ -46,13 +66,16 @@ export default function AuthProvider({children} : {children : ReactNode})  {
         if(requestInjector != null) apiClient.interceptors.request.eject(requestInjector);
         setRequestInjector(null);
 
+        removeCookie("authentication-token");
+
     }
 
-    
+  
+
     return (
         <AuthContext.Provider value={{
             authentication, 
-            login: (clientData : ClientData) => login(clientData, { setAuthentication, setRequestInjector}), 
+            login: (clientData : ClientData) => login(clientData, { setAuthentication, setRequestInjector, setCookie}), 
             logout
         }}>
             {children}
