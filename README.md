@@ -1,6 +1,6 @@
 # Ilum Orchestrate
 
-Built on top of **Ilum**, which uses **Apapche Spark** for Big Data solutions.
+Built on top of [**Ilum**](https://ilum.cloud/docs/), which uses **Apapche Spark** for Big Data solutions.
 
 **Ilum Orchestrate** is a **framework** aimed at organising complex data flow into **distinct stages** with clear input/output format and **automated testing**, while also **abstracting away** complex system logic from data scientists
 
@@ -217,35 +217,35 @@ cd /jobs_manager
     ```
 - **working on backend**
     1. **Deploy the cluster** as in quick start, use **default configuration**
-    2. **Remove** existing **jobs_manager backend**
-      ```bash
+    2. **Remove** existing **jobs_manager backend**:
+       
+      ```
         kubectl delete deployment jobs-manager
       ```
-    3. **Build your own**
-      ```bash
+    4. **Build your own**
+      ```
         cd ./jobs_manager
-        
         mvn package
-        
         eval $(minikube docker-env up)
         docker build -t jobs_manager .
-        
         kubectl delete -f deployment.yaml
         kubectl apply -f deployment.yaml
         kubectl port-forward svc/jobs-manager 8080:8080
       ```
 - **working with jobs_connection_lib**
-    1. **Build the library** 
-      ```bash
+    1. **Build the library**
+  
+      ```
         cd ./jobs_connection_lib
         mvn package  
       ``` 
-    2. **Move package file to the backend resources**
-      ```bash
+    3. **Move package file to the backend resources**
+       
+      ```
         cd ../
         mv ./jobs_connection_lib/target/jobs_connection_lib-1.0.jar ./jobs_manager/src/main/resources/jobs_connection_lib.jar
       ```
-    3. **Build Backend as in previous step**
+    5. **Build Backend as in previous step**
 
 **Submit a pull request**
 
