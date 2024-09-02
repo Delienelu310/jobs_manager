@@ -31,6 +31,7 @@ const ProjectPlug = ({element} : ProjectPlugArgs) => {
                 <strong>Channel Name:</strong>{channelData.channelDetails.name}<br/>
                 <strong>Type : {channelData.channelDetails.type}</strong> <br/>
                 <strong>Header : {channelData.channelDetails.headers.join(", ")}</strong>
+                <strong>Channel Location: {"internal_" + channelData.id}</strong>
   
                 {channelData.inputJobs && channelData.inputJobs.length > 0 && <>
                            

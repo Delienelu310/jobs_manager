@@ -20,6 +20,12 @@
     <jacoco.unit-tests.limit.class-complexity>20</jacoco.unit-tests.limit.class-complexity>
     <jacoco.unit-tests.limit.method-complexity>5</jacoco.unit-tests.limit.method-complexity>
   </properties>
+  <repositories>
+    <repository>
+      <id>github</id>
+      <url>https://maven.pkg.github.com/Delienelu310/jobs_connection_lib</url>
+    </repository>
+  </repositories>
   <dependencies>
 
     <dependency>

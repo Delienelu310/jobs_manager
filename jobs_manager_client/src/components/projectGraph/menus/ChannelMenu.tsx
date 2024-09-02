@@ -13,6 +13,7 @@ const ChannelMenu = ({element} : ChannelMenuArgs) => {
             <strong>Channel Name:</strong>{element.getData().channelDetails.name}<br/>
                 <strong>Type : {element.getData().channelDetails.type}</strong> <br/>
                 <strong>Header : {element.getData().channelDetails.headers.join(", ")}</strong>
+                <strong>Channel Location: {"internal_" + element.getData().id}</strong>
   
                 {element.getData().inputJobs && element.getData().inputJobs.length > 0 && <>
                            
