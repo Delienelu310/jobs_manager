@@ -89,6 +89,7 @@ helm isntall jobsmanager jobs-manager/jobs-manager-helm-chart-1.0.0 \
 - Use **Connect Mod** to connect inputs and outputs, while configuring the **channel headers and type**
 
 **Video example:**
+https://github.com/user-attachments/assets/8cc0933b-f69b-4eb0-8952-82173fe5e120
 
 
 2. **Create script**
@@ -177,6 +178,8 @@ public final class SoloRSI implements Job {
 - In Job Script menu add the job script to **queue**, specifying the queue type: **jobsQueue** for job scripts, **testingQueue** for tester scripts
 
 **Video example:**
+https://github.com/user-attachments/assets/99003533-2296-46f4-8612-09e0e7d4c241
+
 
 5. **Run the Job Node to Test job Scripts**
 - Go to Job Node Page
@@ -186,6 +189,7 @@ public final class SoloRSI implements Job {
 - Go to **Job Resuts** and **Job Errors** folder to see the result or errors
 
 **Video example:**
+https://github.com/user-attachments/assets/ede68e3c-e90e-4246-8dcf-3e95af725af0
 
 6. **Manage Roles of a project and a job node**:
 
@@ -229,7 +233,6 @@ cd /jobs_manager
         kubectl delete -f deployment.yaml
         kubectl apply -f deployment.yaml
         kubectl port-forward svc/jobs-manager 8080:8080
-
       ```
 - **working with jobs_connection_lib**
     1. **Build the library** 
@@ -241,7 +244,6 @@ cd /jobs_manager
       ```bash
         cd ../
         mv ./jobs_connection_lib/target/jobs_connection_lib-1.0.jar ./jobs_manager/src/main/resources/jobs_connection_lib.jar
-      
       ```
     3. **Build Backend as in previous step**
 
