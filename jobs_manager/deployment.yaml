@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: jobs-manager-container
-          image: delienelu/jobs_manager:1.0.0
+          image: jobs_manager:latest
           ports:
             - containerPort: 8080
           env:
@@ -36,7 +36,7 @@ spec:
             
 
             - name: MONGODB_HOST
-              value: my-new-mongodb-service
+              value: jobs-manager-mongodb
             - name: MONGODB_DATABASE
               value: jobs_manager_db
             - name: MONGODB_PORT
@@ -50,7 +50,7 @@ spec:
               value: ilum-kafka:9092
 
             - name: QUARTZ_MONGO_URI
-              value: mongodb://myroot:mypass@localhost:27017
+              value: mongodb://myroot:mypass@jobs-manager-mongodb:27017
             - name: QUARTZ_MONGO_DATABASE
               value: jobs_manager_db
             

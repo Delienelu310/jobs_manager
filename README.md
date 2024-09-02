@@ -25,31 +25,31 @@ easily
 ## Quick start:
 
 1. **Start minikube**:
-``` 
+``` bash
 minikube start --cpus 4 --memory 8192 --addons metrics-server
 ```
 
 2. **Deploy Ilum**:
-```
+```bash
 helm repo add ilum https://charts.ilum.cloud
 helm install ilum ilum/ilum
 ```
 
 3. **Deploy ilum orchestry**
-```
+```bash
 helm repo add jobs-manager https://Delienelu310.github.io/jobs_manager/jobs-manager-helm-repo/
 helm isntall jobsmanager jobs-manager/jobs-manager-helm-chart-1.0.0
 ```
 
 4. **Port-forward to use client**
-```
+```bash
 kubectl port-forward svc/jobs-manager-client 3000:80
 ```
 5. **Finally go to localhost:3000 in your browser**
 
 
 ## jobs manager helm chart configuration:
-```
+```yaml
 jobs_manager:
   admin: 
     username: admin
@@ -80,13 +80,13 @@ helm isntall jobsmanager jobs-manager/jobs-manager-helm-chart-1.0.0 \
 ## Usage
 1. **Build data flow architecture**
 
-- Go to project page and use interactive canvas.
+- Go to project page and use **interactive canvas**.
 
-- Use JobNode Mod to create stages
+- Use **JobNode Mod** to create stages
 
-- Using Cursor Mod, click on bars to open bar menu, where you can add input/outputs
+- Using **Cursor Mod**, click on bars to open bar menu, where you can add input/outputs
 
-- Use Connect Mod to connect inputs and outputs, while configuring the channel headers and type
+- Use **Connect Mod** to connect inputs and outputs, while configuring the **channel headers and type**
 
 **Video example:**
 
@@ -96,7 +96,7 @@ helm isntall jobsmanager jobs-manager/jobs-manager-helm-chart-1.0.0 \
 - Create java project with maven and jdk8+
 
 - Add dependency from **Ilum**:
-```
+```xml
 <dependency>
     <groupId>cloud.ilum</groupId>
     <artifactId>ilum-job-api</artifactId>
@@ -104,7 +104,7 @@ helm isntall jobsmanager jobs-manager/jobs-manager-helm-chart-1.0.0 \
 </dependency>
 ```
 - Add dependency from **Ilum Orchestry**:
-```
+```xml
 <repositories>
     <repository>
       <id>github</id>
@@ -125,8 +125,7 @@ helm isntall jobsmanager jobs-manager/jobs-manager-helm-chart-1.0.0 \
 - In the end of your code, call **finish** method of ```JobProcessor```
 
 **How it should look like:**
-```
-
+```java
 @JobNode
 public final class SoloRSI implements Job {
     @InputChannel(label = "RSI")
@@ -159,8 +158,8 @@ public final class SoloRSI implements Job {
 3. **Create Script-Tester in a similar way**
 - Use ```@TestJob``` instead of```@JobNode```, use ```TestJobProcessor``` instead of ```JobProcessor```, use ```@OutputChannelTestDataset``` instead of ```@OutputChannel```
 - read from ```@OutputChannelTestDataset```, don`t assign dataset to it in the code
-- In the end of code return Json String of format 
-```
+- In the end of code **return Json String** of format 
+```json
 {
   "metric_1" : "value_1",
   ...
@@ -170,21 +169,21 @@ public final class SoloRSI implements Job {
 **For more examples look into trading_bot/test-indicators folder of the project**
 
 
-4. ** Upload Script an add it to queue **
+4. **Upload Script an add it to queue**
 - Go to Project page, choose stage, scroll down to Job Node details and click **More** to navigate to Job Node page
-- Choose JobsFiles Folder and use Upload File form to upload file
-- Choose Job Scripts Folder and create script, specifying its full class name
-- In Job Script menu, add jobs file as a dependency
-- In Job Script menu add the job script to queue, specifying the queue type: jobsQueue for job scripts, testingQueue for tester scripts
+- Choose **JobsFiles Folder** and use Upload File form to upload file
+- Choose **Job Scripts Folder** and create script, specifying its **full class name**
+- In Job Script menu, add jobs file as a **dependency**
+- In Job Script menu add the job script to **queue**, specifying the queue type: **jobsQueue** for job scripts, **testingQueue** for tester scripts
 
 **Video example:**
 
 5. **Run the Job Node to Test job Scripts**
 - Go to Job Node Page
-- Write ilum group details
-- Click Start
+- Write **ilum group** details
+- Click **Start**
 - Wait for a minute
-- Go to Job Resuts and Job Errors folder to see the result or errors
+- Go to **Job Resuts** and **Job Errors** folder to see the result or errors
 
 **Video example:**
 
@@ -192,3 +191,64 @@ public final class SoloRSI implements Job {
 
 
 ## Contribution
+
+**How to contribute?**
+
+- **clone project code**
+```bash
+git clone https://github.com/Delienelu310/jobs_manager.git
+cd /jobs_manager
+```
+
+- **working on client**
+  1. **Deploy the cluster** as in quick start, but dont port-forward client in the end
+  2. **Port-forward** jobs_manager **backend** to the localhost:
+    ```bash
+      kubectl port-forward svc/jobs-manager 8080:8080
+    ```
+  3. **To run:** 
+    ```bash
+      cd ./jobs_manager_client
+      npm start  
+    ```
+- **working on backend**
+    1. **Deploy the cluster** as in quick start, use **default configuration**
+    2. **Remove** existing **jobs_manager backend**
+      ```bash
+        kubectl delete deployment jobs-manager
+      ```
+    3. **Build your own**
+      ```bash
+        cd ./jobs_manager
+        
+        mvn package
+        
+        eval $(minikube docker-env up)
+        docker build -t jobs_manager .
+        
+        kubectl delete -f deployment.yaml
+        kubectl apply -f deployment.yaml
+        kubectl port-forward svc/jobs-manager 8080:8080
+
+      ```
+- **working with jobs_connection_lib**
+    1. **Build the library** 
+      ```bash
+        cd ./jobs_connection_lib
+        mvn package  
+      ``` 
+    2. **Move package file to the backend resources**
+      ```bash
+        cd ../
+        mv ./jobs_connection_lib/target/jobs_connection_lib-1.0.jar ./jobs_manager/src/main/resources/jobs_connection_lib.jar
+      
+      ```
+    3. **Build Backend as in previous step**
+
+**Submit a pull request**
+
+If you'd like to contribute, please fork the repository and open a pull request to the `main` branch.
+
+**What to contribute?**
+1. **Python connection lib library**
+2. **New channels types**
