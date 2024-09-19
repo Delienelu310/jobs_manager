@@ -38,7 +38,7 @@ helm install ilum ilum/ilum
 3. **Deploy ilum orchestry**
 ```bash
 helm repo add jobs-manager https://Delienelu310.github.io/jobs_manager/jobs-manager-helm-repo/
-helm isntall jobsmanager jobs-manager/jobs-manager-helm-chart-1.0.0
+helm install jobsmanager jobs-manager/jobs-manager-helm-chart
 ```
 
 4. **Port-forward to use client**
